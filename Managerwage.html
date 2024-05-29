@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Wage Calculator</title>
+</head>
+<body>
+    <h1>Manager Wage Calculator</h1>
+    <form id="calculator-form">
+        <label for="full_days">Full Days Worked:</label>
+        <input type="number" id="full_days" name="full_days" min="0" max="7" value="0"><br>
+
+        <label for="half_days">Half Days Worked:</label>
+        <input type="number" id="half_days" name="half_days" min="0" max="7" value="0"><br>
+
+        <label for="hours_worked">Hours Worked:</label>
+        <input type="number" id="hours_worked" name="hours_worked" min="0" max="15" step="any" value="0"><br>
+
+        <label for="full_wage">Full Day Wage:</label>
+        <input type="number" id="full_wage" name="full_wage" value="235"><br>
+
+        <label for="half_wage">Half Day Wage:</label>
+        <input type="number" id="half_wage" name="half_wage" value="75"><br>
+
+        <label for="hour_wage">Hourly Wage:</label>
+        <input type="number" id="hour_wage" name="hour_wage" value="24.5"><br>
+
+        <input type="button" id="calculate-button" value="Calculate">
+    </form>
+
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('calculate-button').addEventListener('click', function() {
+            // Get form values
+            var fullDays = parseInt(document.getElementById('full_days').value);
+            var halfDays = parseInt(document.getElementById('half_days').value);
+            var hoursWorked = parseFloat(document.getElementById('hours_worked').value);
+            var fullWage = parseFloat(document.getElementById('full_wage').value);
+            var halfWage = parseFloat(document.getElementById('half_wage').value);
+            var hourWage = parseFloat(document.getElementById('hour_wage').value);
+
+            // Perform calculations
+            var fullDayWage = fullDays * fullWage;
+            var halfDayWage = halfDays * halfWage;
+            var totalWage = fullDayWage + halfDayWage;
+            var netPayment = totalWage - ((10 - hoursWorked) * hourWage);
+
+            // Display results
+            var resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = "<h2>Results</h2>" +
+                                   "<p>Full Day Wage: $" + fullDayWage.toFixed(2) + "</p>" +
+                                   "<p>Half Day Wage: $" + halfDayWage.toFixed(2) + "</p>" +
+                                   "<p>Total Wage: $" + totalWage.toFixed(2) + "</p>" +
+                                   "<p>Net Payment: $" + netPayment.toFixed(2) + "</p>";
+        });
+    </script>
+</body>
+</html>
