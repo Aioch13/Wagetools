@@ -25,45 +25,64 @@
 
         /* Main Container Styling */
         .container {
-            display: flex;
+            width: 90%;
+            max-width: 400px;
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
             overflow: hidden;
-            width: 90%;
-            max-width: 800px;
             transition: box-shadow 0.3s ease;
         }
         .container:hover {
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
 
-        /* Form Section Styling */
-        .form-section {
-            flex: 1;
-            padding: 30px;
-            border-right: 1px solid #e0e0e0;
+        /* Results Section Styling (Hidden initially) */
+        .results-section {
+            display: none;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-size: 16px;
+            color: #333;
+            animation: slideDown 0.5s ease forwards;
         }
 
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Title */
         .form-section h1 {
             font-size: 24px;
-            margin-bottom: 20px;
             color: #333;
             font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Form Layout */
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         label {
             font-weight: 600;
             color: #666;
-            display: block;
-            margin: 15px 0 5px;
             font-size: 14px;
+            margin-bottom: 5px;
         }
 
         input[type="number"] {
             width: 100%;
-            padding: 12px;
-            margin: 5px 0;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
@@ -94,61 +113,34 @@
             background-color: #45a049;
             transform: scale(1.02);
         }
-
-        /* Results Section Styling */
-        .results-section {
-            flex: 1;
-            padding: 30px;
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #333;
-        }
-
-        .results-section h2 {
-            font-size: 20px;
-            color: #333;
-            margin-bottom: 10px;
-            display: none; /* Hide until calculated */
-        }
-
-        .results-section p {
-            font-size: 16px;
-            color: #444;
-            margin-bottom: 8px;
-        }
-
-        /* Hide results initially */
-        #results {
-            display: none;
-            text-align: left;
-            width: 100%;
-            max-width: 300px;
-            padding: 15px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Expanding Results Section -->
+        <div class="results-section" id="results">
+            <h2>Results</h2>
+            <p id="fullDayWage"></p>
+            <p id="halfDayWage"></p>
+            <p id="totalWage"></p>
+            <p id="netPayment"></p>
+        </div>
+
+        <!-- Form Section -->
         <div class="form-section">
             <h1>Manager Wage Calculator</h1>
             <form id="calculator-form">
-                <label for="full_days">Full Days Worked:</label>
-                <input type="number" id="full_days" name="full_days" min="0" max="7" value="0">
-
-                <label for="half_days">Half Days Worked:</label>
-                <input type="number" id="half_days" name="half_days" min="0" max="7" value="0">
+                <!-- Full and Half Days in the same row -->
+                <div class="form-row">
+                    <div>
+                        <label for="full_days">Full Days Worked:</label>
+                        <input type="number" id="full_days" name="full_days" min="0" max="7" value="0">
+                    </div>
+                    <div>
+                        <label for="half_days">Half Days Worked:</label>
+                        <input type="number" id="half_days" name="half_days" min="0" max="7" value="0">
+                    </div>
+                </div>
 
                 <label for="hours_worked">Hours Worked:</label>
                 <input type="number" id="hours_worked" name="hours_worked" min="0" max="15" step="any" value="0">
@@ -164,13 +156,6 @@
 
                 <input type="button" id="calculate-button" value="Calculate">
             </form>
-        </div>
-
-        <div class="results-section">
-            <h2>Results</h2>
-            <div id="results">
-                <!-- Results will be populated here -->
-            </div>
         </div>
     </div>
 
@@ -190,15 +175,12 @@
             var totalWage = fullDayWage + halfDayWage;
             var netPayment = totalWage - ((15 - hoursWorked) * hourWage);
 
-            // Display results
-            var resultsDiv = document.getElementById('results');
-            var resultsTitle = document.querySelector('.results-section h2');
-            resultsTitle.style.display = 'block'; // Show results title
-            resultsDiv.style.display = 'block';    // Show results container
-            resultsDiv.innerHTML = "<p>Full Day Wage: $" + fullDayWage.toFixed(2) + "</p>" +
-                                   "<p>Half Day Wage: $" + halfDayWage.toFixed(2) + "</p>" +
-                                   "<p>Total Wage: $" + totalWage.toFixed(2) + "</p>" +
-                                   "<p>Net Payment: $" + netPayment.toFixed(2) + "</p>";
+            // Display results in the expanding section
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('fullDayWage').innerText = "Full Day Wage: $" + fullDayWage.toFixed(2);
+            document.getElementById('halfDayWage').innerText = "Half Day Wage: $" + halfDayWage.toFixed(2);
+            document.getElementById('totalWage').innerText = "Total Wage: $" + totalWage.toFixed(2);
+            document.getElementById('netPayment').innerText = "Net Payment: $" + netPayment.toFixed(2);
         });
     </script>
 </body>
