@@ -38,6 +38,28 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
 
+        /* Stylized Title */
+        .form-section h1 {
+            font-size: 26px;
+            color: #333;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .form-section h1::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: #4CAF50;
+            border-radius: 4px;
+        }
+
         /* Results Section Styling (Hidden initially) */
         .results-section {
             display: none;
@@ -55,15 +77,6 @@
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Form Title */
-        .form-section h1 {
-            font-size: 24px;
-            color: #333;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 20px;
         }
 
         /* Form Layout */
@@ -95,40 +108,56 @@
             background-color: #fff;
         }
 
-        #calculate-button {
-            width: 100%;
+        /* Button Styling */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .button {
+            flex: 1;
             padding: 12px;
-            background-color: #4CAF50;
-            color: white;
             font-size: 16px;
             font-weight: bold;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 20px;
             transition: background-color 0.3s, transform 0.1s;
         }
-
-        #calculate-button:hover {
+        .button#calculate-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .button#calculate-button:hover {
             background-color: #45a049;
+            transform: scale(1.02);
+        }
+        .button#reset-button {
+            background-color: #d9534f;
+            color: white;
+        }
+        .button#reset-button:hover {
+            background-color: #c9302c;
             transform: scale(1.02);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Expanding Results Section -->
-        <div class="results-section" id="results">
-            <h2>Results</h2>
-            <p id="fullDayWage"></p>
-            <p id="halfDayWage"></p>
-            <p id="totalWage"></p>
-            <p id="netPayment"></p>
-        </div>
-
-        <!-- Form Section -->
+        <!-- Form Heading -->
         <div class="form-section">
             <h1>Manager Wage Calculator</h1>
+            
+            <!-- Expanding Results Section Below Heading -->
+            <div class="results-section" id="results">
+                <h2>Results</h2>
+                <p id="fullDayWage"></p>
+                <p id="halfDayWage"></p>
+                <p id="totalWage"></p>
+                <p id="netPayment"></p>
+            </div>
+
+            <!-- Form Section -->
             <form id="calculator-form">
                 <!-- Full and Half Days in the same row -->
                 <div class="form-row">
@@ -154,12 +183,17 @@
                 <label for="hour_wage">Hourly Wage:</label>
                 <input type="number" id="hour_wage" name="hour_wage" value="24.5">
 
-                <input type="button" id="calculate-button" value="Calculate">
+                <!-- Button Group for Calculate and Reset -->
+                <div class="button-group">
+                    <input type="button" id="calculate-button" class="button" value="Calculate">
+                    <input type="button" id="reset-button" class="button" value="Reset">
+                </div>
             </form>
         </div>
     </div>
 
     <script>
+        // Calculate Button Functionality
         document.getElementById('calculate-button').addEventListener('click', function() {
             // Get form values
             var fullDays = parseInt(document.getElementById('full_days').value);
@@ -181,6 +215,20 @@
             document.getElementById('halfDayWage').innerText = "Half Day Wage: $" + halfDayWage.toFixed(2);
             document.getElementById('totalWage').innerText = "Total Wage: $" + totalWage.toFixed(2);
             document.getElementById('netPayment').innerText = "Net Payment: $" + netPayment.toFixed(2);
+        });
+
+        // Reset Button Functionality
+        document.getElementById('reset-button').addEventListener('click', function() {
+            // Reset all input fields to default values
+            document.getElementById('full_days').value = 0;
+            document.getElementById('half_days').value = 0;
+            document.getElementById('hours_worked').value = 0;
+            document.getElementById('full_wage').value = 235;
+            document.getElementById('half_wage').value = 75;
+            document.getElementById('hour_wage').value = 24.5;
+
+            // Hide the results section
+            document.getElementById('results').style.display = 'none';
         });
     </script>
 </body>
