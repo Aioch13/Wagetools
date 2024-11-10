@@ -4,32 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Wage Calculator</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Body Styling */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+
+        /* Container Styling */
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* Title Styling */
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Label Styling */
+        label {
+            font-weight: bold;
+            color: #555;
+            display: block;
+            margin: 15px 0 5px;
+            text-align: left;
+        }
+
+        /* Input Styling */
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* Button Styling */
+        #calculate-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        #calculate-button:hover {
+            background-color: #45a049;
+        }
+
+        /* Results Section */
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #results h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        #results p {
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    <h1>Manager Wage Calculator</h1>
-    <form id="calculator-form">
-        <label for="full_days">Full Days Worked:</label>
-        <input type="number" id="full_days" name="full_days" min="0" max="7" value="0"><br>
+    <div class="container">
+        <h1>Manager Wage Calculator</h1>
+        <form id="calculator-form">
+            <label for="full_days">Full Days Worked:</label>
+            <input type="number" id="full_days" name="full_days" min="0" max="7" value="0">
 
-        <label for="half_days">Half Days Worked:</label>
-        <input type="number" id="half_days" name="half_days" min="0" max="7" value="0"><br>
+            <label for="half_days">Half Days Worked:</label>
+            <input type="number" id="half_days" name="half_days" min="0" max="7" value="0">
 
-        <label for="hours_worked">Hours Worked:</label>
-        <input type="number" id="hours_worked" name="hours_worked" min="0" max="15" step="any" value="0"><br>
+            <label for="hours_worked">Hours Worked:</label>
+            <input type="number" id="hours_worked" name="hours_worked" min="0" max="15" step="any" value="0">
 
-        <label for="full_wage">Full Day Wage:</label>
-        <input type="number" id="full_wage" name="full_wage" value="235"><br>
+            <label for="full_wage">Full Day Wage:</label>
+            <input type="number" id="full_wage" name="full_wage" value="235">
 
-        <label for="half_wage">Half Day Wage:</label>
-        <input type="number" id="half_wage" name="half_wage" value="75"><br>
+            <label for="half_wage">Half Day Wage:</label>
+            <input type="number" id="half_wage" name="half_wage" value="75">
 
-        <label for="hour_wage">Hourly Wage:</label>
-        <input type="number" id="hour_wage" name="hour_wage" value="24.5"><br>
+            <label for="hour_wage">Hourly Wage:</label>
+            <input type="number" id="hour_wage" name="hour_wage" value="24.5">
 
-        <input type="button" id="calculate-button" value="Calculate">
-    </form>
+            <input type="button" id="calculate-button" value="Calculate">
+        </form>
 
-    <div id="results"></div>
+        <div id="results"></div>
+    </div>
 
     <script>
         document.getElementById('calculate-button').addEventListener('click', function() {
