@@ -46,7 +46,43 @@
              <button id="clearLogBtn" class="danger-btn">Clear ENTIRE Log (This Browser)</button>
         </section>
 
+        <section class="admin-section">
+            <h2>Weekly Timesheet Summary</h2>
+            <p class="warning">
+                <strong>Note:</strong> Calculations are based on sign-in/out pairs found in *this browser's* local storage for the same day. Overnight shifts might not be calculated correctly. Data accuracy depends on correct user actions.
+            </p>
+    
+            <div class="form-group">
+                <label for="weekSelector">Select Week:</label>
+                <select id="weekSelector">
+                    <option value="">-- Loading Weeks --</option>
+                    </select>
+            </div>
+    
+            <table id="timesheetSummaryTable">
+                <thead>
+                    <tr>
+                        <th>Staff Name</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                        <th>Sunday</th>
+                        <th>Weekly Total</th>
+                    </tr>
+                </thead>
+                <tbody id="timesheetSummaryBody">
+                    <tr><td colspan="9" style="text-align: center;">Select a week to view the summary.</td></tr>
+                </tbody>
+            </table>
+        </section>
     </div>
+
+    <hr>
+
+    
 
     <script src="admin.js"></script>
 </body>
