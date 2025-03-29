@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Admin Panel</h1>
+
+        <section class="admin-section">
+            <h2>Manage Staff</h2>
+            <div class="form-group">
+                <label for="newStaffName">Add New Staff:</label>
+                <input type="text" id="newStaffName" placeholder="Enter staff name">
+                <button id="addStaffBtn">Add Staff</button>
+            </div>
+            <h3>Current Staff List:</h3>
+            <ul id="staffList" class="item-list">
+                </ul>
+        </section>
+
+        <hr>
+
+        <section class="admin-section">
+            <h2>Attendance Log</h2>
+             <p class="warning">
+                <strong>Note:</strong> This log shows entries stored in *this browser's* local storage.
+                It will NOT automatically show sign-ins/outs from other staff members' computers.
+            </p>
+            <button id="refreshLogBtn">Refresh Log</button>
+            <table id="attendanceLogTable">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceLogBody">
+                    </tbody>
+            </table>
+             <button id="clearLogBtn" class="danger-btn">Clear ENTIRE Log (This Browser)</button>
+        </section>
+
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
