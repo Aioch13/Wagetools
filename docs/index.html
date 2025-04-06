@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Time Tracker (NZ) - Focus Start Time</title>
+    <title>Team Time Tracker (NZ) - Polished v4</title>
     <style>
         /* --- Base Styles & Variables --- */
         :root {
@@ -22,7 +22,7 @@
             --log-bg: #f8f9fa;
             --border-light: #eaeaec;
             --ph-active-color: var(--success-color);
-            --highlight-bg: #e6f2ff; /* Light blue for highlight */
+            --highlight-bg: #e6f2ff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { font-size: 16px; width: 100%; }
@@ -73,6 +73,7 @@
         /* --- Input Area (Center Panel) --- */
         .input-area {
             flex: 1 1 480px;
+            min-width: 300px;
             padding: 0 15px;
             overflow-y: auto;
             display: flex;
@@ -88,7 +89,8 @@
         input[type="text"][name*="time"], input[type="number"], input[type="date"] {
             width: 100%; padding: 11px 14px; border: 1px solid var(--border-color);
             border-radius: 10px; font-size: 1rem; background-color: var(--card-background);
-            color: var(--text-primary); appearance: none; -moz-appearance: none; -webkit-appearance: none;
+            color: var(--text-primary);
+            appearance: none; -moz-appearance: none; -webkit-appearance: none; /* Added -webkit prefix */
             transition: border-color 0.2s ease, box-shadow 0.2s ease; margin-bottom: 4px;
         }
          input[type="text"][name*="time"]::placeholder { color: var(--subtle-grey); font-size: 0.9rem;}
@@ -100,7 +102,7 @@
         .form-row > .input-group { flex: 1; }
         .input-group { margin-bottom: 15px; }
         .stepper-input-group { display: flex; align-items: center; gap: 8px; }
-        .stepper-input-group input { text-align: center; flex-grow: 1; margin-bottom: 0 !important; }
+        .stepper-input-group input { text-align: center; flex-grow: 1; margin-bottom: 0 !important; -moz-appearance: textfield; /* Keep for number input */ }
         .stepper-button {
             flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
             border: 1px solid var(--border-color); background-color: var(--card-background);
@@ -112,7 +114,12 @@
         .stepper-button:active { background-color: var(--subtle-grey); transform: scale(0.95); }
         .ph-toggle-group { display: flex; align-items: center; margin-top: 10px; gap: 10px; padding: 8px; border-radius: 10px; transition: background-color 0.2s ease; cursor: pointer;}
         .ph-toggle-group:hover { background-color: var(--input-background); }
-        .ph-toggle { appearance: none; width: 22px; height: 22px; border: 1.5px solid var(--border-color); border-radius: 6px; cursor: pointer; position: relative; flex-shrink: 0; background-color: var(--card-background); transition: background-color 0.2s ease, border-color 0.2s ease; }
+        .ph-toggle {
+            appearance: none; -webkit-appearance: none; /* Added prefix */
+            width: 22px; height: 22px; border: 1.5px solid var(--border-color);
+            border-radius: 6px; cursor: pointer; position: relative; flex-shrink: 0;
+            background-color: var(--card-background); transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
         .ph-toggle:checked { background-color: var(--success-color); border-color: var(--success-color); }
         .ph-toggle:checked::after { content: '✔'; color: white; font-size: 15px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); line-height: 1; }
         .ph-toggle:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px;}
@@ -126,6 +133,7 @@
         /* --- Log & Summary Area (Right Panel) --- */
         .log-summary-area {
             flex: 1 1 420px;
+            min-width: 300px;
             padding-left: 25px;
             border-left: 1px solid var(--border-light);
             display: flex; flex-direction: column; overflow: hidden;
@@ -147,10 +155,20 @@
 
         .log-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .log-area h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
-        #log-entries { list-style: none; overflow-y: auto; flex-grow: 1; padding-right: 8px; }
+        #log-entries {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 8px;
+            /* Firefox scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: var(--subtle-grey) transparent;
+        }
+        /* Webkit scrollbar styling */
         #log-entries::-webkit-scrollbar { width: 6px; }
         #log-entries::-webkit-scrollbar-track { background: transparent; }
-        #log-entries::-webkit-scrollbar-thumb { background-color: var(--subtle-grey); border-radius: 10px; border: 1px solid var(--background-color); }
+        #log-entries::-webkit-scrollbar-thumb { background-color: var(--subtle-grey); border-radius: 10px; border: 1px solid var(--card-background); /* Match card bg */ }
+
         .log-entry { background-color: var(--card-background); border: 1px solid var(--border-light); border-radius: 10px; padding: 10px 15px; margin-bottom: 10px; font-size: 0.9rem; position: relative; transition: box-shadow 0.2s ease; }
         .log-entry:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06);}
         .log-entry p { margin-bottom: 4px; color: var(--text-secondary); }
@@ -159,12 +177,8 @@
         .log-entry .delete-log-btn { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border: none; background: var(--subtle-grey); color: var(--text-secondary); border-radius: 50%; cursor: pointer; font-size: 14px; line-height: 20px; text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease, background-color 0.2s ease; transform: scale(0.8); }
         .log-entry:hover .delete-log-btn { opacity: 0.7; visibility: visible; transform: scale(1); }
         .delete-log-btn:hover { opacity: 1; background-color: var(--danger-color); color: white; }
-        /* Animation for new log entry */
         .log-entry.new-entry-highlight { animation: highlightFade 1.5s ease-out forwards; }
-        @keyframes highlightFade {
-            0% { background-color: var(--highlight-bg); }
-            100% { background-color: var(--card-background); }
-        }
+        @keyframes highlightFade { 0% { background-color: var(--highlight-bg); } 100% { background-color: var(--card-background); } }
 
 
         .log-controls { margin-top: 15px; flex-shrink: 0; display: flex; gap: 10px; }
@@ -293,7 +307,7 @@
         const DEFAULT_CLEANER_RATE = 24.70;
         const DEFAULT_LYNETTE_FULL_DAYS = 2;
         const DEFAULT_LYNETTE_HALF_DAYS = 3;
-        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_polished_v3_focusFix'; // Updated key
+        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_polished_v4_xBrowser'; // Updated key
 
         // --- State ---
         let currentStaff = null;
@@ -329,7 +343,6 @@
         const summaryBaseMgrWage = document.getElementById('summary-base-mgr-wage');
         const summaryAdjustment = document.getElementById('summary-adjustment');
         const summaryFinalMgrWage = document.getElementById('summary-final-mgr-wage');
-        // Summary Rate Display Elements
         const summaryRateFull = document.getElementById('summary-rate-full');
         const summaryRateHalf = document.getElementById('summary-rate-half');
         const summaryRateCleaner = document.getElementById('summary-rate-cleaner');
@@ -385,7 +398,7 @@
                 else if (!timeRegex.test(endVal)) { showError('end_time', 'Invalid format (HH:MM).'); isValid = false; }
                 else { clearError('end_time'); }
                 if (timeRegex.test(startVal) && timeRegex.test(endVal)) { if (calculateDuration(startVal, endVal) <= 0) { showError('end_time', 'End must be after start.'); isValid = false; } else { const eEE=document.getElementById('end_time-error'); if(eEE&&eEE.textContent==='End must be after start.'){clearError('end_time');}}}
-            } else { clearError('start_time'); clearError('end_time'); }
+            } else { clearError('start_time'); clearError('end_time'); } // Clear errors if both empty
             if (currentStaff === 'Lynette') { const vN=(id,m,mx)=>{const iE=document.getElementById(id);const v=parseInt(iE.value);if(isNaN(v)||v<m||(mx!==undefined&&v>mx)){showError(id,`Must be ${m}-${mx}.`); isValid = false;} else {clearError(id);}}; vN('full_days', 0, 7); vN('half_days', 0, 7); }
             return isValid;
         };
@@ -405,11 +418,7 @@
                 let phMarker=entry.isPH?'<span class="log-ph">(PH)</span>':'';
                 let content=`<button type="button" class="delete-log-btn" title="Delete Entry">×</button><p><strong>${entry.staffName}</strong> - ${formatDate(entry.date)}</p><p>Time: <span>${formatDisplayTime(entry.start)} - ${formatDisplayTime(entry.end)}</span></p><p>Hours: <span>${formatHours(entry.hours)} ${phMarker}</span></p>`;
                 li.innerHTML=content;
-                // Add highlight animation class - check if it's newly added
-                if (entry.isNew) {
-                    li.classList.add('new-entry-highlight');
-                    setTimeout(() => { li.classList.remove('new-entry-highlight'); delete entry.isNew; }, 1500);
-                }
+                if (entry.isNew) { li.classList.add('new-entry-highlight'); setTimeout(() => { li.classList.remove('new-entry-highlight'); delete entry.isNew; }, 1500); }
                 logEntriesUI.appendChild(li);
                 });
         };
@@ -449,7 +458,7 @@
             startTimeInput.value = ''; endTimeInput.value = ''; isPhCheckbox.checked = false; // Clear time inputs
             // Keep date input value
             clearAllErrors(); updateSummary();
-            startTimeInput.focus(); // *** CHANGED: Focus Start Time input on staff select ***
+            startTimeInput.focus(); // Focus Start Time input on staff select
         };
         const handleManagerDaysChange = () => {
              if (currentStaff !== 'Lynette') return; let fV=true; let hV=true; const fVal=parseInt(fullDaysInput.value); const hVal=parseInt(halfDaysInput.value);
@@ -462,17 +471,29 @@
             if (!currentStaff) { alert('Please select a staff member first.'); return false; }
             const formattedStart = parseAndFormatTime(startTimeInput); const formattedEnd = parseAndFormatTime(endTimeInput);
             const startForValidation = formattedStart || startTimeInput.value; const endForValidation = formattedEnd || endTimeInput.value;
-            if (!startForValidation && !endForValidation) { showError('start_time', 'Start/End time required to log.'); startTimeInput.focus(); return false; } // Prevent logging empty entry
-            if (!validateEntryInputs()) { const firstError = calculatorForm.querySelector('.input-error'); firstError?.focus(); return false; }
+            // Require date AND at least start/end times to be present to log
+            let isValidForLog = true;
+            if (!entryDateInput.value) { showError('entry_date', 'Date required.'); isValidForLog = false; }
+            if (!startForValidation && !endForValidation) {
+                 showError('start_time', 'Start/End time required to log.');
+                 if (!startForValidation) startTimeInput.focus(); else endTimeInput.focus();
+                 isValidForLog = false;
+            } else if (!validateEntryInputs()) { // Run full validation only if times potentially exist
+                 isValidForLog = false;
+            }
+            if (!isValidForLog) { const firstError = calculatorForm.querySelector('.input-error'); firstError?.focus(); return false; }
+
             const startTime24 = startTimeInput.value; const endTime24 = endTimeInput.value;
             const entryDate = entryDateInput.value; const isPH = isPhCheckbox.checked;
             const hours = calculateDuration(startTime24, endTime24);
-            if (hours <= 0) { showError('end_time', 'Calculated hours <= 0.'); endTimeInput.focus(); return false; }
-            const newEntry = { id: Date.now(), staffName: currentStaff, date: entryDate, start: startTime24, end: endTime24, hours: hours, isPH: isPH, isNew: true }; // Mark as new
+            if (hours <= 0 && (startForValidation || endForValidation)) { showError('end_time', 'Calculated hours <= 0.'); endTimeInput.focus(); return false; } // Check duration if times were entered
+
+            const newEntry = { id: Date.now(), staffName: currentStaff, date: entryDate, start: startTime24, end: endTime24, hours: hours, isPH: isPH, isNew: true };
             logEntries.push(newEntry); saveLog(); renderLog(); updateSummary();
+            // Clear only time inputs and PH flag, keep date
             startTimeInput.value = ''; endTimeInput.value = ''; isPhCheckbox.checked = false;
             clearError('start_time'); clearError('end_time');
-            startTimeInput.focus(); // Return focus to start time for next entry for SAME staff
+            startTimeInput.focus();
             return true;
         };
 
@@ -490,12 +511,7 @@
             if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
                 if (targetId === 'entry_date') { e.preventDefault(); startTimeInput.focus(); }
                 else if (targetId === 'start_time') { e.preventDefault(); parseAndFormatTime(target); endTimeInput.focus(); }
-                else if (targetId === 'end_time') {
-                    e.preventDefault();
-                    parseAndFormatTime(target);
-                    // Skip PH checkbox, focus Log button
-                    logButton.focus();
-                }
+                else if (targetId === 'end_time') { e.preventDefault(); parseAndFormatTime(target); logButton.focus(); /* Focus Log button */ }
                 // Allow Enter on buttons, steppers etc.
             }
             // Ctrl+Enter Shortcut for Log & Next
@@ -505,6 +521,7 @@
         // --- Initialization ---
         const init = () => {
             loadLog(); renderStaffList(); renderLog(); updateSummary();
+            // Default date to upcoming Sunday
             const today = new Date(); const dayOfWeek = today.getDay(); const diff=today.getDate()-dayOfWeek+(dayOfWeek===0?0:7); const weekEndingDate = new Date(today.setDate(diff)); entryDateInput.value = weekEndingDate.toISOString().split('T')[0];
 
             // Attach Event Listeners
@@ -526,9 +543,10 @@
                  handleStaffSelect(STAFF_LIST[0]); // Call handler directly
              } else if (currentStaff) {
                  updateSummary();
-                 startTimeInput.focus(); // *** CHANGED: Focus Start Time if loaded with staff ***
+                 startTimeInput.focus(); // Focus Start Time if loaded with staff
              } else {
-                 startTimeInput.focus(); // *** CHANGED: Focus Start Time if no staff/empty start ***
+                 // If no staff somehow, focus date as a fallback
+                 entryDateInput.focus();
              }
         };
 
