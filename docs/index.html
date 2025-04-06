@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Time Tracker (NZ) - Polished v3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Team Time Tracking Application for NZ-based staff">
+    <title>Team Time Tracker (NZ) - v7 Final</title>
     <style>
-        /* --- Base Styles & Variables --- */
+        /* --- CSS Variables & Base Styles --- */
         :root {
-            --system-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            --system-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --background-color: #f2f2f7;
             --card-background: #ffffff;
             --text-primary: #1c1c1e;
@@ -22,10 +23,14 @@
             --log-bg: #f8f9fa;
             --border-light: #eaeaec;
             --ph-active-color: var(--success-color);
-            --highlight-bg: #e6f2ff; /* Light blue for highlight */
+            --highlight-bg: #e6f2ff;
+            --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { font-size: 16px; width: 100%; }
+        html {
+            font-size: 16px;
+            width: 100%; /* Retained */
+        }
         body {
             font-family: var(--system-font);
             display: flex;
@@ -35,53 +40,86 @@
             padding: 20px 15px;
             color: var(--text-primary);
             line-height: 1.5;
-            width: 100%;
+            width: 100%; /* Retained */
         }
 
-        /* --- Main App Layout --- */
+        /* --- Main Layout (Reverted to Flexbox) --- */
         .app-container {
-            display: flex;
+            display: flex; /* CHANGED: Back to Flexbox */
             gap: 25px;
             width: 100%;
-            max-width: 1250px;
+            max-width: 1300px; /* Adjusted max-width */
             background-color: var(--card-background);
             border-radius: 18px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
             padding: 30px;
-            height: calc(100vh - 40px);
+            min-height: calc(100vh - 40px);
+            max-height: calc(100vh - 40px);
             overflow: hidden;
         }
 
-        /* --- Staff List (Left Panel) --- */
+        /* --- Column Styling & Overflow (Flexbox properties restored) --- */
         .staff-list {
-            flex: 0 0 190px;
+            flex: 0 0 190px; /* Fixed width */
             border-right: 1px solid var(--border-light);
             padding-right: 25px;
-            overflow-y: auto;
+            overflow-y: auto; /* Allow scroll within column */
+            height: 100%; /* Allow taking full height */
         }
+        .input-area {
+            flex: 1 1 0; /* Grow and shrink from zero basis */
+            min-width: 400px; /* Prevent collapsing too much */
+            padding: 0 15px;
+            overflow-y: auto; /* Allow scroll within column */
+            height: 100%;
+            display: flex; /* Keep internal flex direction */
+            flex-direction: column;
+        }
+        .log-summary-area {
+            flex: 1 1 0; /* Grow and shrink from zero basis */
+            min-width: 350px; /* Prevent collapsing too much */
+            padding-left: 25px;
+            border-left: 1px solid var(--border-light);
+            display: flex; flex-direction: column; overflow: hidden; /* Keep internal flex/overflow */
+            height: 100%;
+        }
+
+
+        @media (max-width: 1100px) {
+            .app-container {
+                flex-direction: column; /* Use flex direction for mobile */
+                height: auto;
+                max-height: none;
+                padding: 20px;
+                overflow-y: auto;
+            }
+            .staff-list, .input-area, .log-summary-area {
+                 border: none; padding: 0; max-height: none; overflow-y: visible; height: auto;
+                 flex-basis: auto; /* Reset flex basis */
+                 min-width: 0;
+            }
+             .staff-list { border-bottom: 1px solid var(--border-light); padding-bottom: 15px; margin-bottom: 15px; flex-shrink: 0; }
+             .log-summary-area { border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 15px; flex-shrink: 0; }
+             .input-area { flex-grow: 1; }
+        }
+
+        /* --- Staff List Accessibility Improvements --- */
         .staff-list h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 18px; }
-        .staff-list ul { list-style: none; }
-        .staff-list li button {
+        .staff-list [role="list"] { list-style: none; }
+        .staff-list button[role="listitem"] {
             display: block; width: 100%; padding: 11px 14px; margin-bottom: 8px;
             border: none; background-color: transparent; border-radius: 10px;
             text-align: left; font-size: 1rem; font-weight: 500; cursor: pointer;
-            color: var(--accent-color); transition: background-color 0.2s ease, color 0.2s ease;
+            color: var(--accent-color); transition: background-color 0.2s var(--transition-timing), color 0.2s var(--transition-timing);
         }
-        .staff-list li button:hover { background-color: var(--input-background); }
-        .staff-list li button.active { background-color: var(--accent-color); color: white; font-weight: 600; }
+        .staff-list button[role="listitem"]:hover { background-color: var(--input-background); }
+        .staff-list button[role="listitem"].active { background-color: var(--accent-color); color: white; font-weight: 600; }
 
-        /* --- Input Area (Center Panel) --- */
-        .input-area {
-            flex: 1 1 480px;
-            padding: 0 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
+
+        /* --- Input Area Styling --- */
         .input-area-header { text-align: center; margin-bottom: 25px; }
         .input-area h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 5px; }
         .input-area h2 span { font-weight: 700; color: var(--accent-color); }
-
         fieldset { border: none; padding: 0; margin: 0 0 20px 0; }
         legend { font-weight: 600; margin-bottom: 12px; font-size: 1.1rem; padding: 0; }
         label { font-weight: 500; color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 6px; }
@@ -98,9 +136,9 @@
         }
         .form-row { display: flex; gap: 18px; align-items: flex-start; }
         .form-row > .input-group { flex: 1; }
-        .input-group { margin-bottom: 15px; }
+        .input-group { margin-bottom: 15px; position: relative; }
         .stepper-input-group { display: flex; align-items: center; gap: 8px; }
-        .stepper-input-group input { text-align: center; flex-grow: 1; margin-bottom: 0 !important; }
+        .stepper-input-group input { text-align: center; flex-grow: 1; margin-bottom: 0 !important; -moz-appearance: textfield; }
         .stepper-button {
             flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
             border: 1px solid var(--border-color); background-color: var(--card-background);
@@ -112,7 +150,7 @@
         .stepper-button:active { background-color: var(--subtle-grey); transform: scale(0.95); }
         .ph-toggle-group { display: flex; align-items: center; margin-top: 10px; gap: 10px; padding: 8px; border-radius: 10px; transition: background-color 0.2s ease; cursor: pointer;}
         .ph-toggle-group:hover { background-color: var(--input-background); }
-        .ph-toggle { appearance: none; width: 22px; height: 22px; border: 1.5px solid var(--border-color); border-radius: 6px; cursor: pointer; position: relative; flex-shrink: 0; background-color: var(--card-background); transition: background-color 0.2s ease, border-color 0.2s ease; }
+        .ph-toggle { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border: 1.5px solid var(--border-color); border-radius: 6px; cursor: pointer; position: relative; flex-shrink: 0; background-color: var(--card-background); transition: background-color 0.2s ease, border-color 0.2s ease; }
         .ph-toggle:checked { background-color: var(--success-color); border-color: var(--success-color); }
         .ph-toggle:checked::after { content: '✔'; color: white; font-size: 15px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); line-height: 1; }
         .ph-toggle:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px;}
@@ -123,13 +161,23 @@
         .error-message { font-size: 0.8rem; color: var(--danger-color); min-height: 1.3em; display: block; margin-top: 4px; }
         .input-error { border-color: var(--danger-color) !important; }
 
+         /* Enhanced Input Validation Styles */
+         .input-group.has-error { /* Add class via JS */
+             animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+             transform: translate3d(0, 0, 0);
+             backface-visibility: hidden;
+             perspective: 1000px;
+         }
+
+         @keyframes shake {
+             10%, 90% { transform: translate3d(-1px, 0, 0); }
+             20%, 80% { transform: translate3d(2px, 0, 0); }
+             30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+             40%, 60% { transform: translate3d(3px, 0, 0); }
+         }
+
+
         /* --- Log & Summary Area (Right Panel) --- */
-        .log-summary-area {
-            flex: 1 1 420px;
-            padding-left: 25px;
-            border-left: 1px solid var(--border-light);
-            display: flex; flex-direction: column; overflow: hidden;
-        }
         .summary-section { padding: 18px; margin-bottom: 18px; border-radius: 12px; background-color: var(--input-background); border: 1px solid var(--border-light); flex-shrink: 0; }
         .summary-section h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 12px; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;}
         .summary-section .summary-scope-note { font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin-top: -10px; margin-bottom: 10px;}
@@ -144,27 +192,29 @@
         .summary-section .adjustment-negative { color: var(--danger-color); }
         .summary-section .current-rates { font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px; padding-top: 6px; border-top: 1px dotted var(--border-light); }
 
-
         .log-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .log-area h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
         #log-entries { list-style: none; overflow-y: auto; flex-grow: 1; padding-right: 8px; }
-        #log-entries::-webkit-scrollbar { width: 6px; }
-        #log-entries::-webkit-scrollbar-track { background: transparent; }
-        #log-entries::-webkit-scrollbar-thumb { background-color: var(--subtle-grey); border-radius: 10px; border: 1px solid var(--background-color); }
+        /* Improved Scrollbar Consistency */
+        #log-entries {
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: var(--subtle-grey) transparent; /* Firefox */
+        }
+        #log-entries::-webkit-scrollbar { width: 6px; height: 6px; } /* Webkit */
+        #log-entries::-webkit-scrollbar-track { background: transparent; } /* Webkit */
+        #log-entries::-webkit-scrollbar-thumb { background-color: var(--subtle-grey); border-radius: 10px; border: 1px solid var(--card-background); } /* Webkit */
+
+
         .log-entry { background-color: var(--card-background); border: 1px solid var(--border-light); border-radius: 10px; padding: 10px 15px; margin-bottom: 10px; font-size: 0.9rem; position: relative; transition: box-shadow 0.2s ease; }
         .log-entry:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06);}
         .log-entry p { margin-bottom: 4px; color: var(--text-secondary); }
         .log-entry p span { color: var(--text-primary); font-weight: 500; }
         .log-entry .log-ph { color: var(--success-color); font-weight: 600; margin-left: 5px; font-size: 0.8rem; vertical-align: middle;}
-        .log-entry .delete-log-btn { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border: none; background: var(--subtle-grey); color: var(--text-secondary); border-radius: 50%; cursor: pointer; font-size: 14px; line-height: 20px; text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease, background-color 0.2s ease; transform: scale(0.8); }
+        .log-entry .delete-log-btn { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border: none; background: var(--subtle-grey); color: var(--text-secondary); border-radius: 50%; cursor: pointer; font-size: 14px; line-height: 20px; text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease, background-color 0.2s ease, transform 0.1s ease; transform: scale(0.8); }
         .log-entry:hover .delete-log-btn { opacity: 0.7; visibility: visible; transform: scale(1); }
         .delete-log-btn:hover { opacity: 1; background-color: var(--danger-color); color: white; }
-        /* Animation for new log entry */
         .log-entry.new-entry-highlight { animation: highlightFade 1.5s ease-out forwards; }
-        @keyframes highlightFade {
-            0% { background-color: var(--highlight-bg); }
-            100% { background-color: var(--card-background); }
-        }
+        @keyframes highlightFade { 0% { background-color: var(--highlight-bg); } 100% { background-color: var(--card-background); } }
 
 
         .log-controls { margin-top: 15px; flex-shrink: 0; display: flex; gap: 10px; }
@@ -173,22 +223,29 @@
         .export-log-button:hover { background-color: var(--accent-color); color: white; }
         .clear-log-button { color: var(--danger-color); border-color: var(--danger-color); }
         .clear-log-button:hover { background-color: var(--danger-color); color: white; }
-        @media (max-width: 1100px) { .app-container { flex-direction: column; height: auto; max-height: none; } .staff-list, .log-summary-area { border: none; padding: 0; flex-basis: auto; max-height: 35vh; overflow-y: auto; } .staff-list { border-bottom: 1px solid var(--border-light); padding-bottom: 15px; margin-bottom: 15px; } .log-summary-area { border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 15px; } .input-area { padding: 0; overflow-y: visible; flex-basis: auto; } }
-        @media (max-width: 600px) { body { padding: 10px 5px; } .app-container { padding: 15px; gap: 15px; } .form-row { flex-direction: column; gap: 0; } h1, .input-area h2, .log-summary-area h2, .staff-list h2 { font-size: 1.1rem; } .button, .log-button { font-size: 0.95rem; padding: 12px; } input[type="text"][name*="time"], input[type="number"], input[type="date"] { font-size: 0.9rem; padding: 10px; } .log-entry { font-size: 0.8rem; } .summary-section p { font-size: 0.85rem; } .staff-list { flex-basis: auto; } .log-summary-area { flex-basis: auto; } }
+        @media (max-width: 600px) { /* Simplified responsive */
+             body { padding: 10px 5px; }
+             .app-container { padding: 15px; gap: 15px; }
+             .form-row { flex-direction: column; gap: 0; }
+             h1, .input-area h2, .log-summary-area h2, .staff-list h2 { font-size: 1.1rem; }
+             .button, .log-button { font-size: 0.95rem; padding: 12px; }
+             input[type="text"][name*="time"], input[type="number"], input[type="date"] { font-size: 0.9rem; padding: 10px; }
+             .log-entry { font-size: 0.8rem; }
+             .summary-section p { font-size: 0.85rem; }
+             .staff-list { flex-basis: auto; }
+             .log-summary-area { flex-basis: auto; }
+        }
         .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 
     </style>
 </head>
 <body>
     <div class="app-container">
+        <nav class="staff-list scrollable-area" aria-labelledby="staff-heading"> <h2 id="staff-heading">Staff</h2>
+            <ul id="staff-list-ui" role="list"></ul>
+        </nav>
 
-        <aside class="staff-list">
-            <h2>Staff</h2>
-            <ul id="staff-list-ui"></ul>
-        </aside>
-
-        <main class="input-area">
-            <div class="input-area-header">
+        <main class="input-area scrollable-area"> <div class="input-area-header">
                 <h2 id="current-staff-header">Select Staff</h2>
             </div>
 
@@ -201,19 +258,19 @@
                             <label for="full_days">Full Days</label>
                             <div class="stepper-input-group">
                                 <button type="button" class="stepper-button" aria-label="Decrease Full Days" data-target="full_days" data-step="-1">−</button>
-                                <input type="number" id="full_days" name="full_days" min="0" max="7" step="1" value="2">
+                                <input type="number" id="full_days" name="full_days" min="0" max="7" step="1" value="2" aria-describedby="full_days-error">
                                 <button type="button" class="stepper-button" aria-label="Increase Full Days" data-target="full_days" data-step="1">+</button>
                             </div>
-                            <span class="error-message" id="full_days-error"></span>
+                            <span class="error-message" id="full_days-error" role="alert"></span>
                         </div>
                         <div class="input-group">
                             <label for="half_days">Half Days</label>
                              <div class="stepper-input-group">
                                 <button type="button" class="stepper-button" aria-label="Decrease Half Days" data-target="half_days" data-step="-1">−</button>
-                                <input type="number" id="half_days" name="half_days" min="0" max="7" step="1" value="3">
+                                <input type="number" id="half_days" name="half_days" min="0" max="7" step="1" value="3" aria-describedby="half_days-error">
                                 <button type="button" class="stepper-button" aria-label="Increase Half Days" data-target="half_days" data-step="1">+</button>
                             </div>
-                            <span class="error-message" id="half_days-error"></span>
+                            <span class="error-message" id="half_days-error" role="alert"></span>
                         </div>
                     </div>
                 </fieldset>
@@ -222,24 +279,25 @@
                     <legend id="time-entry-legend">Log Work Time</legend>
                      <div class="input-group">
                          <label for="entry_date">Date</label>
-                         <input type="date" id="entry_date" name="entry_date" aria-label="Entry Date">
-                         <span class="error-message" id="entry_date-error"></span>
+                         <input type="date" id="entry_date" name="entry_date" aria-label="Entry Date" aria-describedby="entry_date-error">
+                         <span class="error-message" id="entry_date-error" role="alert"></span>
                      </div>
                     <div class="form-row">
                         <div class="input-group">
                             <label for="start_time">Start Time</label>
-                            <input type="text" id="start_time" name="start_time" placeholder="e.g., 9, 9a, 14:30" inputmode="decimal" aria-label="Start Time"> <span class="error-message" id="start_time-error"></span>
+                            <input type="text" id="start_time" name="start_time" placeholder="e.g., 9, 9a, 14:30" inputmode="decimal" aria-label="Start Time" aria-describedby="start_time-error">
+                            <span class="error-message" id="start_time-error" role="alert"></span>
                         </div>
                         <div class="input-group">
                             <label for="end_time">End Time</label>
-                            <input type="text" id="end_time" name="end_time" placeholder="e.g., 11, 3p, 1700" inputmode="decimal" aria-label="End Time">
-                            <span class="error-message" id="end_time-error"></span>
+                            <input type="text" id="end_time" name="end_time" placeholder="e.g., 11, 3p, 1700" inputmode="decimal" aria-label="End Time" aria-describedby="end_time-error">
+                            <span class="error-message" id="end_time-error" role="alert"></span>
                         </div>
                     </div>
                      <div class="ph-toggle-group input-group">
-                        <input type="checkbox" class="ph-toggle" id="is_ph" name="is_ph">
+                        <input type="checkbox" class="ph-toggle" id="is_ph" name="is_ph" aria-describedby="is_ph-error">
                         <label for="is_ph">Work on Public Holiday?</label>
-                        <span class="error-message" id="is_ph-error"></span>
+                        <span class="error-message" id="is_ph-error" role="alert"></span>
                     </div>
                 </fieldset>
 
@@ -252,9 +310,8 @@
             </form>
         </main>
 
-        <aside class="log-summary-area">
-             <section id="summary-section" class="summary-section" style="display: none;">
-                <h3>Summary for <span id="summary-staff-name">Staff</span></h3>
+        <aside class="log-summary-area" aria-label="Time log and summary">
+             <section id="summary-section" class="summary-section" style="display: none;" aria-live="polite"> <h3>Summary for <span id="summary-staff-name">Staff</span></h3>
                 <p class="summary-scope-note">(Based on currently logged entries)</p>
                 <p><span>Total Standard Hours:</span> <span id="summary-std-hours">0.00</span></p>
                 <p><span>Total Public Holiday Hours:</span> <span id="summary-ph-hours" class="ph-hours">0.00</span></p>
@@ -273,8 +330,7 @@
 
             <section class="log-area">
                 <h3>Time Log</h3>
-                <ul id="log-entries"></ul>
-                <div class="log-controls">
+                <ul id="log-entries" class="scrollable-area"></ul> <div class="log-controls">
                      <button type="button" id="export-log-button" class="export-log-button">Export Log (CSV)</button>
                      <button type="button" id="clear-log-button" class="clear-log-button">Clear Log</button>
                 </div>
@@ -284,258 +340,137 @@
     </div>
 
     <script>
-        // --- Constants and Staff Data ---
-        const STAFF_LIST = ['Lynette', 'Upashna', 'Sarah', 'Shaun', 'Katherine'];
-        const IRD_TARGET_HOURS = 15;
-        const PUBLIC_HOLIDAY_MULTIPLIER = 1.5;
-        const DEFAULT_FULL_DAY_RATE = 235;
-        const DEFAULT_HALF_DAY_RATE = 75;
-        const DEFAULT_CLEANER_RATE = 24.70;
-        const DEFAULT_LYNETTE_FULL_DAYS = 2;
-        const DEFAULT_LYNETTE_HALF_DAYS = 3;
-        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_polished_v3'; // Updated key
+        // --- Constants ---
+        const CONFIG = {
+            // UPDATED Staff Order
+            STAFF: ['Lynette', 'Sarah', 'Shaun', 'Upashna', 'Katherine'],
+            RATES: { FULL_DAY: 235, HALF_DAY: 75, CLEANER_HOURLY: 24.70, PH_MULTIPLIER: 1.5 },
+            DEFAULTS: { LYNETTE_FULL_DAYS: 2, LYNETTE_HALF_DAYS: 3 },
+            IRD_TARGET_HOURS: 15,
+            STORAGE_KEY: 'teamTimeTracker_v7_final' // New key for final version
+        };
 
         // --- State ---
-        let currentStaff = null;
-        let logEntries = [];
-        let lynetteManagerDays = { full: DEFAULT_LYNETTE_FULL_DAYS, half: DEFAULT_LYNETTE_HALF_DAYS };
+        let state = {
+            currentStaff: null,
+            logEntries: [],
+            managerDays: {
+                // Initialize Lynette's default, others can be added if needed
+                'Lynette': { full: CONFIG.DEFAULTS.LYNETTE_FULL_DAYS, half: CONFIG.DEFAULTS.LYNETTE_HALF_DAYS }
+            }
+        };
+
 
         // --- DOM Elements ---
-        const staffListUI = document.getElementById('staff-list-ui');
-        const currentStaffHeader = document.getElementById('current-staff-header');
-        const calculatorForm = document.getElementById('calculator-form');
-        const lynetteManagerInputs = document.getElementById('lynette-manager-inputs');
-        const timeEntryLegend = document.getElementById('time-entry-legend');
-        const logEntriesUI = document.getElementById('log-entries');
-        const logButton = document.getElementById('log-entry-button');
-        const clearLogButton = document.getElementById('clear-log-button');
-        const exportLogButton = document.getElementById('export-log-button');
-        const entryDateInput = document.getElementById('entry_date');
-        const startTimeInput = document.getElementById('start_time');
-        const endTimeInput = document.getElementById('end_time');
-        const isPhCheckbox = document.getElementById('is_ph');
-        const fullDaysInput = document.getElementById('full_days');
-        const halfDaysInput = document.getElementById('half_days');
-        const fullDayRateInput = document.getElementById('full_day_rate');
-        const halfDayRateInput = document.getElementById('half_day_rate');
-        const cleanerHourlyRateInput = document.getElementById('cleaner_hourly_rate');
-        // Summary Elements
-        const summarySection = document.getElementById('summary-section');
-        const summaryStaffName = document.getElementById('summary-staff-name');
-        const summaryStdHours = document.getElementById('summary-std-hours');
-        const summaryPhHours = document.getElementById('summary-ph-hours');
-        const lynetteSummaryDetails = document.getElementById('lynette-summary-details');
-        const summaryMgrDays = document.getElementById('summary-mgr-days');
-        const summaryBaseMgrWage = document.getElementById('summary-base-mgr-wage');
-        const summaryAdjustment = document.getElementById('summary-adjustment');
-        const summaryFinalMgrWage = document.getElementById('summary-final-mgr-wage');
-        // Summary Rate Display Elements
-        const summaryRateFull = document.getElementById('summary-rate-full');
-        const summaryRateHalf = document.getElementById('summary-rate-half');
-        const summaryRateCleaner = document.getElementById('summary-rate-cleaner');
+        const ui = {
+            staffList: document.getElementById('staff-list-ui'),
+            currentStaffHeader: document.getElementById('current-staff-header'),
+            calculatorForm: document.getElementById('calculator-form'),
+            lynetteInputs: document.getElementById('lynette-manager-inputs'),
+            timeEntryLegend: document.getElementById('time-entry-legend'),
+            logEntries: document.getElementById('log-entries'),
+            logButton: document.getElementById('log-entry-button'),
+            clearLogButton: document.getElementById('clear-log-button'),
+            exportLogButton: document.getElementById('export-log-button'),
+            dateInput: document.getElementById('entry_date'),
+            startTimeInput: document.getElementById('start_time'),
+            endTimeInput: document.getElementById('end_time'),
+            isPhCheckbox: document.getElementById('is_ph'),
+            fullDaysInput: document.getElementById('full_days'),
+            halfDaysInput: document.getElementById('half_days'),
+            summarySection: document.getElementById('summary-section'),
+            summaryStaffName: document.getElementById('summary-staff-name'),
+            summaryStdHours: document.getElementById('summary-std-hours'),
+            summaryPhHours: document.getElementById('summary-ph-hours'),
+            lynetteSummary: document.getElementById('lynette-summary-details'),
+            summaryMgrDays: document.getElementById('summary-mgr-days'),
+            summaryBaseMgrWage: document.getElementById('summary-base-mgr-wage'),
+            summaryAdjustment: document.getElementById('summary-adjustment'),
+            summaryFinalMgrWage: document.getElementById('summary-final-mgr-wage'),
+            summaryRateFull: document.getElementById('summary-rate-full'),
+            summaryRateHalf: document.getElementById('summary-rate-half'),
+            summaryRateCleaner: document.getElementById('summary-rate-cleaner'),
+        };
 
 
         // --- Utility Functions ---
-        const formatHours = (hours) => isNaN(hours) || !hours || hours === 0 ? '0.00' : hours.toFixed(2);
-        const formatCurrency = (value) => isNaN(value) ? '$0.00' : `$${value.toFixed(2)}`;
-        const formatDate = (dateStr) => { if (!dateStr) return 'N/A'; try { const d=new Date(dateStr+'T00:00:00'); return d.toLocaleDateString('en-NZ',{weekday:'short',day:'2-digit',month:'short'}); } catch { return dateStr; } };
-        const formatDisplayTime = (timeStr24) => { if (!timeStr24 || typeof timeStr24 !== 'string' || !timeStr24.includes(':')) return 'N/A'; try { const [h,m]=timeStr24.split(':'); const hr=parseInt(h); const sfx=hr>=12?'PM':'AM'; const h12=hr%12===0?12:hr%12; return `${h12}:${m} ${sfx}`; } catch { return timeStr24; } };
+        const formatHours = (h) => isNaN(h)||!h||h===0?'0.00':h.toFixed(2);
+        const formatCurrency = (v) => isNaN(v)?'$0.00':`$${v.toFixed(2)}`;
+        const formatDate = (d) => {if(!d)return 'N/A';try{const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('en-NZ',{weekday:'short',day:'2-digit',month:'short'});}catch{return d;}};
+        const formatDisplayTime = (t) => {if(!t||typeof t!=='string'||!t.includes(':'))return 'N/A';try{const [h,m]=t.split(':');const hr=parseInt(h);const sfx=hr>=12?'PM':'AM';const h12=hr%12===0?12:hr%12;return `${h12}:${m} ${sfx}`;}catch{return t;}};
 
-
-        // --- Smart Time Parsing ---
-        const parseAndFormatTime = (inputElement) => {
-            const rawValue = inputElement.value.trim().toLowerCase();
-            if (!rawValue) { clearError(inputElement.id); return null; }
+        // --- Smart Time Parsing (from Dev Suggestion - slightly refined) ---
+        const parseTimeInput = (inputElement) => {
+            const value = inputElement.value;
+            const cleanValue = value.trim().toLowerCase();
+            if (!cleanValue) { clearError(inputElement.id); return null; }
             let hour = NaN, minute = 0; let explicitAM = false, explicitPM = false;
-            if (rawValue.includes('a')) { explicitAM = true; } if (rawValue.includes('p')) { explicitPM = true; }
-            let numStr = rawValue.replace(/[^0-9.:]/g, '');
-            if (numStr.includes(':') || numStr.includes('.')) { const p=numStr.split(/[:.]/); hour=parseInt(p[0]); minute=parseInt(p[1]||'0'); }
-            else { const n=parseInt(numStr); if(!isNaN(n)){ if(numStr.length<=2){hour=n;minute=0;} else if(numStr.length===3){hour=parseInt(numStr.substring(0,1));minute=parseInt(numStr.substring(1));} else if(numStr.length===4){hour=parseInt(numStr.substring(0,2));minute=parseInt(numStr.substring(2));}}}
-            if(isNaN(hour)||isNaN(minute)||minute<0||minute>59){showError(inputElement.id,'Invalid time format.');return null;}
-            if(explicitAM||explicitPM){ if(hour<1||hour>12){showError(inputElement.id,'Hour must be 1-12 w/ AM/PM.');return null;} if(explicitPM&&hour!==12)hour+=12; if(explicitAM&&hour===12)hour=0;}
-            else{ if(hour>=1&&hour<=6){ if(inputElement.id.includes('end'))hour+=12;} else if(hour===12){/* Assume noon if just 12 */}}
+            if (cleanValue.includes('a')) { explicitAM = true; } if (cleanValue.includes('p')) { explicitPM = true; }
+            let numStr = cleanValue.replace(/[^0-9.:]/g, '');
+            if (/^\d{3,4}$/.test(numStr)) { // Military time check first
+                if (numStr.length === 3) { hour = parseInt(numStr.slice(0, 1)); minute = parseInt(numStr.slice(1)); }
+                else { hour = parseInt(numStr.slice(0, 2)); minute = parseInt(numStr.slice(2)); }
+            } else if (numStr.includes(':') || numStr.includes('.')) { const p=numStr.split(/[:.]/); hour=parseInt(p[0]); minute=parseInt(p[1]||'0'); }
+            else { const n=parseInt(numStr); if(!isNaN(n)){ if(numStr.length<=2){hour=n;minute=0;} }}
+            if(isNaN(hour)||isNaN(minute)||minute<0||minute>59){showError(inputElement.id,'Invalid format.');return null;}
+            if(explicitAM||explicitPM){ if(hour<1||hour>12){showError(inputElement.id,'Use 1-12 w/ AM/PM.');return null;} if(explicitPM&&hour!==12)hour+=12; if(explicitAM&&hour===12)hour=0;}
+            else{ if(hour>=1&&hour<=6){ if(inputElement.id.includes('end'))hour+=12;} else if(hour===12){}}
             if(hour<0||hour>23){showError(inputElement.id,'Invalid hour.');return null;}
             const fmtTime = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
             inputElement.value = fmtTime; clearError(inputElement.id); return fmtTime;
         };
 
-
         // --- Time Calculation ---
-        const calculateDuration = (startStr24, endStr24) => {
-            if (!startStr24 || !endStr24) return 0; try { const bD="1970-01-01"; const sD=new Date(`${bD}T${startStr24}`); let eD=new Date(`${bD}T${endStr24}`); if(isNaN(sD.getTime())||isNaN(eD.getTime())) return 0; if(eD<=sD){eD.setDate(eD.getDate()+1);} const diffMs=eD-sD; if(diffMs<0) return 0; const diffHrs=diffMs/(1000*60*60); return Math.round(diffHrs*100)/100; } catch(e){console.error("Error calculating duration:",startStr24,endStr24,e); return 0;}
-        };
+        const calculateDuration = (s,e) => { if(!s||!e)return 0;try{const bD="1970-01-01";const sD=new Date(`${bD}T${s}`);let eD=new Date(`${bD}T${e}`);if(isNaN(sD.getTime())||isNaN(eD.getTime()))return 0;if(eD<=sD){eD.setDate(eD.getDate()+1);}const dMs=eD-sD;if(dMs<0)return 0;const dH=dMs/36e5;return Math.round(dH*100)/100;}catch(err){console.error("Duration Err:",s,e,err);return 0;}};
 
         // --- Error Handling ---
-        const showError = (elementId, message) => { const eEl=document.getElementById(`${elementId}-error`); const iEl=document.getElementById(elementId); if(eEl)eEl.textContent=message; iEl?.classList.add('input-error'); };
-        const clearError = (elementId) => { const eEl=document.getElementById(`${elementId}-error`); const iEl=document.getElementById(elementId); if(eEl)eEl.textContent=''; iEl?.classList.remove('input-error'); };
-        const clearAllErrors = () => { calculatorForm.querySelectorAll('.error-message').forEach(el=>el.textContent=''); calculatorForm.querySelectorAll('input.input-error').forEach(input=>input.classList.remove('input-error')); };
-         const style = document.createElement('style'); style.textContent=`.input-error { border-color: var(--danger-color) !important; }`; document.head.appendChild(style);
-
+        const showError = (id,msg) => { const eE=document.getElementById(`${id}-error`); const iE=document.getElementById(id); const iG=iE?.closest('.input-group'); if(eE)eE.textContent=msg; iE?.classList.add('input-error'); iG?.classList.add('has-error'); };
+        const clearError = (id) => { const eE=document.getElementById(`${id}-error`); const iEl=document.getElementById(id); const iG=iEl?.closest('.input-group'); if(eE)eE.textContent=''; iEl?.classList.remove('input-error'); if(iG&&!iG.querySelector('.input-error')){iG.classList.remove('has-error'); setTimeout(()=>iG.classList.remove('has-error'),400);}};
+        const clearAllErrors = () => { ui.calculatorForm.querySelectorAll('.error-message').forEach(el=>el.textContent=''); ui.calculatorForm.querySelectorAll('.input-error').forEach(i=>i.classList.remove('input-error')); ui.calculatorForm.querySelectorAll('.has-error').forEach(g=>g.classList.remove('has-error')); };
+         const style = document.createElement('style'); style.textContent=`.input-error{border-color:var(--danger-color)!important;}.has-error{animation:shake 0.4s cubic-bezier(.36,.07,.19,.97) both;transform:translate3d(0,0,0);backface-visibility:hidden;perspective:1000px;}@keyframes shake{10%,90%{transform:translate3d(-1px,0,0);}20%,80%{transform:translate3d(2px,0,0);}30%,50%,70%{transform:translate3d(-3px,0,0);}40%,60%{transform:translate3d(3px,0,0);}}`; document.head.appendChild(style);
 
         // --- Input Validation ---
-        const validateEntryInputs = () => {
-            clearAllErrors(); let isValid = true;
-            if (!entryDateInput.value) { showError('entry_date', 'Date required.'); isValid = false; } else { clearError('entry_date'); }
-            const timeRegex = /^[0-2][0-9]:[0-5][0-9]$/; const startVal = startTimeInput.value; const endVal = endTimeInput.value;
-            // Only require time if one of the fields has value
-            if (startVal || endVal) {
-                if (!startVal) { showError('start_time', 'Start time required.'); isValid = false; }
-                else if (!timeRegex.test(startVal)) { showError('start_time', 'Invalid format (HH:MM).'); isValid = false; }
-                else { clearError('start_time'); }
-
-                if (!endVal) { showError('end_time', 'End time required.'); isValid = false; }
-                else if (!timeRegex.test(endVal)) { showError('end_time', 'Invalid format (HH:MM).'); isValid = false; }
-                else { clearError('end_time'); }
-
-                if (timeRegex.test(startVal) && timeRegex.test(endVal)) {
-                    if (calculateDuration(startVal, endVal) <= 0) { showError('end_time', 'End must be after start.'); isValid = false; }
-                    else { const eEE=document.getElementById('end_time-error'); if(eEE&&eEE.textContent==='End must be after start.'){clearError('end_time');}}
-                }
-            } else {
-                 // If both are empty, clear errors but allow logging (handled in log function)
-                 clearError('start_time'); clearError('end_time');
-            }
-
-            if (currentStaff === 'Lynette') { const vN=(id,m,mx)=>{const iE=document.getElementById(id);const v=parseInt(iE.value);if(isNaN(v)||v<m||(mx!==undefined&&v>mx)){showError(id,`Must be ${m}-${mx}.`); isValid = false;} else {clearError(id);}}; vN('full_days', 0, 7); vN('half_days', 0, 7); }
-            return isValid;
-        };
+        const validateEntryInputs = () => { clearError('entry_date');clearError('start_time');clearError('end_time'); if(state.currentStaff==='Lynette'){clearError('full_days');clearError('half_days');} let isValid=true; if(!ui.entryDateInput.value){showError('entry_date','Date required.');isValid=false;} const rgx=/^[0-2][0-9]:[0-5][0-9]$/; const sV=ui.startTimeInput.value; const eV=ui.endTimeInput.value; if(sV||eV){if(!sV){showError('start_time','Start required.');isValid=false;}else if(!rgx.test(sV)){showError('start_time','Invalid format (HH:MM).');isValid=false;} if(!eV){showError('end_time','End required.');isValid=false;}else if(!rgx.test(eV)){showError('end_time','Invalid format (HH:MM).');isValid=false;} if(rgx.test(sV)&&rgx.test(eV)){if(calculateDuration(sV,eV)<=0){showError('end_time','End must be after start.');isValid=false;}}} if(state.currentStaff==='Lynette'){const vN=(id,m,mx)=>{const iE=document.getElementById(id);const v=parseInt(iE.value);if(isNaN(v)||v<m||(mx!==undefined&&v>mx)){showError(id,`Must be ${m}-${mx}.`);isValid=false;}};vN('full_days',0,7);vN('half_days',0,7);} return isValid; };
 
         // --- Local Storage ---
-        const saveLog = () => { try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(logEntries)); } catch (e) { console.error("Error saving log:", e); } };
-        const loadLog = () => { try { const s = localStorage.getItem(LOCAL_STORAGE_KEY); logEntries = s ? JSON.parse(s) : []; } catch (e) { console.error("Error loading log:", e); logEntries = []; } };
+        const persistState = () => { try { localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({ logEntries: state.logEntries, managerDays: state.managerDays })); } catch (e) { console.error("Error saving state:", e); } };
+        const loadState = () => { try { const s = localStorage.getItem(CONFIG.STORAGE_KEY); if(s){ const saved=JSON.parse(s); state.logEntries=saved.logEntries||[]; state.managerDays=saved.managerDays||{'Lynette':{full:CONFIG.DEFAULTS.LYNETTE_FULL_DAYS,half:CONFIG.DEFAULTS.LYNETTE_HALF_DAYS}}; } else { state.logEntries=[]; state.managerDays={'Lynette':{full:CONFIG.DEFAULTS.LYNETTE_FULL_DAYS,half:CONFIG.DEFAULTS.LYNETTE_HALF_DAYS}};} } catch (e) { console.error("Error loading state:", e); state.logEntries=[]; state.managerDays={'Lynette':{full:CONFIG.DEFAULTS.LYNETTE_FULL_DAYS,half:CONFIG.DEFAULTS.LYNETTE_HALF_DAYS}}; } };
 
         // --- UI Rendering ---
-        const renderStaffList = () => { staffListUI.innerHTML = ''; STAFF_LIST.forEach(n=>{const l=document.createElement('li');const b=document.createElement('button');b.textContent=n;b.dataset.staffName=n;if(n===currentStaff)b.classList.add('active');l.appendChild(b);staffListUI.appendChild(l);}); };
-        const renderLog = () => {
-            logEntriesUI.innerHTML = ''; if(logEntries.length===0){logEntriesUI.innerHTML='<p style="color:var(--text-secondary);text-align:center;margin-top:20px;">No time logged yet.</p>';return;}
-            logEntries.slice().reverse().forEach((entry)=>{
-                const li=document.createElement('li');
-                li.classList.add('log-entry');
-                li.dataset.entryId=entry.id;
-                let phMarker=entry.isPH?'<span class="log-ph">(PH)</span>':'';
-                let content=`<button type="button" class="delete-log-btn" title="Delete Entry">×</button><p><strong>${entry.staffName}</strong> - ${formatDate(entry.date)}</p><p>Time: <span>${formatDisplayTime(entry.start)} - ${formatDisplayTime(entry.end)}</span></p><p>Hours: <span>${formatHours(entry.hours)} ${phMarker}</span></p>`;
-                li.innerHTML=content;
-                // Add highlight animation class
-                li.classList.add('new-entry-highlight');
-                // Remove the class after animation finishes
-                setTimeout(() => { li.classList.remove('new-entry-highlight'); }, 1500); // Match animation duration
-                logEntriesUI.appendChild(li);
-                });
-        };
-        const updateSummary = () => {
-             if (!currentStaff) { summarySection.style.display = 'none'; return; }
-             summarySection.style.display = 'block'; summaryStaffName.textContent = currentStaff;
-             const staffEntries = logEntries.filter(e => e.staffName === currentStaff);
-             let totalStandardHours = 0; let totalPublicHolidayHours = 0;
-             staffEntries.forEach(e => { if (e.isPH) { totalPublicHolidayHours += e.hours; } else { totalStandardHours += e.hours; } });
-             summaryStdHours.textContent = formatHours(totalStandardHours); summaryPhHours.textContent = formatHours(totalPublicHolidayHours);
-             summaryPhHours.parentElement.style.display = totalPublicHolidayHours > 0 ? 'flex' : 'none';
-             if (currentStaff === 'Lynette') {
-                lynetteSummaryDetails.style.display = 'block'; const fullDays=lynetteManagerDays.full; const halfDays=lynetteManagerDays.half;
-                const fullDayRate=parseFloat(fullDayRateInput.value); const halfDayRate=parseFloat(halfDayRateInput.value); const stdCleanerRate=parseFloat(cleanerHourlyRateInput.value);
-                const baseMgrWage=(fullDays*fullDayRate)+(halfDays*halfDayRate);
-                const actualStdClnValue=totalStandardHours*stdCleanerRate; const actualPHClnValue=totalPublicHolidayHours*stdCleanerRate*PUBLIC_HOLIDAY_MULTIPLIER;
-                const totalActualEarned=baseMgrWage+actualStdClnValue+actualPHClnValue;
-                const phHrsPaid=Math.min(totalPublicHolidayHours,IRD_TARGET_HOURS); const stdHrsPaid=Math.max(0,IRD_TARGET_HOURS-phHrsPaid);
-                const valuePaidClnInXero=(phHrsPaid*stdCleanerRate*PUBLIC_HOLIDAY_MULTIPLIER)+(stdHrsPaid*stdCleanerRate);
-                const finalMgrWagePayable=totalActualEarned-valuePaidClnInXero; const adjValue=finalMgrWagePayable-baseMgrWage;
-                summaryMgrDays.textContent=`${fullDays} / ${halfDays}`; summaryBaseMgrWage.textContent=formatCurrency(baseMgrWage);
-                summaryAdjustment.textContent=`${formatCurrency(Math.abs(adjValue))} ${adjValue>=-0.005?'(Add)':'(Deduct)'}`; summaryAdjustment.className=adjValue>=-0.005?'adjustment-positive':'adjustment-negative';
-                summaryFinalMgrWage.textContent=formatCurrency(finalMgrWagePayable);
-                // Display current rates used
-                summaryRateFull.textContent = fullDayRate.toFixed(2);
-                summaryRateHalf.textContent = halfDayRate.toFixed(2);
-                summaryRateCleaner.textContent = stdCleanerRate.toFixed(2);
-
-             } else { lynetteSummaryDetails.style.display = 'none'; }
-        };
+        const renderStaffList = () => { ui.staffList.innerHTML='';CONFIG.STAFF.forEach(n=>{const l=document.createElement('li');const b=document.createElement('button');b.textContent=n;b.dataset.staffName=n;b.setAttribute('role','listitem');if(n===state.currentStaff)b.classList.add('active');l.appendChild(b);ui.staffList.appendChild(l);}); };
+        const renderLog = () => { ui.logEntries.innerHTML='';if(state.logEntries.length===0){ui.logEntries.innerHTML='<p style="color:var(--text-secondary);text-align:center;margin-top:20px;">No time logged yet.</p>';return;} state.logEntries.slice().reverse().forEach((entry)=>{const li=document.createElement('li');li.classList.add('log-entry');li.dataset.entryId=entry.id;let ph=entry.isPH?'<span class="log-ph">(PH)</span>':'';let c=`<button type="button" class="delete-log-btn" title="Delete Entry" aria-label="Delete log entry for ${entry.staffName} on ${formatDate(entry.date)}">×</button><p><strong>${entry.staffName}</strong> - ${formatDate(entry.date)}</p><p>Time: <span>${formatDisplayTime(entry.start)} - ${formatDisplayTime(entry.end)}</span></p><p>Hours: <span>${formatHours(entry.hours)} ${ph}</span></p>`;li.innerHTML=c;if(entry.isNew){li.classList.add('new-entry-highlight');setTimeout(()=>{li.classList.remove('new-entry-highlight');delete entry.isNew;},1500);} ui.logEntries.appendChild(li);}); };
+        const updateSummary = () => { if(!state.currentStaff){ui.summarySection.style.display='none';return;} ui.summarySection.style.display='block';ui.summaryStaffName.textContent=state.currentStaff; const sE=state.logEntries.filter(e=>e.staffName===state.currentStaff); let tSH=0;let tPHH=0; sE.forEach(e=>{if(e.isPH){tPHH+=e.hours;}else{tSH+=e.hours;}}); ui.summaryStdHours.textContent=formatHours(tSH);ui.summaryPhHours.textContent=formatHours(tPHH); ui.summaryPhHours.parentElement.style.display=tPHH>0?'flex':'none'; if(state.currentStaff==='Lynette'){ui.lynetteSummary.style.display='block';const mD=state.managerDays['Lynette']||{full:CONFIG.DEFAULTS.LYNETTE_FULL_DAYS,half:CONFIG.DEFAULTS.LYNETTE_HALF_DAYS};const fD=mD.full;const hD=mD.half; const fDR=CONFIG.RATES.FULL_DAY;const hDR=CONFIG.RATES.HALF_DAY;const sCR=CONFIG.RATES.CLEANER_HOURLY; const bMW=(fD*fDR)+(hD*hDR); const aSCV=tSH*sCR;const aPCV=tPHH*sCR*CONFIG.RATES.PH_MULTIPLIER; const tAE=bMW+aSCV+aPCV; const pHHP=Math.min(tPHH,CONFIG.IRD_TARGET_HOURS);const sHP=Math.max(0,CONFIG.IRD_TARGET_HOURS-pHHP); const vPCIX=(pHHP*sCR*CONFIG.RATES.PH_MULTIPLIER)+(sHP*sCR); const fMWP=tAE-vPCIX;const aV=fMWP-bMW; ui.summaryMgrDays.textContent=`${fD} / ${hD}`;ui.summaryBaseMgrWage.textContent=formatCurrency(bMW); ui.summaryAdjustment.textContent=`${formatCurrency(Math.abs(aV))} ${aV>=-0.005?'(Add)':'(Deduct)'}`;ui.summaryAdjustment.className=aV>=-0.005?'adjustment-positive':'adjustment-negative'; ui.summaryFinalMgrWage.textContent=formatCurrency(fMWP); ui.summaryRateFull.textContent=fDR.toFixed(2);ui.summaryRateHalf.textContent=hDR.toFixed(2);ui.summaryRateCleaner.textContent=sCR.toFixed(2); }else{ui.lynetteSummary.style.display='none';}};
 
         // --- Event Handlers ---
-        const selectNextStaff = () => { if (!currentStaff) return STAFF_LIST[0] || null; const cI=STAFF_LIST.indexOf(currentStaff); const nI=(cI+1)%STAFF_LIST.length; return STAFF_LIST[nI]; };
-        const handleStaffSelect = (eventOrName) => {
-            let staffName = (typeof eventOrName === 'string') ? eventOrName : eventOrName.target.closest('button[data-staff-name]')?.dataset.staffName;
-            if (!staffName) return; currentStaff = staffName;
-            renderStaffList(); currentStaffHeader.innerHTML = `Enter Time for <span>${currentStaff}</span>`;
-            lynetteManagerInputs.style.display = currentStaff === 'Lynette' ? 'block' : 'none';
-            timeEntryLegend.textContent = currentStaff === 'Lynette' ? 'Log Cleaner Time Entry' : 'Log Work Time Entry';
-            if (currentStaff === 'Lynette') { fullDaysInput.value = lynetteManagerDays.full; halfDaysInput.value = lynetteManagerDays.half; }
-            startTimeInput.value = ''; endTimeInput.value = ''; isPhCheckbox.checked = false;
-            clearAllErrors(); updateSummary();
-            entryDateInput.focus(); // Focus Date input on staff select
-        };
-        const handleManagerDaysChange = () => {
-             if (currentStaff !== 'Lynette') return; let fV=true; let hV=true; const fVal=parseInt(fullDaysInput.value); const hVal=parseInt(halfDaysInput.value);
-             if(isNaN(fVal)||fVal<0||fVal>7){showError('full_days','Must be 0-7.');fV=false;}else{clearError('full_days');} if(isNaN(hVal)||hVal<0||hVal>7){showError('half_days','Must be 0-7.');hV=false;}else{clearError('half_days');}
-             if(fV&&hV){lynetteManagerDays.full=fVal;lynetteManagerDays.half=hVal;updateSummary();}
-        };
-
-        // Handles Log ONLY for current staff
-        const handleLogEntry = () => {
-            if (!currentStaff) { alert('Please select a staff member first.'); return false; }
-            const formattedStart = parseAndFormatTime(startTimeInput); const formattedEnd = parseAndFormatTime(endTimeInput);
-            const startForValidation = formattedStart || startTimeInput.value; const endForValidation = formattedEnd || endTimeInput.value;
-            // Require at least start and end times to be present to log
-            if (!startForValidation && !endForValidation) {
-                 showError('start_time', 'Start time required.');
-                 showError('end_time', 'End time required.');
-                 startTimeInput.focus();
-                 return false; // Prevent logging empty entry
-            }
-            if (!validateEntryInputs()) { const firstError = calculatorForm.querySelector('.input-error'); firstError?.focus(); return false; }
-            const startTime24 = startTimeInput.value; const endTime24 = endTimeInput.value;
-            const entryDate = entryDateInput.value; const isPH = isPhCheckbox.checked;
-            const hours = calculateDuration(startTime24, endTime24);
-            if (hours <= 0) { showError('end_time', 'Calculated hours are zero or less.'); endTimeInput.focus(); return false; }
-            const newEntry = { id: Date.now(), staffName: currentStaff, date: entryDate, start: startTime24, end: endTime24, hours: hours, isPH: isPH };
-            logEntries.push(newEntry); saveLog(); renderLog(); updateSummary();
-            // Clear time entry inputs, keep date, focus start time
-            startTimeInput.value = ''; endTimeInput.value = ''; isPhCheckbox.checked = false;
-            clearError('start_time'); clearError('end_time');
-            startTimeInput.focus();
-            return true;
-        };
-
-        // Handles Log AND Select Next Staff
-        const handleLogAndSelectNextStaff = () => { if (handleLogEntry()) { const nextStaff = selectNextStaff(); if (nextStaff) { handleStaffSelect(nextStaff); } } };
-        const handleStep = (event) => { const button = event.target.closest('.stepper-button'); if (!button) return; const tId=button.dataset.target; const s=parseInt(button.dataset.step); const tIn=document.getElementById(tId); if(tIn){let cV=parseInt(tIn.value); if(isNaN(cV))cV=(s>0?-1:1); const min=parseInt(tIn.min)||0; const max=parseInt(tIn.max); let nV=cV+s; if(nV<min)nV=min; if(max!==undefined&&!isNaN(max)&&nV>max)nV=max; tIn.value=nV; handleManagerDaysChange();} };
-        const handleDeleteLogEntry = (event) => { const dB=event.target.closest('.delete-log-btn'); if(!dB)return; const eE=dB.closest('.log-entry'); const eId=parseInt(eE.dataset.entryId); if(isNaN(eId))return; if(confirm('Delete this log entry?')){logEntries=logEntries.filter(e=>e.id!==eId);saveLog();renderLog();updateSummary();} };
-        const handleClearLog = () => { if (logEntries.length > 0 && confirm('Clear the entire time log?')) { logEntries = []; saveLog(); renderLog(); updateSummary(); } };
-        const handleExportLog = () => { if(logEntries.length===0){alert('Log empty.');return;} let csv="data:text/csv;charset=utf-8,Staff Name,Date,Start Time (24hr),End Time (24hr),Hours,Public Holiday\n"; logEntries.forEach(e=>{const r=[`"${e.staffName}"`,e.date||'',e.start||'',e.end||'',formatHours(e.hours),e.isPH?'Yes':'No'].join(",");csv+=r+"\r\n";}); const u=encodeURI(csv);const l=document.createElement("a");l.setAttribute("href",u);const t=new Date().toISOString().slice(0,10);l.setAttribute("download",`time_log_${t}.csv`);document.body.appendChild(l);l.click();document.body.removeChild(l); };
-
-        // --- Keyboard Flow Event Listeners ---
-        const handleFormKeyDown = (e) => {
-            const target = e.target; const targetId = target.id;
-            // Enter Key Logic for field progression
-            if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
-                if (targetId === 'entry_date') { e.preventDefault(); startTimeInput.focus(); }
-                else if (targetId === 'start_time') { e.preventDefault(); parseAndFormatTime(target); endTimeInput.focus(); }
-                else if (targetId === 'end_time') { e.preventDefault(); parseAndFormatTime(target); logButton.focus(); /* Focus Log button */ }
-                // Allow Enter on buttons, steppers etc.
-            }
-            // Ctrl+Enter Shortcut for Log & Next
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { if (target.closest('#calculator-form')) { e.preventDefault(); handleLogAndSelectNextStaff(); } }
-        };
+        const selectNextStaff = () => { if(!state.currentStaff)return CONFIG.STAFF[0]||null;const cI=CONFIG.STAFF.indexOf(state.currentStaff);const nI=(cI+1)%CONFIG.STAFF.length;return CONFIG.STAFF[nI]; };
+        const handleStaffSelect = (eOrN) => { let sN=(typeof eOrN==='string')?eOrN:eOrN.target.closest('button[data-staff-name]')?.dataset.staffName; if(!sN||sN===state.currentStaff)return; state.currentStaff=sN; renderStaffList();ui.currentStaffHeader.innerHTML=`Enter Time for <span>${state.currentStaff}</span>`; ui.lynetteInputs.style.display=state.currentStaff==='Lynette'?'block':'none'; ui.timeEntryLegend.textContent=state.currentStaff==='Lynette'?'Log Cleaner Time Entry':'Log Work Time Entry'; if(state.currentStaff==='Lynette'){if(!state.managerDays['Lynette'])state.managerDays['Lynette']={full:CONFIG.DEFAULTS.LYNETTE_FULL_DAYS,half:CONFIG.DEFAULTS.LYNETTE_HALF_DAYS}; ui.fullDaysInput.value=state.managerDays['Lynette'].full;ui.halfDaysInput.value=state.managerDays['Lynette'].half;} ui.startTimeInput.value='';ui.endTimeInput.value='';ui.isPhCheckbox.checked=false; clearAllErrors();updateSummary(); ui.startTimeInput.focus(); }; // Focus Start Time
+        const handleManagerDaysChange = () => { if(state.currentStaff!=='Lynette')return;let fV=true;let hV=true;const fVal=parseInt(ui.fullDaysInput.value);const hVal=parseInt(ui.halfDaysInput.value); if(isNaN(fVal)||fVal<0||fVal>7){showError('full_days','Must be 0-7.');fV=false;}else{clearError('full_days');} if(isNaN(hVal)||hVal<0||hVal>7){showError('half_days','Must be 0-7.');hV=false;}else{clearError('half_days');} if(fV&&hV){if(!state.managerDays['Lynette'])state.managerDays['Lynette']={}; state.managerDays['Lynette'].full=fVal;state.managerDays['Lynette'].half=hVal;persistState();updateSummary();} };
+        const handleLogEntry = () => { if(!state.currentStaff){alert('Select staff.');return false;} const fS=parseTimeInput(ui.startTimeInput);const fE=parseTimeInput(ui.endTimeInput); const sV=ui.startTimeInput.value;const eV=ui.endTimeInput.value; if(!sV&&!eV){showError('start_time','Start/End time required.');showError('end_time','');ui.startTimeInput.focus();return false;} if(!validateEntryInputs()){const fE=ui.calculatorForm.querySelector('.input-error');fE?.focus();return false;} const sT24=ui.startTimeInput.value;const eT24=ui.endTimeInput.value; const eD=ui.entryDateInput.value;const iPH=ui.isPhCheckbox.checked; const h=calculateDuration(sT24,eT24); if(h<=0&&(sV||eV)){showError('end_time','Hours <= 0.');ui.endTimeInput.focus();return false;} const nE={id:Date.now(),staffName:state.currentStaff,date:eD,start:sT24,end:eT24,hours:h,isPH:iPH,isNew:true}; state.logEntries.push(nE);persistState();renderLog();updateSummary(); ui.startTimeInput.value='';ui.endTimeInput.value='';ui.isPhCheckbox.checked=false; clearError('start_time');clearError('end_time'); ui.startTimeInput.focus(); return true; };
+        const handleLogAndSelectNextStaff = () => { if(handleLogEntry()){const nS=selectNextStaff();if(nS){handleStaffSelect(nS);}} };
+        const handleStep = (e) => { const b=e.target.closest('.stepper-button');if(!b)return;const tId=b.dataset.target;const s=parseInt(b.dataset.step);const tIn=document.getElementById(tId);if(tIn){let cV=parseInt(tIn.value);if(isNaN(cV))cV=(s>0?-1:1);const min=parseInt(tIn.min)||0;const max=parseInt(tIn.max);let nV=cV+s;if(nV<min)nV=min;if(max!==undefined&&!isNaN(max)&&nV>max)nV=max;tIn.value=nV;handleManagerDaysChange();}};
+        const handleDeleteLogEntry = (e) => { const dB=e.target.closest('.delete-log-btn');if(!dB)return;const eE=dB.closest('.log-entry');const eId=parseInt(eE.dataset.entryId);if(isNaN(eId))return;if(confirm('Delete entry?')){state.logEntries=state.logEntries.filter(e=>e.id!==eId);persistState();renderLog();updateSummary();}};
+        const handleClearLog = () => { if(state.logEntries.length>0&&confirm('Clear log?')){state.logEntries=[];persistState();renderLog();updateSummary();}};
+        const handleExportLog = () => { if(state.logEntries.length===0){alert('Log empty.');return;}let csv="data:text/csv;charset=utf-8,Staff Name,Date,Start Time (24hr),End Time (24hr),Hours,Public Holiday\n";state.logEntries.forEach(e=>{const r=[`"${e.staffName}"`,e.date||'',e.start||'',e.end||'',formatHours(e.hours),e.isPH?'Yes':'No'].join(",");csv+=r+"\r\n";});const u=encodeURI(csv);const l=document.createElement("a");l.setAttribute("href",u);const t=new Date().toISOString().slice(0,10);l.setAttribute("download",`time_log_${t}.csv`);document.body.appendChild(l);l.click();document.body.removeChild(l);};
+        const handleFormKeyDown = (e) => { const t=e.target;const id=t.id; if(e.key==='Enter'&&!e.ctrlKey&&!e.metaKey){if(id==='entry_date'){e.preventDefault();ui.startTimeInput.focus();}else if(id==='start_time'){e.preventDefault();parseTimeInput(t);ui.endTimeInput.focus();}else if(id==='end_time'){e.preventDefault();parseTimeInput(t);ui.logButton.focus();}} if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){if(t.closest('#calculator-form')){e.preventDefault();handleLogAndSelectNextStaff();}}};
+        const initAccessibility = () => { ui.staffList.addEventListener('keydown',(e)=>{if(e.target.matches('button[role="listitem"]')&&(e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();const b=Array.from(ui.staffList.querySelectorAll('button[role="listitem"]'));const cI=b.indexOf(e.target);let nI;if(e.key==='ArrowDown'){nI=(cI+1)%b.length;}else{nI=(cI-1+b.length)%b.length;} b[nI].focus();}else if(e.key==='Enter'||e.key===' '){if(e.target.matches('button[data-staff-name]')){e.preventDefault();handleStaffSelect(e);}}}); };
 
         // --- Initialization ---
         const init = () => {
-            loadLog(); renderStaffList(); renderLog(); updateSummary();
-            // Default date to upcoming Sunday
-            const today = new Date(); const dayOfWeek = today.getDay(); const diff=today.getDate()-dayOfWeek+(dayOfWeek===0?0:7); const weekEndingDate = new Date(today.setDate(diff)); entryDateInput.value = weekEndingDate.toISOString().split('T')[0];
-
-            // Attach Event Listeners
-            staffListUI.addEventListener('click', handleStaffSelect);
-            logButton.addEventListener('click', handleLogEntry); // Button only Logs current
-            clearLogButton.addEventListener('click', handleClearLog);
-            exportLogButton.addEventListener('click', handleExportLog);
-            calculatorForm.addEventListener('click', handleStep); // Steppers
-            logEntriesUI.addEventListener('click', handleDeleteLogEntry); // Delete buttons
-            startTimeInput.addEventListener('blur', (e) => parseAndFormatTime(e.target));
-            endTimeInput.addEventListener('blur', (e) => parseAndFormatTime(e.target));
-            calculatorForm.addEventListener('keydown', handleFormKeyDown); // Enter/Ctrl+Enter flow
-            fullDaysInput.addEventListener('change', handleManagerDaysChange);
-            halfDaysInput.addEventListener('change', handleManagerDaysChange);
-            calculatorForm.querySelectorAll('input[type="date"], input[type="number"], input[type="text"][name*="time"]').forEach(input => { input.addEventListener('input', () => clearError(input.id)); });
-            if (!currentStaff && STAFF_LIST.length > 0) { handleStaffSelect(STAFF_LIST[0]); } else if (currentStaff) { updateSummary(); entryDateInput.focus(); } else { entryDateInput.focus(); }
+            loadState(); renderStaffList(); renderLog(); updateSummary(); initAccessibility();
+            const today = new Date(); const dOW=today.getDay(); const diff=today.getDate()-dOW+(dOW===0?0:7); const wED=new Date(today.setDate(diff)); ui.entryDateInput.value=wED.toISOString().split('T')[0];
+            ui.staffList.addEventListener('click', handleStaffSelect);
+            ui.logButton.addEventListener('click', handleLogEntry);
+            ui.clearLogButton.addEventListener('click', handleClearLog);
+            ui.exportLogButton.addEventListener('click', handleExportLog);
+            ui.calculatorForm.addEventListener('click', handleStep);
+            ui.logEntries.addEventListener('click', handleDeleteLogEntry);
+            ui.startTimeInput.addEventListener('blur', (e)=>parseTimeInput(e.target));
+            ui.endTimeInput.addEventListener('blur', (e)=>parseTimeInput(e.target));
+            ui.calculatorForm.addEventListener('keydown', handleFormKeyDown);
+            ui.fullDaysInput.addEventListener('change', handleManagerDaysChange);
+            ui.halfDaysInput.addEventListener('change', handleManagerDaysChange);
+            ui.calculatorForm.querySelectorAll('input[type="date"],input[type="number"],input[type="text"][name*="time"]').forEach(i=>{i.addEventListener('input',()=>clearError(i.id));});
+            if(!state.currentStaff&&CONFIG.STAFF.length>0){handleStaffSelect(CONFIG.STAFF[0]);}else if(state.currentStaff){renderStaffList();updateSummary();ui.startTimeInput.focus();}else{ui.entryDateInput.focus();}
         };
 
         // --- Run ---
@@ -544,15 +479,3 @@
     </script>
 </body>
 </html>
-```
-
-**Summary of Final Polish Added:**
-
-* **Keep Date on Log:** `handleLogEntry` no longer clears the date field, making multiple entries for the same day faster.
-* **Log Entry Highlight:** Added a simple CSS animation (`highlightFade`) that briefly highlights the background of a newly added log entry.
-* **Default Date:** Changed the default date to the upcoming Sunday, potentially more useful for weekly processing.
-* **Rate Display:** Lynette's summary section now includes a small line displaying the Manager Full/Half Day rates and the Cleaner Hourly rate currently being used in her calculations.
-* **Summary Scope Note:** Added a small note "(Based on currently logged entries)" below the summary title for clarity.
-* **Minor Style Tweaks:** Adjusted spacing, rounding, font sizes slightly for better visual balance and alignment with modern aesthetics. Added subtle hover/active states to more elements like steppers. Added custom scrollbar styling for the log. Improved log entry hover effect for delete button visibility.
-
-This version represents a highly refined tool based on our iterative discussion, incorporating robust functionality, optimized workflow, and a clean, modern user interfa
