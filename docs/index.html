@@ -5,235 +5,321 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Wage Calculator (NZ)</title>
     <style>
-        /* --- Basic Reset & Font --- */
+        /* --- Base Styles & Variables --- */
+        :root {
+            --system-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            --background-color: #f2f2f7; /* iOS-like light grey */
+            --card-background: #ffffff;
+            --text-primary: #1c1c1e; /* iOS primary text */
+            --text-secondary: #8a8a8e; /* iOS secondary text */
+            --accent-color: #007aff; /* iOS blue */
+            --accent-color-hover: #0056b3;
+            --border-color: #d1d1d6;
+            --input-background: #f2f2f7; /* Match page background */
+            --danger-color: #ff3b30; /* iOS red */
+            --success-color: #34c759; /* iOS green */
+            --subtle-grey: #e5e5ea;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-family: var(--system-font);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Align top for longer content */
             min-height: 100vh;
-            background-color: #f8f9fa; /* Lighter background */
-            padding: 20px;
-            color: #343a40; /* Darker text */
+            background-color: var(--background-color);
+            padding: 30px 15px;
+            color: var(--text-primary);
+            line-height: 1.5;
         }
 
         /* --- Container --- */
         .container {
-            width: 90%;
-            max-width: 450px; /* Slightly wider */
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-            padding: 35px;
+            width: 100%;
+            max-width: 480px; /* Slightly wider for better spacing */
+            background-color: var(--card-background);
+            border-radius: 16px; /* More pronounced rounding */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 30px;
             overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+        .container:hover {
+             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
         /* --- Heading --- */
         h1 {
             font-size: 24px;
-            color: #212529;
             font-weight: 600;
             text-align: center;
-            margin-bottom: 25px;
-            position: relative;
-            padding-bottom: 10px;
-        }
-        h1::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            bottom: 0;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background-color: #0d6efd; /* Bootstrap blue */
-            border-radius: 4px;
+            margin-bottom: 30px;
         }
 
         /* --- Form Styling --- */
         #calculator-form label {
             font-weight: 500;
-            color: #495057;
-            font-size: 14px;
-            display: block; /* Ensure label is block */
-            margin-bottom: 6px;
-            margin-top: 15px; /* Space between input groups */
+            color: var(--text-primary);
+            font-size: 15px; /* Standard iOS size */
+            display: block;
+            margin-bottom: 8px;
+            margin-top: 18px;
         }
         .input-info {
-            font-size: 12px;
-            color: #6c757d;
+            font-size: 13px;
+            color: var(--text-secondary);
             margin-bottom: 8px;
-            margin-top: -4px; /* Bring closer to label */
+            margin-top: -5px;
+        }
+        .error-message {
+            font-size: 12px;
+            color: var(--danger-color);
+            margin-top: 4px;
+            min-height: 16px; /* Prevent layout shifts */
+            display: block; /* Ensure it takes space */
         }
 
         .form-row {
             display: flex;
-            gap: 15px; /* Increased gap */
-            margin-bottom: 0; /* Remove bottom margin here */
+            gap: 15px;
+            align-items: flex-start; /* Align items top */
         }
         .form-row > div {
-            flex: 1; /* Make columns equal width */
+            flex: 1;
+        }
+        .input-group {
+             margin-bottom: 5px; /* Space below each group */
         }
 
+        /* Input Base Style */
         input[type="number"] {
             width: 100%;
-            padding: 12px; /* Increased padding */
-            border: 1px solid #ced4da;
-            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px; /* iOS-like rounding */
             font-size: 16px;
-            background-color: #f8f9fa;
+            background-color: var(--input-background);
+            color: var(--text-primary);
+            appearance: textfield; /* Remove spinners */
+            -moz-appearance: textfield;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         input[type="number"]:focus {
-            border-color: #86b7fe; /* Focus color */
+            border-color: var(--accent-color);
             outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25); /* Focus shadow */
-            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            background-color: var(--card-background);
         }
-        /* Hide spinner buttons for number inputs */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-         input[type=number] {
-            -moz-appearance: textfield; /* Firefox */
+            -webkit-appearance: none; margin: 0;
         }
 
+        /* Stepper Controls */
+        .stepper-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stepper-input-group input[type="number"] {
+            text-align: center;
+            flex-grow: 1;
+        }
+        .stepper-button {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%; /* Circular buttons */
+            border: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            color: var(--accent-color);
+            font-size: 20px;
+            font-weight: 400;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .stepper-button:hover {
+            background-color: var(--input-background);
+            border-color: var(--subtle-grey);
+        }
+        .stepper-button:active {
+            background-color: var(--subtle-grey);
+        }
 
         /* --- Button Group --- */
         .button-group {
             display: flex;
             gap: 15px;
-            margin-top: 30px;
+            margin-top: 35px;
         }
         .button {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             font-size: 16px;
-            font-weight: 600; /* Slightly bolder */
+            font-weight: 600;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
+            text-align: center;
         }
         .button#calculate-button {
-            background-color: #0d6efd; /* Primary blue */
+            background-color: var(--accent-color);
             color: white;
         }
         .button#calculate-button:hover {
-            background-color: #0b5ed7;
-            transform: translateY(-1px); /* Subtle lift */
+            background-color: var(--accent-color-hover);
+            transform: scale(1.02);
+        }
+        .button#calculate-button:active {
+             background-color: var(--accent-color-hover);
+             transform: scale(0.98); /* Press effect */
         }
         .button#reset-button {
-            background-color: #6c757d; /* Secondary grey */
-            color: white;
+            background-color: var(--subtle-grey);
+            color: var(--accent-color);
         }
         .button#reset-button:hover {
-            background-color: #5c636a;
-            transform: translateY(-1px);
+            background-color: #dcdce0; /* Slightly darker grey */
+            transform: scale(1.02);
         }
+         .button#reset-button:active {
+             background-color: #d1d1d6;
+             transform: scale(0.98);
+         }
 
         /* --- Results Section --- */
         .results-section {
-            display: none; /* Hidden initially */
-            margin-top: 25px; /* Space above results */
+            display: none;
+            margin-top: 30px;
             padding: 20px;
-            background-color: #e9ecef; /* Light background for results */
-            border-radius: 8px;
-            animation: fadeIn 0.5s ease forwards;
+            background-color: var(--input-background); /* Subtle background */
+            border-radius: 12px;
+            animation: slideDown 0.5s ease-out forwards; /* Smoother easing */
+            border: 1px solid var(--subtle-grey);
         }
         .results-section h2 {
             font-size: 18px;
             font-weight: 600;
-            color: #343a40;
             text-align: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ced4da;
-            padding-bottom: 10px;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
         }
         .results-section p {
             font-size: 16px;
-            color: #212529;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             line-height: 1.5;
-            display: flex; /* Use flex for alignment */
-            justify-content: space-between; /* Space out label and value */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
          .results-section p span:first-child {
-             font-weight: 500; /* Make label slightly bolder */
+             color: var(--text-secondary); /* Secondary color for labels */
+             font-size: 15px;
              margin-right: 10px;
          }
         .results-section p span:last-child {
-             font-weight: 600; /* Make value bolder */
+             font-weight: 500;
+             text-align: right;
          }
-         .adjustment-positive { color: #198754; } /* Green for positive adjustment (addition) */
-         .adjustment-negative { color: #dc3545; } /* Red for negative adjustment (deduction) */
+         .final-result span:last-child {
+            font-weight: 600; /* Make final result bold */
+         }
+         .adjustment-positive { color: var(--success-color); }
+         .adjustment-negative { color: var(--danger-color); }
 
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* RESTORED: Keyframes from original */
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Manager Wage Calculator (NZ)</h1>
+        <h1>Manager Wage Calculator</h1>
 
-        <form id="calculator-form" onsubmit="return false;"> <div class="form-row">
-                <div>
-                    <label for="full_days">Full Manager Days:</label>
-                    <input type="number" id="full_days" name="full_days" min="0" max="7" step="1" value="0">
-                </div>
-                <div>
-                    <label for="half_days">Half Manager Days:</label>
-                    <input type="number" id="half_days" name="half_days" min="0" max="7" step="1" value="0">
-                </div>
-            </div>
+        <form id="calculator-form" onsubmit="return false;">
 
-            <div>
-                <label for="actual_cleaner_hours">Actual Cleaner Hours Worked:</label>
-                 <p class="input-info">Enter actual hours worked. Pay adjusted for 15hr IRD declaration.</p>
-                <input type="number" id="actual_cleaner_hours" name="actual_cleaner_hours" min="0" step="any" value="0">
-            </div>
+            <fieldset style="border:none; padding:0; margin:0;">
+                <legend style="font-weight: 600; margin-bottom: 10px; font-size: 17px;">Manager Work</legend>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="full_days">Full Days</label>
+                        <div class="stepper-input-group">
+                            <button type="button" class="stepper-button" data-target="full_days" data-step="-1">−</button>
+                            <input type="number" id="full_days" name="full_days" min="0" max="7" step="1" value="0">
+                            <button type="button" class="stepper-button" data-target="full_days" data-step="1">+</button>
+                        </div>
+                         <span class="error-message" id="full_days-error"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="half_days">Half Days</label>
+                         <div class="stepper-input-group">
+                             <button type="button" class="stepper-button" data-target="half_days" data-step="-1">−</button>
+                            <input type="number" id="half_days" name="half_days" min="0" max="7" step="1" value="0">
+                            <button type="button" class="stepper-button" data-target="half_days" data-step="1">+</button>
+                        </div>
+                        <span class="error-message" id="half_days-error"></span>
+                    </div>
+                </div>
+            </fieldset>
 
-            <div class="form-row">
-                <div>
-                    <label for="full_day_rate">Full Day Rate ($):</label>
-                    <input type="number" id="full_day_rate" name="full_day_rate" step="any" value="235">
+             <fieldset style="border:none; padding:0; margin:0; margin-top: 20px;">
+                <legend style="font-weight: 600; margin-bottom: 10px; font-size: 17px;">Cleaner Work</legend>
+                <div class="input-group">
+                    <label for="actual_cleaner_hours">Actual Hours Worked</label>
+                    <p class="input-info">Enter actual hours. Pay is adjusted for the required 15hr IRD declaration.</p>
+                    <input type="number" id="actual_cleaner_hours" name="actual_cleaner_hours" min="0" step="any" value="0">
+                    <span class="error-message" id="actual_cleaner_hours-error"></span>
                 </div>
-                 <div>
-                    <label for="half_day_rate">Half Day Rate ($):</label>
-                    <input type="number" id="half_day_rate" name="half_day_rate" step="any" value="75">
+             </fieldset>
+
+             <fieldset style="border:none; padding:0; margin:0; margin-top: 20px;">
+                 <legend style="font-weight: 600; margin-bottom: 10px; font-size: 17px;">Rates ($)</legend>
+                 <div class="form-row">
+                    <div class="input-group">
+                        <label for="full_day_rate">Full Day</label>
+                        <input type="number" id="full_day_rate" name="full_day_rate" step="any" value="235">
+                         <span class="error-message" id="full_day_rate-error"></span>
+                    </div>
+                     <div class="input-group">
+                        <label for="half_day_rate">Half Day</label>
+                        <input type="number" id="half_day_rate" name="half_day_rate" step="any" value="75">
+                        <span class="error-message" id="half_day_rate-error"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="cleaner_hourly_rate">Cleaner /hr</label>
+                        <input type="number" id="cleaner_hourly_rate" name="cleaner_hourly_rate" step="any" value="24.70">
+                        <span class="error-message" id="cleaner_hourly_rate-error"></span>
+                    </div>
                 </div>
-                <div>
-                    <label for="cleaner_hourly_rate">Cleaner Rate ($/hr):</label>
-                    <input type="number" id="cleaner_hourly_rate" name="cleaner_hourly_rate" step="any" value="24.70">
-                </div>
-            </div>
+             </fieldset>
 
             <div class="button-group">
-                <button type="button" id="calculate-button" class="button">Calculate</button>
+                <button type="button" id="calculate-button" class="button">Calculate Weekly Pay</button>
                 <button type="button" id="reset-button" class="button">Reset</button>
             </div>
         </form>
 
          <div class="results-section" id="results">
              <h2>Weekly Pay Calculation</h2>
-             <p><span>Base Manager Wage:</span> <span id="baseManagerWage">$0.00</span></p>
-             <p><span>Cleaner Hours Adjustment:</span> <span id="cleanerHoursAdjustment">$0.00</span></p>
-             <hr style="border: none; border-top: 1px solid #ced4da; margin: 10px 0;">
-             <p><span>Adjusted Manager Wage Payable:</span> <span id="finalManagerWagePayable">$0.00</span></p>
-             <p style="font-size: 13px; color: #6c757d; margin-top: 15px; display: block; text-align: center;">(This plus 15hrs @ cleaner rate = Total Gross)</p>
+             <p><span>Base Manager Wage</span> <span id="baseManagerWage">$0.00</span></p>
+             <p><span>Cleaner Hours Adjustment</span> <span id="cleanerHoursAdjustment">$0.00</span></p>
+             <hr style="border: none; border-top: 1px solid var(--border-color); margin: 15px 0;">
+             <p class="final-result"><span>Manager Wage Component</span> <span id="finalManagerWagePayable">$0.00</span></p>
+             <p style="font-size: 13px; color: var(--text-secondary); margin-top: 15px; display: block; text-align: center;">(Pay this Manager Wage + Fixed 15hrs Cleaner Pay)</p>
          </div>
-
     </div>
 
     <script>
@@ -247,113 +333,141 @@
 
         // --- DOM Elements ---
         const form = document.getElementById('calculator-form');
-        const fullDaysInput = document.getElementById('full_days');
-        const halfDaysInput = document.getElementById('half_days');
-        const actualCleanerHoursInput = document.getElementById('actual_cleaner_hours');
-        const fullDayRateInput = document.getElementById('full_day_rate');
-        const halfDayRateInput = document.getElementById('half_day_rate');
-        const cleanerHourlyRateInput = document.getElementById('cleaner_hourly_rate');
-
+        const allInputs = form.querySelectorAll('input[type="number"]');
         const resultsSection = document.getElementById('results');
         const baseManagerWageEl = document.getElementById('baseManagerWage');
         const cleanerHoursAdjustmentEl = document.getElementById('cleanerHoursAdjustment');
         const finalManagerWagePayableEl = document.getElementById('finalManagerWagePayable');
-
         const calculateButton = document.getElementById('calculate-button');
         const resetButton = document.getElementById('reset-button');
+        const stepperButtons = form.querySelectorAll('.stepper-button');
 
         // --- Utility Functions ---
-        const formatCurrency = (value) => `$${value.toFixed(2)}`;
+        const formatCurrency = (value) => isNaN(value) ? '$0.00' : `$${value.toFixed(2)}`;
+
+        // --- Error Handling ---
+        const showError = (inputId, message) => {
+            const errorEl = document.getElementById(`${inputId}-error`);
+            if (errorEl) errorEl.textContent = message;
+            const inputEl = document.getElementById(inputId);
+            if (inputEl) inputEl.style.borderColor = 'var(--danger-color)'; // Visual cue
+        };
+        const clearError = (inputId) => {
+            const errorEl = document.getElementById(`${inputId}-error`);
+            if (errorEl) errorEl.textContent = '';
+            const inputEl = document.getElementById(inputId);
+             if (inputEl) inputEl.style.borderColor = ''; // Reset border
+        };
+        const clearAllErrors = () => {
+            form.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            allInputs.forEach(input => input.style.borderColor = '');
+        };
 
         // --- Input Validation ---
-        const validateInputs = (...inputs) => {
-            for (const input of inputs) {
+        const validateInputs = () => {
+            clearAllErrors();
+            let isValid = true;
+            allInputs.forEach(input => {
                 const value = parseFloat(input.value);
-                // Check if it's not a number or if it's negative
                 if (isNaN(value) || value < 0) {
-                    alert(`Invalid input: Please enter a non-negative number for ${input.labels[0]?.innerText || input.name}.`);
-                    input.focus(); // Focus the problematic input
-                    return false;
+                    showError(input.id, 'Must be a positive number.');
+                    isValid = false;
                 }
-            }
-            return true;
+            });
+            return isValid;
         };
 
         // --- Calculation Logic ---
         const calculateAndDisplay = () => {
-            // Validate inputs before proceeding
-            if (!validateInputs(
-                    fullDaysInput, halfDaysInput, actualCleanerHoursInput,
-                    fullDayRateInput, halfDayRateInput, cleanerHourlyRateInput
-                )) {
-                resultsSection.style.display = 'none'; // Hide results if validation fails
+            if (!validateInputs()) {
+                resultsSection.style.display = 'none';
                 return;
             }
 
-            // Get validated values
-            const fullDays = parseInt(fullDaysInput.value);
-            const halfDays = parseInt(halfDaysInput.value);
-            const actualCleanerHours = parseFloat(actualCleanerHoursInput.value);
-            const fullDayRate = parseFloat(fullDayRateInput.value);
-            const halfDayRate = parseFloat(halfDayRateInput.value);
-            const cleanerHourlyRate = parseFloat(cleanerHourlyRateInput.value);
+            // Get current values
+            const fullDays = parseInt(document.getElementById('full_days').value);
+            const halfDays = parseInt(document.getElementById('half_days').value);
+            const actualCleanerHours = parseFloat(document.getElementById('actual_cleaner_hours').value);
+            const fullDayRate = parseFloat(document.getElementById('full_day_rate').value);
+            const halfDayRate = parseFloat(document.getElementById('half_day_rate').value);
+            const cleanerHourlyRate = parseFloat(document.getElementById('cleaner_hourly_rate').value);
 
-            // Perform calculations
             const baseManagerWage = (fullDays * fullDayRate) + (halfDays * halfDayRate);
-
-            // Calculate the value difference between declared 15 cleaner hours and actual cleaner hours
-            // Positive: Need to deduct from manager wage (paid more cleaner hours than worked)
-            // Negative: Need to add to manager wage (worked more cleaner hours than declared)
             const cleanerHoursValueDifference = (IRD_TARGET_HOURS - actualCleanerHours) * cleanerHourlyRate;
-
-            // Calculate the final manager wage component payable
             const finalManagerWage = baseManagerWage - cleanerHoursValueDifference;
 
-            // Determine adjustment text and style
             let adjustmentText = formatCurrency(Math.abs(cleanerHoursValueDifference));
             let adjustmentClass = '';
-            if (cleanerHoursValueDifference > 0) {
-                 adjustmentText += " (Deduction)";
-                 adjustmentClass = 'adjustment-negative';
-            } else if (cleanerHoursValueDifference < 0) {
-                 adjustmentText += " (Addition)";
-                 adjustmentClass = 'adjustment-positive';
+            const tolerance = 0.005; // Handle floating point issues near zero
+            if (cleanerHoursValueDifference > tolerance) {
+                 adjustmentText += " (Deduction)"; adjustmentClass = 'adjustment-negative';
+            } else if (cleanerHoursValueDifference < -tolerance) {
+                 adjustmentText += " (Addition)"; adjustmentClass = 'adjustment-positive';
             } else {
-                 adjustmentText += " (No Adjustment)";
-                 adjustmentClass = '';
+                 adjustmentText = "$0.00 (No Adjustment)"; adjustmentClass = '';
             }
 
-
-            // Display results
             resultsSection.style.display = 'block';
             baseManagerWageEl.textContent = formatCurrency(baseManagerWage);
             cleanerHoursAdjustmentEl.textContent = adjustmentText;
-            cleanerHoursAdjustmentEl.className = adjustmentClass; // Apply class for color
+            cleanerHoursAdjustmentEl.className = adjustmentClass;
             finalManagerWagePayableEl.textContent = formatCurrency(finalManagerWage);
+        };
+
+        // --- Stepper Functionality ---
+        const handleStep = (event) => {
+            const button = event.target.closest('.stepper-button');
+            if (!button) return;
+
+            const targetInputId = button.dataset.target;
+            const step = parseInt(button.dataset.step);
+            const targetInput = document.getElementById(targetInputId);
+
+            if (targetInput) {
+                let currentValue = parseInt(targetInput.value);
+                if (isNaN(currentValue)) currentValue = 0; // Default to 0 if invalid
+
+                const min = parseInt(targetInput.min) || 0;
+                const max = parseInt(targetInput.max); // Max might not always be defined
+
+                let newValue = currentValue + step;
+
+                // Clamp value within min/max
+                if (newValue < min) newValue = min;
+                if (max !== undefined && !isNaN(max) && newValue > max) newValue = max;
+
+                targetInput.value = newValue;
+                clearError(targetInputId); // Clear error on manual adjustment
+                // Optional: Recalculate immediately on step
+                // calculateAndDisplay();
+            }
         };
 
         // --- Reset Functionality ---
         const resetCalculator = () => {
-            fullDaysInput.value = DEFAULT_DAYS;
-            halfDaysInput.value = DEFAULT_DAYS;
-            actualCleanerHoursInput.value = DEFAULT_HOURS;
-            fullDayRateInput.value = DEFAULT_FULL_DAY_RATE;
-            halfDayRateInput.value = DEFAULT_HALF_DAY_RATE;
-            cleanerHourlyRateInput.value = DEFAULT_CLEANER_RATE;
-            resultsSection.style.display = 'none'; // Hide results
-            // Clear any potential validation styling if added later
+            document.getElementById('full_days').value = DEFAULT_DAYS;
+            document.getElementById('half_days').value = DEFAULT_DAYS;
+            document.getElementById('actual_cleaner_hours').value = DEFAULT_HOURS;
+            document.getElementById('full_day_rate').value = DEFAULT_FULL_DAY_RATE;
+            document.getElementById('half_day_rate').value = DEFAULT_HALF_DAY_RATE;
+            document.getElementById('cleaner_hourly_rate').value = DEFAULT_CLEANER_RATE;
+            resultsSection.style.display = 'none';
+            clearAllErrors();
         };
 
         // --- Event Listeners ---
         calculateButton.addEventListener('click', calculateAndDisplay);
         resetButton.addEventListener('click', resetCalculator);
-
-        // Optional: Recalculate when pressing Enter in an input field
         form.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent default form submission
-                calculateAndDisplay();
+                event.preventDefault(); calculateAndDisplay();
             }
+        });
+        // Add listener for all stepper buttons
+        form.addEventListener('click', handleStep);
+        // Optional: Clear errors when user types in an input
+        allInputs.forEach(input => {
+            input.addEventListener('input', () => clearError(input.id));
         });
 
     </script>
