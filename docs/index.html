@@ -3,358 +3,720 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager Wage Calculator (NZ)</title>
+    <title>Team Weekly Time Tracker (NZ) v2</title>
     <style>
-        /* --- Basic Reset & Font --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* --- Base Styles & Variables --- */
+        :root {
+            --system-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            --background-color: #f2f2f7;
+            --card-background: #ffffff;
+            --text-primary: #1c1c1e;
+            --text-secondary: #636366; /* Slightly adjusted for better contrast */
+            --accent-color: #007aff; /* iOS blue */
+            --accent-color-hover: #0056b3;
+            --border-color: #d1d1d6;
+            --input-background: #f2f2f7; /* Match page background */
+            --danger-color: #ff3b30; /* iOS red */
+            --success-color: #34c759; /* iOS green */
+            --subtle-grey: #e5e5ea;
+            --log-bg: #f8f9fa;
+            --border-light: #eaeaec;
+            --ph-active-bg: #e6f2ff; /* Light blue for active PH */
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; } /* Base font size */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-family: var(--system-font);
             display: flex;
             justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            background-color: #f8f9fa; /* Lighter background */
-            padding: 20px;
-            color: #343a40; /* Darker text */
+            background-color: var(--background-color);
+            padding: 20px 15px;
+            color: var(--text-primary);
+            line-height: 1.4; /* Slightly tighter line height */
         }
 
-        /* --- Container --- */
-        .container {
-            width: 90%;
-            max-width: 450px; /* Slightly wider */
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-            padding: 35px;
+        /* --- Main App Layout --- */
+        .app-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1300px; /* Wider for weekly view */
+            background-color: var(--card-background);
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            height: calc(100vh - 40px);
             overflow: hidden;
         }
 
-        /* --- Heading --- */
-        h1 {
-            font-size: 24px;
-            color: #212529;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 25px;
-            position: relative;
-            padding-bottom: 10px;
+        /* --- Staff List (Left Panel) --- */
+        .staff-list {
+            flex: 0 0 180px;
+            border-right: 1px solid var(--border-light);
+            padding-right: 20px;
+            overflow-y: auto;
         }
-        h1::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            bottom: 0;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background-color: #0d6efd; /* Bootstrap blue */
-            border-radius: 4px;
+        .staff-list h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; }
+        .staff-list ul { list-style: none; }
+        .staff-list li button {
+            display: block; width: 100%; padding: 10px 12px; margin-bottom: 8px;
+            border: none; background-color: transparent; border-radius: 8px;
+            text-align: left; font-size: 0.95rem; font-weight: 500; cursor: pointer;
+            color: var(--accent-color); transition: background-color 0.2s ease, color 0.2s ease;
         }
+        .staff-list li button:hover { background-color: var(--input-background); }
+        .staff-list li button.active { background-color: var(--accent-color); color: white; font-weight: 600; }
 
-        /* --- Form Styling --- */
-        #calculator-form label {
-            font-weight: 500;
-            color: #495057;
-            font-size: 14px;
-            display: block; /* Ensure label is block */
-            margin-bottom: 6px;
-            margin-top: 15px; /* Space between input groups */
-        }
-        .input-info {
-            font-size: 12px;
-            color: #6c757d;
-            margin-bottom: 8px;
-            margin-top: -4px; /* Bring closer to label */
-        }
-
-        .form-row {
+        /* --- Input Area (Center Panel) --- */
+        .input-area {
+            flex: 1 1 600px; /* Allow more width for weekly card */
+            padding: 0 10px;
+            overflow-y: auto;
             display: flex;
-            gap: 15px; /* Increased gap */
-            margin-bottom: 0; /* Remove bottom margin here */
+            flex-direction: column;
         }
-        .form-row > div {
-            flex: 1; /* Make columns equal width */
+        .input-area-header {
+             text-align: center;
+             margin-bottom: 15px;
+             padding-bottom: 10px;
+             border-bottom: 1px solid var(--border-light);
         }
+        .input-area h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
+        .input-area h2 span { font-weight: 700; color: var(--accent-color); }
+        .input-area #week-ending-input-group { margin-bottom: 15px; max-width: 250px; margin-left: auto; margin-right: auto;}
+        .input-area #week-ending-input-group label { font-size: 0.9rem; }
 
-        input[type="number"] {
-            width: 100%;
-            padding: 12px; /* Increased padding */
-            border: 1px solid #ced4da;
-            border-radius: 8px;
-            font-size: 16px;
-            background-color: #f8f9fa;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        fieldset { border: none; padding: 0; margin: 0 0 15px 0; }
+        legend { font-weight: 600; margin-bottom: 10px; font-size: 1.05rem; padding: 0; }
+        label { font-weight: 500; color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 5px; }
+        input[type="time"], input[type="number"], input[type="date"] {
+            width: 100%; padding: 8px 10px; border: 1px solid var(--border-color);
+            border-radius: 6px; font-size: 0.95rem; background-color: var(--input-background);
+            color: var(--text-primary); appearance: none; -moz-appearance: none; -webkit-appearance: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease; margin-bottom: 3px;
         }
-        input[type="number"]:focus {
-            border-color: #86b7fe; /* Focus color */
-            outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25); /* Focus shadow */
-            background-color: #fff;
+        input:focus {
+            border-color: var(--accent-color); outline: 0;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15); background-color: var(--card-background);
         }
-        /* Hide spinner buttons for number inputs */
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        .form-row { display: flex; gap: 15px; align-items: flex-start; }
+        .form-row > .input-group { flex: 1; }
+        .input-group { margin-bottom: 8px; }
+
+        /* Stepper */
+        .stepper-input-group { display: flex; align-items: center; gap: 6px; }
+        .stepper-input-group input { text-align: center; flex-grow: 1; margin-bottom: 0 !important; }
+        .stepper-button {
+            flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+            border: 1px solid var(--border-color); background-color: var(--card-background);
+            color: var(--accent-color); font-size: 16px; font-weight: 400; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; line-height: 1;
+            transition: background-color 0.15s ease;
         }
-         input[type=number] {
-            -moz-appearance: textfield; /* Firefox */
+        .stepper-button:hover { background-color: var(--input-background); }
+        .stepper-button:active { background-color: var(--subtle-grey); }
+
+        /* Weekly Time Card */
+        .time-card { display: grid; grid-template-columns: 60px repeat(4, 1fr); gap: 8px 12px; align-items: center; }
+        .time-card-header { font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); padding-bottom: 5px; text-align: center; }
+        .day-label { font-weight: 600; font-size: 0.95rem; text-align: right; padding-right: 10px; }
+        .time-input-group { display: flex; flex-direction: column; }
+        .ph-toggle-group { text-align: center; }
+        .ph-toggle { /* Custom checkbox styling */
+            appearance: none; width: 20px; height: 20px; border: 1px solid var(--border-color);
+            border-radius: 4px; cursor: pointer; vertical-align: middle; position: relative;
+            background-color: var(--input-background); transition: background-color 0.2s ease;
         }
+        .ph-toggle:checked { background-color: var(--accent-color); border-color: var(--accent-color); }
+        .ph-toggle:checked::after { /* Checkmark */
+            content: '✔'; color: white; font-size: 14px; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%); line-height: 1;
+        }
+        /* Style row when PH is checked */
+        /* Target the container div holding the row elements */
+        .day-row-container.is-ph { background-color: var(--ph-active-bg); border-radius: 4px; } /* Apply highlight to the container */
+        .day-row-container.is-ph .day-label { color: var(--accent-color); } /* Style label within highlighted row */
 
 
-        /* --- Button Group --- */
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-        }
-        .button {
-            flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: 600; /* Slightly bolder */
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+        .daily-hours { font-size: 0.9rem; font-weight: 500; text-align: center; color: var(--text-secondary); min-height: 1.4em; }
+        .time-card .error-message { grid-column: 2 / -1; /* Span across input columns */ text-align: left; padding-left: 5px; } /* Position errors below inputs */
+
+
+        /* Calculate Button */
+        .calculate-button {
+            width: 100%; padding: 12px; font-size: 1rem; font-weight: 600;
+            border: none; border-radius: 10px; cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
+            background-color: var(--accent-color); color: white; margin-top: 25px;
         }
-        .button#calculate-button {
-            background-color: #0d6efd; /* Primary blue */
-            color: white;
-        }
-        .button#calculate-button:hover {
-            background-color: #0b5ed7;
-            transform: translateY(-1px); /* Subtle lift */
-        }
-        .button#reset-button {
-            background-color: #6c757d; /* Secondary grey */
-            color: white;
-        }
-        .button#reset-button:hover {
-            background-color: #5c636a;
-            transform: translateY(-1px);
-        }
+        .calculate-button:hover { background-color: var(--accent-color-hover); transform: scale(1.01); }
+        .calculate-button:active { transform: scale(0.99); }
 
-        /* --- Results Section --- */
-        .results-section {
-            display: none; /* Hidden initially */
-            margin-top: 25px; /* Space above results */
-            padding: 20px;
-            background-color: #e9ecef; /* Light background for results */
-            border-radius: 8px;
-            animation: fadeIn 0.5s ease forwards;
+        /* Error Message */
+        .error-message { font-size: 0.75rem; color: var(--danger-color); min-height: 1.2em; display: block; margin-top: 2px; }
+
+        /* --- Log Area (Right Panel) --- */
+        .log-area {
+            flex: 1 1 350px; /* Slightly narrower */
+            border-left: 1px solid var(--border-light);
+            padding-left: 20px;
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        .results-section h2 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #343a40;
-            text-align: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ced4da;
-            padding-bottom: 10px;
+        .log-area h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+        #log-entries { list-style: none; overflow-y: auto; flex-grow: 1; padding-right: 5px; }
+        .log-entry {
+            background-color: var(--log-bg); border: 1px solid var(--border-light);
+            border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; font-size: 0.9rem;
         }
-        .results-section p {
-            font-size: 16px;
-            color: #212529;
-            margin-bottom: 10px;
-            line-height: 1.5;
-            display: flex; /* Use flex for alignment */
-            justify-content: space-between; /* Space out label and value */
+        .log-entry strong { font-weight: 600; color: var(--accent-color); }
+        .log-entry p { margin-bottom: 4px; color: var(--text-secondary); }
+        .log-entry p span { color: var(--text-primary); font-weight: 500; }
+        .log-entry .ph-hours { color: var(--success-color); font-weight: 600; }
+        .log-entry .lynette-details { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-light); }
+        .log-entry .lynette-details p { font-size: 0.85rem; }
+
+        .log-controls { margin-top: 15px; flex-shrink: 0; }
+        .clear-log-button {
+             display: block; width: 100%; padding: 8px; font-size: 0.9rem; font-weight: 500;
+             border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;
+             background-color: transparent; color: var(--danger-color);
+             transition: background-color 0.2s ease, color 0.2s ease;
         }
-         .results-section p span:first-child {
-             font-weight: 500; /* Make label slightly bolder */
-             margin-right: 10px;
+         .clear-log-button:hover { background-color: var(--danger-color); color: white; }
+
+        /* Responsive adjustments */
+        @media (max-width: 1100px) { /* Adjust breakpoint for weekly view */
+            .app-container { flex-direction: column; height: auto; max-height: none; }
+            .staff-list, .log-area { border: none; padding: 0; flex-basis: auto; max-height: 250px; overflow-y: auto; }
+            .staff-list { border-bottom: 1px solid var(--border-light); padding-bottom: 15px; margin-bottom: 15px; }
+            .log-area { border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 15px; }
+            .input-area { padding: 0; overflow-y: visible; flex-basis: auto; }
+            .time-card { grid-template-columns: 50px repeat(4, 1fr); font-size: 0.9rem; } /* Adjust grid slightly */
+            input[type="time"] { padding: 8px; } /* Smaller padding */
+        }
+         @media (max-width: 600px) {
+             body { padding: 10px 5px; }
+             .app-container { padding: 15px; }
+             .time-card { display: block; } /* Stack days vertically */
+             .day-row-container { display: block; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-light); background-color: transparent !important; /* Remove row highlight on mobile */ }
+             .day-row-container:last-child { border-bottom: none; margin-bottom: 0;}
+             .time-card-header { display: none; } /* Hide header in stacked view */
+             .day-label { text-align: left; margin-bottom: 5px; font-size: 1rem; }
+             .time-input-group { display: flex; gap: 10px; align-items: center; margin-bottom: 5px !important; }
+             .time-input-group label { flex-basis: 40px; margin-bottom: 0; font-size: 0.85rem; }
+             .time-input-group input { flex: 1; }
+             .ph-toggle-group { text-align: left; margin-top: 8px; padding-left: 0px; }
+             .ph-toggle-group label { display: inline-block; margin-left: 5px; vertical-align: middle; font-size: 0.9rem; color: var(--text-primary); } /* Style checkbox label */
+             .daily-hours { text-align: right; margin-top: -2.0em; padding-right: 5px; font-size: 0.95rem; } /* Position hours to the right */
+             .form-row { flex-direction: column; gap: 0; }
+             h1 { font-size: 1.1rem; } .input-area h2 { font-size: 1rem; }
+             .log-area h2, .staff-list h2 { font-size: 1rem; }
+             .button, .calculate-button { font-size: 0.95rem; padding: 12px; }
          }
-        .results-section p span:last-child {
-             font-weight: 600; /* Make value bolder */
-         }
-         .adjustment-positive { color: #198754; } /* Green for positive adjustment (addition) */
-         .adjustment-negative { color: #dc3545; } /* Red for negative adjustment (deduction) */
+         /* Add input error class style */
+         .input-error { border-color: var(--danger-color) !important; }
 
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
 
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Manager Wage Calculator (NZ)</h1>
+    <div class="app-container">
 
-        <form id="calculator-form" onsubmit="return false;"> <div class="form-row">
-                <div>
-                    <label for="full_days">Full Manager Days:</label>
-                    <input type="number" id="full_days" name="full_days" min="0" max="7" step="1" value="0">
-                </div>
-                <div>
-                    <label for="half_days">Half Manager Days:</label>
-                    <input type="number" id="half_days" name="half_days" min="0" max="7" step="1" value="0">
-                </div>
+        <aside class="staff-list">
+            <h2>Staff</h2>
+            <ul id="staff-list-ui"></ul>
+        </aside>
+
+        <main class="input-area">
+            <div class="input-area-header">
+                <h2 id="current-staff-header">Select Staff</h2>
+                 <div id="week-ending-input-group" class="input-group">
+                     <label for="week_ending">Week Ending Date:</label>
+                     <input type="date" id="week_ending" name="week_ending">
+                     <span class="error-message" id="week_ending-error"></span>
+                 </div>
             </div>
 
-            <div>
-                <label for="actual_cleaner_hours">Actual Cleaner Hours Worked:</label>
-                 <p class="input-info">Enter actual hours worked. Pay adjusted for 15hr IRD declaration.</p>
-                <input type="number" id="actual_cleaner_hours" name="actual_cleaner_hours" min="0" step="any" value="0">
-            </div>
+            <form id="calculator-form" onsubmit="return false;">
 
-            <div class="form-row">
-                <div>
-                    <label for="full_day_rate">Full Day Rate ($):</label>
-                    <input type="number" id="full_day_rate" name="full_day_rate" step="any" value="235">
-                </div>
-                 <div>
-                    <label for="half_day_rate">Half Day Rate ($):</label>
-                    <input type="number" id="half_day_rate" name="half_day_rate" step="any" value="75">
-                </div>
-                <div>
-                    <label for="cleaner_hourly_rate">Cleaner Rate ($/hr):</label>
-                    <input type="number" id="cleaner_hourly_rate" name="cleaner_hourly_rate" step="any" value="24.70">
-                </div>
-            </div>
+                <fieldset id="lynette-manager-inputs" style="display: none;">
+                    <legend>Manager Work (This Week)</legend>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="full_days">Full Days</label>
+                            <div class="stepper-input-group">
+                                <button type="button" class="stepper-button" data-target="full_days" data-step="-1">−</button>
+                                <input type="number" id="full_days" name="full_days" min="0" max="7" step="1" value="2">
+                                <button type="button" class="stepper-button" data-target="full_days" data-step="1">+</button>
+                            </div>
+                            <span class="error-message" id="full_days-error"></span>
+                        </div>
+                        <div class="input-group">
+                            <label for="half_days">Half Days</label>
+                             <div class="stepper-input-group">
+                                <button type="button" class="stepper-button" data-target="half_days" data-step="-1">−</button>
+                                <input type="number" id="half_days" name="half_days" min="0" max="7" step="1" value="3">
+                                <button type="button" class="stepper-button" data-target="half_days" data-step="1">+</button>
+                            </div>
+                            <span class="error-message" id="half_days-error"></span>
+                        </div>
+                    </div>
+                </fieldset>
 
-            <div class="button-group">
-                <button type="button" id="calculate-button" class="button">Calculate</button>
-                <button type="button" id="reset-button" class="button">Reset</button>
-            </div>
-        </form>
+                <fieldset>
+                    <legend id="time-card-legend">Weekly Time Card</legend>
+                    <div class="time-card">
+                        <div class="time-card-header">Day</div>
+                        <div class="time-card-header">Start Time</div>
+                        <div class="time-card-header">End Time</div>
+                        <div class="time-card-header">Public Hol?</div>
+                        <div class="time-card-header">Hours</div>
 
-         <div class="results-section" id="results">
-             <h2>Weekly Pay Calculation</h2>
-             <p><span>Base Manager Wage:</span> <span id="baseManagerWage">$0.00</span></p>
-             <p><span>Cleaner Hours Adjustment:</span> <span id="cleanerHoursAdjustment">$0.00</span></p>
-             <hr style="border: none; border-top: 1px solid #ced4da; margin: 10px 0;">
-             <p><span>Adjusted Manager Wage Payable:</span> <span id="finalManagerWagePayable">$0.00</span></p>
-             <p style="font-size: 13px; color: #6c757d; margin-top: 15px; display: block; text-align: center;">(This plus 15hrs @ cleaner rate = Total Gross)</p>
-         </div>
+                        </div>
+                     <span class="error-message" id="time_card-error"></span> </fieldset>
+
+                <input type="hidden" id="full_day_rate" value="235">
+                 <input type="hidden" id="half_day_rate" value="75">
+                 <input type="hidden" id="cleaner_hourly_rate" value="24.70">
+
+                <button type="button" id="calculate-button" class="calculate-button">Calculate & Log Week</button>
+            </form>
+        </main>
+
+        <aside class="log-area">
+            <h2>Time Log</h2>
+            <ul id="log-entries"></ul>
+            <div class="log-controls">
+                 <button type="button" id="clear-log-button" class="clear-log-button">Clear Log</button>
+            </div>
+        </aside>
 
     </div>
 
     <script>
-        // --- Constants and Defaults ---
+        // --- Constants and Staff Data ---
+        const STAFF_LIST = ['Lynette', 'Upashna', 'Sarah', 'Shaun', 'Katherine'];
+        const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const IRD_TARGET_HOURS = 15;
+        const PUBLIC_HOLIDAY_MULTIPLIER = 1.5;
         const DEFAULT_FULL_DAY_RATE = 235;
         const DEFAULT_HALF_DAY_RATE = 75;
         const DEFAULT_CLEANER_RATE = 24.70;
-        const DEFAULT_DAYS = 0;
-        const DEFAULT_HOURS = 0;
+        const DEFAULT_LYNETTE_FULL_DAYS = 2;
+        const DEFAULT_LYNETTE_HALF_DAYS = 3;
+
+        // --- State ---
+        let currentStaff = null;
+        let logEntries = []; // Array to store log entry objects
 
         // --- DOM Elements ---
-        const form = document.getElementById('calculator-form');
+        const staffListUI = document.getElementById('staff-list-ui');
+        const currentStaffHeader = document.getElementById('current-staff-header');
+        const calculatorForm = document.getElementById('calculator-form');
+        const lynetteManagerInputs = document.getElementById('lynette-manager-inputs');
+        const timeCardContainer = document.querySelector('.time-card');
+        const logEntriesUI = document.getElementById('log-entries');
+        const calculateButton = document.getElementById('calculate-button');
+        const clearLogButton = document.getElementById('clear-log-button');
+        const weekEndingInput = document.getElementById('week_ending');
         const fullDaysInput = document.getElementById('full_days');
         const halfDaysInput = document.getElementById('half_days');
-        const actualCleanerHoursInput = document.getElementById('actual_cleaner_hours');
         const fullDayRateInput = document.getElementById('full_day_rate');
         const halfDayRateInput = document.getElementById('half_day_rate');
         const cleanerHourlyRateInput = document.getElementById('cleaner_hourly_rate');
 
-        const resultsSection = document.getElementById('results');
-        const baseManagerWageEl = document.getElementById('baseManagerWage');
-        const cleanerHoursAdjustmentEl = document.getElementById('cleanerHoursAdjustment');
-        const finalManagerWagePayableEl = document.getElementById('finalManagerWagePayable');
-
-        const calculateButton = document.getElementById('calculate-button');
-        const resetButton = document.getElementById('reset-button');
 
         // --- Utility Functions ---
-        const formatCurrency = (value) => `$${value.toFixed(2)}`;
+        const formatHours = (hours) => isNaN(hours) || !hours || hours === 0 ? '0.00' : hours.toFixed(2);
+        const formatCurrency = (value) => isNaN(value) ? '$0.00' : `$${value.toFixed(2)}`;
+
+        // --- Time Calculation ---
+        const calculateDuration = (startStr, endStr) => {
+            if (!startStr || !endStr) return 0;
+            try {
+                const baseDate = "1970-01-01"; // Use a fixed date to avoid DST issues
+                const startDate = new Date(`${baseDate}T${startStr}`);
+                let endDate = new Date(`${baseDate}T${endStr}`);
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 0; // Invalid time format parsed
+
+                // Handle overnight shifts
+                if (endDate <= startDate) {
+                    endDate.setDate(endDate.getDate() + 1);
+                }
+                const diffMilliseconds = endDate - startDate;
+                if (diffMilliseconds < 0) return 0; // Should be caught by overnight logic
+
+                const diffHours = diffMilliseconds / (1000 * 60 * 60);
+                return Math.round(diffHours * 100) / 100; // Round to 2 decimal places
+            } catch (e) {
+                console.error("Error calculating duration:", startStr, endStr, e);
+                return 0;
+            }
+        };
+
+        // --- Error Handling ---
+        const showError = (elementId, message) => {
+            const errorEl = document.getElementById(`${elementId}-error`);
+            const inputEl = document.getElementById(elementId);
+            if (errorEl) errorEl.textContent = message;
+            // Apply error style to the input itself or its parent group
+            const parentGroup = inputEl?.closest('.input-group, .time-input-group');
+             if (parentGroup) {
+                 parentGroup.querySelectorAll('input').forEach(inp => inp.classList.add('input-error'));
+             } else if (inputEl) { // Fallback for inputs not in expected groups
+                 inputEl.classList.add('input-error');
+             }
+        };
+        const clearError = (elementId) => {
+            const errorEl = document.getElementById(`${elementId}-error`);
+            const inputEl = document.getElementById(elementId);
+            if (errorEl) errorEl.textContent = '';
+             const parentGroup = inputEl?.closest('.input-group, .time-input-group');
+             if (parentGroup) {
+                 parentGroup.querySelectorAll('input').forEach(inp => inp.classList.remove('input-error'));
+             } else if (inputEl) {
+                 inputEl.classList.remove('input-error');
+             }
+        };
+        const clearAllErrors = () => {
+            calculatorForm.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            calculatorForm.querySelectorAll('input.input-error').forEach(input => input.classList.remove('input-error'));
+        };
+
+         // Inject CSS for input error state
+         const style = document.createElement('style');
+         style.textContent = `.input-error { border-color: var(--danger-color) !important; }`;
+         document.head.appendChild(style);
+
 
         // --- Input Validation ---
-        const validateInputs = (...inputs) => {
-            for (const input of inputs) {
-                const value = parseFloat(input.value);
-                // Check if it's not a number or if it's negative
-                if (isNaN(value) || value < 0) {
-                    alert(`Invalid input: Please enter a non-negative number for ${input.labels[0]?.innerText || input.name}.`);
-                    input.focus(); // Focus the problematic input
-                    return false;
-                }
+        const validateWeeklyInputs = () => {
+            clearAllErrors();
+            let isValid = true;
+            let hasAtLeastOneEntry = false;
+
+            if (!weekEndingInput.value) {
+                showError('week_ending', 'Week Ending Date required.'); isValid = false;
             }
-            return true;
+
+            if (currentStaff === 'Lynette') {
+                const validateNumber = (inputId, min, max) => {
+                    const inputEl = document.getElementById(inputId);
+                    const value = parseInt(inputEl.value);
+                    if (isNaN(value) || value < min || (max !== undefined && value > max)) {
+                        showError(inputId, `Must be between ${min} and ${max}.`); isValid = false;
+                    } else {
+                        clearError(inputId); // Clear error if valid
+                    }
+                };
+                validateNumber('full_days', 0, 7);
+                validateNumber('half_days', 0, 7);
+            }
+
+            DAYS_OF_WEEK.forEach(dayLC => {
+                const startId = `start_${dayLC}`;
+                const endId = `end_${dayLC}`;
+                const startEl = document.getElementById(startId);
+                const endEl = document.getElementById(endId);
+
+                if (startEl?.value || endEl?.value) {
+                    hasAtLeastOneEntry = true;
+                    let dailyValid = true;
+                    if (!startEl?.value) { showError(startId, 'Start time needed.'); isValid = false; dailyValid = false; }
+                    if (!endEl?.value) { showError(endId, 'End time needed.'); isValid = false; dailyValid = false; }
+
+                    if (startEl?.value && endEl?.value) {
+                         const duration = calculateDuration(startEl.value, endEl.value);
+                         if (duration <= 0) { showError(endId, 'End must be after start.'); isValid = false; dailyValid = false; }
+                         // Update display during validation
+                         const hoursDisplay = document.getElementById(`hours_${dayLC}`);
+                         if (hoursDisplay) hoursDisplay.textContent = formatHours(duration);
+                    }
+                     // Clear errors for the row if it becomes valid *within this check*
+                     if (dailyValid && startEl?.value && endEl?.value) {
+                        clearError(startId);
+                        clearError(endId);
+                    }
+                } else {
+                    // Clear errors and hours display for empty rows
+                    clearError(startId); clearError(endId);
+                     const hoursDisplay = document.getElementById(`hours_${dayLC}`);
+                     if (hoursDisplay) hoursDisplay.textContent = '0.00';
+                }
+            });
+
+             const timeCardErrorEl = document.getElementById('time_card-error');
+             if (!hasAtLeastOneEntry) {
+                 if (timeCardErrorEl) timeCardErrorEl.textContent = 'Please enter time for at least one day.';
+                 // Allow logging zero hours
+             } else {
+                  if (timeCardErrorEl) timeCardErrorEl.textContent = '';
+             }
+
+            return isValid;
         };
 
-        // --- Calculation Logic ---
-        const calculateAndDisplay = () => {
-            // Validate inputs before proceeding
-            if (!validateInputs(
-                    fullDaysInput, halfDaysInput, actualCleanerHoursInput,
-                    fullDayRateInput, halfDayRateInput, cleanerHourlyRateInput
-                )) {
-                resultsSection.style.display = 'none'; // Hide results if validation fails
+        // --- UI Rendering ---
+        const renderStaffList = () => {
+            staffListUI.innerHTML = '';
+            STAFF_LIST.forEach(name => {
+                const li = document.createElement('li');
+                const button = document.createElement('button');
+                button.textContent = name;
+                button.dataset.staffName = name;
+                if (name === currentStaff) button.classList.add('active');
+                li.appendChild(button);
+                staffListUI.appendChild(li);
+            });
+        };
+
+        const renderTimeCard = () => {
+            timeCardContainer.querySelectorAll('.day-row-container').forEach(row => row.remove()); // Remove previous rows by container
+            DAYS_OF_WEEK.forEach(day => {
+                const dayLC = day.toLowerCase();
+                // Create a container div for all elements of the row
+                const rowContainer = document.createElement('div');
+                rowContainer.classList.add('day-row-container');
+                rowContainer.style.display = 'contents'; // Make it part of the grid
+
+                rowContainer.innerHTML = `
+                    <div class="day-label">${day}</div>
+                    <div class="time-input-group">
+                        <input type="time" id="start_${dayLC}" name="start_${dayLC}" step="900">
+                        <span class="error-message" id="start_${dayLC}-error"></span>
+                    </div>
+                    <div class="time-input-group">
+                        <input type="time" id="end_${dayLC}" name="end_${dayLC}" step="900">
+                        <span class="error-message" id="end_${dayLC}-error"></span>
+                    </div>
+                    <div class="ph-toggle-group">
+                        <input type="checkbox" class="ph-toggle" id="ph_${dayLC}" name="ph_${dayLC}" title="Mark as Public Holiday">
+                        <label for="ph_${dayLC}" class="visually-hidden">Public Holiday ${day}</label> </div>
+                    <div class="daily-hours" id="hours_${dayLC}">0.00</div>`;
+                timeCardContainer.appendChild(rowContainer);
+
+                 const startInput = rowContainer.querySelector(`#start_${dayLC}`);
+                 const endInput = rowContainer.querySelector(`#end_${dayLC}`);
+                 const phCheckbox = rowContainer.querySelector(`#ph_${dayLC}`);
+                 const hoursDisplay = rowContainer.querySelector(`#hours_${dayLC}`);
+
+                 const updateDailyTotal = () => {
+                     clearError(`start_${dayLC}`); clearError(`end_${dayLC}`);
+                     const hours = calculateDuration(startInput.value, endInput.value);
+                     hoursDisplay.textContent = formatHours(hours);
+                     if (startInput.value && endInput.value && hours <= 0) {
+                         showError(`end_${dayLC}`, 'End must be after start.');
+                     }
+                     // Toggle PH highlight on the container
+                     rowContainer.classList.toggle('is-ph', phCheckbox.checked);
+                 };
+
+                 startInput.addEventListener('input', updateDailyTotal);
+                 endInput.addEventListener('input', updateDailyTotal);
+                 phCheckbox.addEventListener('change', updateDailyTotal);
+            });
+             // Add visually hidden class if not already defined
+             if (!document.querySelector('.visually-hidden')) {
+                 const hiddenStyle = document.createElement('style');
+                 hiddenStyle.textContent = `.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }`;
+                 document.head.appendChild(hiddenStyle);
+             }
+        };
+
+
+        const renderLog = () => {
+            logEntriesUI.innerHTML = '';
+            if (logEntries.length === 0) {
+                logEntriesUI.innerHTML = '<p style="color: var(--text-secondary); text-align: center; margin-top: 20px;">No time logged yet.</p>';
                 return;
             }
+            logEntries.slice().reverse().forEach((entry) => {
+                const li = document.createElement('li');
+                li.classList.add('log-entry');
+                let content = `<strong>${entry.staffName}</strong> (Week Ending: ${entry.weekEnding || 'N/A'})`;
 
-            // Get validated values
-            const fullDays = parseInt(fullDaysInput.value);
-            const halfDays = parseInt(halfDaysInput.value);
-            const actualCleanerHours = parseFloat(actualCleanerHoursInput.value);
-            const fullDayRate = parseFloat(fullDayRateInput.value);
-            const halfDayRate = parseFloat(halfDayRateInput.value);
-            const cleanerHourlyRate = parseFloat(cleanerHourlyRateInput.value);
+                if (entry.type === 'lynette') {
+                     content += `
+                        <p>Std Cleaner Hours: <span>${formatHours(entry.standardHours)}</span></p>
+                        ${entry.publicHolidayHours > 0 ? `<p>PH Cleaner Hours: <span class="ph-hours">${formatHours(entry.publicHolidayHours)}</span></p>` : ''}
+                        <div class="lynette-details">
+                            <p>Mgr Days (F/H): <span>${entry.managerFullDays} / ${entry.managerHalfDays}</span></p>
+                            <p>Base Mgr Wage: <span>${formatCurrency(entry.baseManagerWage)}</span></p>
+                            <p>Value Adjustment: <span class="${entry.adjustmentValue >= 0 ? 'adjustment-positive' : 'adjustment-negative'}">${formatCurrency(Math.abs(entry.adjustmentValue))} ${entry.adjustmentValue >= 0 ? '(Add)' : '(Deduct)'}</span></p>
+                            <p>Final Mgr Wage: <span>${formatCurrency(entry.finalManagerWagePayable)}</span></p>
+                        </div>`;
+                } else {
+                    content += `<p>Standard Hours: <span>${formatHours(entry.standardHours)}</span></p>`;
+                    if (entry.publicHolidayHours > 0) {
+                        content += `<p>Public Holiday Hours: <span class="ph-hours">${formatHours(entry.publicHolidayHours)}</span></p>`;
+                    }
+                }
+                li.innerHTML = content;
+                logEntriesUI.appendChild(li);
+            });
+        };
 
-            // Perform calculations
-            const baseManagerWage = (fullDays * fullDayRate) + (halfDays * halfDayRate);
+        // --- Event Handlers ---
+        const handleStaffSelect = (event) => {
+            const button = event.target.closest('button[data-staff-name]');
+            if (!button) return;
+            currentStaff = button.dataset.staffName;
+            renderStaffList();
+            currentStaffHeader.innerHTML = `Enter Time for <span>${currentStaff}</span>`;
+            lynetteManagerInputs.style.display = currentStaff === 'Lynette' ? 'block' : 'none';
+            calculatorForm.reset();
+            renderTimeCard(); // Re-render blank card
+             if (currentStaff === 'Lynette') {
+                fullDaysInput.value = DEFAULT_LYNETTE_FULL_DAYS;
+                halfDaysInput.value = DEFAULT_LYNETTE_HALF_DAYS;
+            }
+            const today = new Date();
+            // Default to upcoming Sunday for week ending
+            const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon,...
+            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? 0:7); // Adjust to Sunday
+            const weekEndingDate = new Date(today.setDate(diff));
+            weekEndingInput.value = weekEndingDate.toISOString().split('T')[0];
 
-            // Calculate the value difference between declared 15 cleaner hours and actual cleaner hours
-            // Positive: Need to deduct from manager wage (paid more cleaner hours than worked)
-            // Negative: Need to add to manager wage (worked more cleaner hours than declared)
-            const cleanerHoursValueDifference = (IRD_TARGET_HOURS - actualCleanerHours) * cleanerHourlyRate;
+            clearAllErrors();
+        };
 
-            // Calculate the final manager wage component payable
-            const finalManagerWage = baseManagerWage - cleanerHoursValueDifference;
+        const handleCalculateAndLogWeek = () => {
+            if (!currentStaff) { alert('Please select a staff member first.'); return; }
+            if (!validateWeeklyInputs()) { return; }
 
-            // Determine adjustment text and style
-            let adjustmentText = formatCurrency(Math.abs(cleanerHoursValueDifference));
-            let adjustmentClass = '';
-            if (cleanerHoursValueDifference > 0) {
-                 adjustmentText += " (Deduction)";
-                 adjustmentClass = 'adjustment-negative';
-            } else if (cleanerHoursValueDifference < 0) {
-                 adjustmentText += " (Addition)";
-                 adjustmentClass = 'adjustment-positive';
+            const weekEnding = weekEndingInput.value;
+            let totalStandardHours = 0;
+            let totalPublicHolidayHours = 0;
+
+            DAYS_OF_WEEK.forEach(dayLC => {
+                const startStr = document.getElementById(`start_${dayLC}`)?.value;
+                const endStr = document.getElementById(`end_${dayLC}`)?.value;
+                const isPH = document.getElementById(`ph_${dayLC}`)?.checked;
+                if (startStr && endStr) {
+                    const dailyHours = calculateDuration(startStr, endStr);
+                    if (isPH) { totalPublicHolidayHours += dailyHours; }
+                    else { totalStandardHours += dailyHours; }
+                }
+            });
+
+            const logEntry = {
+                id: Date.now(), staffName: currentStaff, weekEnding: weekEnding,
+                standardHours: totalStandardHours, publicHolidayHours: totalPublicHolidayHours,
+            };
+
+            if (currentStaff === 'Lynette') {
+                const fullDays = parseInt(fullDaysInput.value);
+                const halfDays = parseInt(halfDaysInput.value);
+                const fullDayRate = parseFloat(fullDayRateInput.value);
+                const halfDayRate = parseFloat(halfDayRateInput.value);
+                const standardCleanerRate = parseFloat(cleanerHourlyRateInput.value);
+
+                const baseManagerWage = (fullDays * fullDayRate) + (halfDays * halfDayRate);
+
+                // *** CORRECTED CALCULATION LOGIC V2 ***
+                // Calculate total value actually earned
+                const actualStdCleanerValue = totalStandardHours * standardCleanerRate;
+                const actualPHCleanerValue = totalPublicHolidayHours * standardCleanerRate * PUBLIC_HOLIDAY_MULTIPLIER;
+                const totalActualEarnedValue = baseManagerWage + actualStdCleanerValue + actualPHCleanerValue;
+
+                // Calculate value of cleaner hours as paid in Xero (assuming PH paid first up to 15 total)
+                const phHrsPaidInXero = Math.min(totalPublicHolidayHours, IRD_TARGET_HOURS);
+                const stdHrsPaidInXero = Math.max(0, IRD_TARGET_HOURS - phHrsPaidInXero);
+                const valuePaidCleanerInXero = (phHrsPaidInXero * standardCleanerRate * PUBLIC_HOLIDAY_MULTIPLIER) + (stdHrsPaidInXero * standardCleanerRate);
+
+                // Calculate the manager wage needed to make the totals match
+                const finalManagerWagePayable = totalActualEarnedValue - valuePaidCleanerInXero;
+
+                // Calculate adjustment amount relative to base manager wage for logging display
+                const adjustmentValue = finalManagerWagePayable - baseManagerWage;
+                // *** END CORRECTED CALCULATION LOGIC V2 ***
+
+                logEntry.type = 'lynette';
+                logEntry.managerFullDays = fullDays;
+                logEntry.managerHalfDays = halfDays;
+                logEntry.baseManagerWage = baseManagerWage;
+                logEntry.adjustmentValue = adjustmentValue;
+                logEntry.finalManagerWagePayable = finalManagerWagePayable;
             } else {
-                 adjustmentText += " (No Adjustment)";
-                 adjustmentClass = '';
+                logEntry.type = 'standard';
             }
 
-
-            // Display results
-            resultsSection.style.display = 'block';
-            baseManagerWageEl.textContent = formatCurrency(baseManagerWage);
-            cleanerHoursAdjustmentEl.textContent = adjustmentText;
-            cleanerHoursAdjustmentEl.className = adjustmentClass; // Apply class for color
-            finalManagerWagePayableEl.textContent = formatCurrency(finalManagerWage);
+            logEntries.push(logEntry);
+            renderLog();
+            renderTimeCard(); // Clear card inputs
+            clearAllErrors();
+             // Optionally reset week ending date, or keep it for next staff? Keep it for now.
         };
 
-        // --- Reset Functionality ---
-        const resetCalculator = () => {
-            fullDaysInput.value = DEFAULT_DAYS;
-            halfDaysInput.value = DEFAULT_DAYS;
-            actualCleanerHoursInput.value = DEFAULT_HOURS;
-            fullDayRateInput.value = DEFAULT_FULL_DAY_RATE;
-            halfDayRateInput.value = DEFAULT_HALF_DAY_RATE;
-            cleanerHourlyRateInput.value = DEFAULT_CLEANER_RATE;
-            resultsSection.style.display = 'none'; // Hide results
-            // Clear any potential validation styling if added later
-        };
-
-        // --- Event Listeners ---
-        calculateButton.addEventListener('click', calculateAndDisplay);
-        resetButton.addEventListener('click', resetCalculator);
-
-        // Optional: Recalculate when pressing Enter in an input field
-        form.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent default form submission
-                calculateAndDisplay();
+        const handleStep = (event) => {
+            const button = event.target.closest('.stepper-button');
+            if (!button) return;
+            const targetInputId = button.dataset.target;
+            const step = parseInt(button.dataset.step);
+            const targetInput = document.getElementById(targetInputId);
+            if (targetInput) {
+                let currentValue = parseInt(targetInput.value);
+                if (isNaN(currentValue)) currentValue = (step > 0 ? -1 : 1); // Step from blank
+                const min = parseInt(targetInput.min) || 0;
+                const max = parseInt(targetInput.max);
+                let newValue = currentValue + step;
+                if (newValue < min) newValue = min;
+                if (max !== undefined && !isNaN(max) && newValue > max) newValue = max;
+                targetInput.value = newValue;
+                clearError(targetInputId);
             }
-        });
+        };
+
+        const handleClearLog = () => {
+            if (logEntries.length > 0 && confirm('Are you sure you want to clear the entire time log?')) {
+                logEntries = [];
+                renderLog();
+                 // Optionally save cleared state to localStorage if persistence is added
+            }
+        };
+
+        // --- Initialization ---
+        const init = () => {
+            renderStaffList();
+            renderTimeCard();
+            renderLog();
+             const today = new Date();
+             const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon,...
+             const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? 0:7); // Adjust to upcoming Sunday
+             const weekEndingDate = new Date(today.setDate(diff));
+             weekEndingInput.value = weekEndingDate.toISOString().split('T')[0];
+
+
+            // Attach Event Listeners
+            staffListUI.addEventListener('click', handleStaffSelect);
+            calculateButton.addEventListener('click', handleCalculateAndLogWeek);
+            clearLogButton.addEventListener('click', handleClearLog);
+            calculatorForm.addEventListener('click', handleStep); // Steppers via delegation
+
+             calculatorForm.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => clearError(input.id));
+            });
+             timeCardContainer.addEventListener('change', (event) => {
+                 if (event.target.type === 'checkbox' && event.target.id.startsWith('ph_')) {
+                     const dayLC = event.target.id.replace('ph_', '');
+                     clearError(`start_${dayLC}`); clearError(`end_${dayLC}`);
+                     // Update daily total to trigger row style update
+                     const startInput = document.getElementById(`start_${dayLC}`);
+                     const endInput = document.getElementById(`end_${dayLC}`);
+                     const hoursDisplay = document.getElementById(`hours_${dayLC}`);
+                     const phCheckbox = event.target;
+                     const dayRowContainer = phCheckbox.closest('.day-row-container');
+
+                     const hours = calculateDuration(startInput?.value, endInput?.value);
+                     if(hoursDisplay) hoursDisplay.textContent = formatHours(hours);
+                     if (dayRowContainer) dayRowContainer.classList.toggle('is-ph', phCheckbox.checked);
+                 }
+             });
+        };
+
+        // --- Run ---
+        init();
 
     </script>
 </body>
