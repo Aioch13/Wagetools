@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Time Tracker (NZ) - Polished v4</title>
+    <title>Team Time Tracker (NZ) - Polished v4 (Modified)</title>
     <style>
         /* --- Base Styles & Variables --- */
         :root {
@@ -129,6 +129,17 @@
         .log-button:active { transform: scale(0.99) translateY(0); }
         .error-message { font-size: 0.8rem; color: var(--danger-color); min-height: 1.3em; display: block; margin-top: 4px; }
         .input-error { border-color: var(--danger-color) !important; }
+
+        /* --- Shake Animation --- */
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-3px); }
+            40%, 60% { transform: translateX(3px); }
+        }
+        .input-shake {
+            animation: shake 0.5s ease-in-out; /* Apply the shake animation */
+        }
 
         /* --- Log & Summary Area (Right Panel) --- */
         .log-summary-area {
@@ -299,7 +310,8 @@
 
     <script>
         // --- Constants and Staff Data ---
-        const STAFF_LIST = ['Lynette', 'Upashna', 'Sarah', 'Shaun', 'Katherine'];
+        // MODIFIED: Staff list order updated
+        const STAFF_LIST = ['Lynette', 'Sarah', 'Shaun', 'Upashna', 'Katherine'];
         const IRD_TARGET_HOURS = 15;
         const PUBLIC_HOLIDAY_MULTIPLIER = 1.5;
         const DEFAULT_FULL_DAY_RATE = 235;
@@ -307,7 +319,7 @@
         const DEFAULT_CLEANER_RATE = 24.70;
         const DEFAULT_LYNETTE_FULL_DAYS = 2;
         const DEFAULT_LYNETTE_HALF_DAYS = 3;
-        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_polished_v4_xBrowser'; // Updated key
+        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_polished_v4_xBrowser_mod1'; // Updated key to reflect changes
 
         // --- State ---
         let currentStaff = null;
@@ -379,11 +391,41 @@
         };
 
         // --- Error Handling ---
-        const showError = (elementId, message) => { const eEl=document.getElementById(`${elementId}-error`); const iEl=document.getElementById(elementId); if(eEl)eEl.textContent=message; iEl?.classList.add('input-error'); };
-        const clearError = (elementId) => { const eEl=document.getElementById(`${elementId}-error`); const iEl=document.getElementById(elementId); if(eEl)eEl.textContent=''; iEl?.classList.remove('input-error'); };
-        const clearAllErrors = () => { calculatorForm.querySelectorAll('.error-message').forEach(el=>el.textContent=''); calculatorForm.querySelectorAll('input.input-error').forEach(input=>input.classList.remove('input-error')); };
-         const style = document.createElement('style'); style.textContent=`.input-error { border-color: var(--danger-color) !important; }`; document.head.appendChild(style);
-
+        // MODIFIED: Added shake animation logic for time inputs
+        const showError = (elementId, message) => {
+            const errorElement = document.getElementById(`${elementId}-error`);
+            const inputElement = document.getElementById(elementId);
+            if (errorElement) errorElement.textContent = message;
+            if (inputElement) {
+                inputElement.classList.add('input-error');
+                // Add shake animation only to start/end time inputs
+                if (elementId === 'start_time' || elementId === 'end_time') {
+                    inputElement.classList.add('input-shake');
+                    // Remove the shake class after the animation duration (500ms)
+                    setTimeout(() => {
+                        inputElement?.classList.remove('input-shake');
+                    }, 500);
+                }
+            }
+        };
+        // MODIFIED: Ensure shake class is removed on clear
+        const clearError = (elementId) => {
+            const errorElement = document.getElementById(`${elementId}-error`);
+            const inputElement = document.getElementById(elementId);
+            if (errorElement) errorElement.textContent = '';
+            if (inputElement) {
+                inputElement.classList.remove('input-error');
+                inputElement.classList.remove('input-shake'); // Ensure shake is removed
+            }
+        };
+        const clearAllErrors = () => {
+             calculatorForm.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+             calculatorForm.querySelectorAll('input.input-error').forEach(input => {
+                 input.classList.remove('input-error');
+                 input.classList.remove('input-shake'); // Ensure shake is removed
+             });
+         };
+         // Note: The style element added here previously is redundant as the class is defined above.
 
         // --- Input Validation ---
         const validateEntryInputs = () => {
