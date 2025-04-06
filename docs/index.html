@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Weekly Time Tracker (NZ) v2</title>
+    <title>Optimized Team Time Tracker (NZ) - Smart Input</title>
     <style>
         /* --- Base Styles & Variables --- */
         :root {
@@ -11,20 +11,20 @@
             --background-color: #f2f2f7;
             --card-background: #ffffff;
             --text-primary: #1c1c1e;
-            --text-secondary: #636366; /* Slightly adjusted for better contrast */
-            --accent-color: #007aff; /* iOS blue */
+            --text-secondary: #636366;
+            --accent-color: #007aff;
             --accent-color-hover: #0056b3;
             --border-color: #d1d1d6;
-            --input-background: #f2f2f7; /* Match page background */
-            --danger-color: #ff3b30; /* iOS red */
-            --success-color: #34c759; /* iOS green */
+            --input-background: #f2f2f7;
+            --danger-color: #ff3b30;
+            --success-color: #34c759;
             --subtle-grey: #e5e5ea;
             --log-bg: #f8f9fa;
             --border-light: #eaeaec;
-            --ph-active-bg: #e6f2ff; /* Light blue for active PH */
+            --ph-active-color: var(--success-color);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { font-size: 16px; } /* Base font size */
+        html { font-size: 16px; }
         body {
             font-family: var(--system-font);
             display: flex;
@@ -33,7 +33,7 @@
             background-color: var(--background-color);
             padding: 20px 15px;
             color: var(--text-primary);
-            line-height: 1.4; /* Slightly tighter line height */
+            line-height: 1.5;
         }
 
         /* --- Main App Layout --- */
@@ -41,7 +41,7 @@
             display: flex;
             gap: 20px;
             width: 100%;
-            max-width: 1300px; /* Wider for weekly view */
+            max-width: 1200px; /* Adjusted width */
             background-color: var(--card-background);
             border-radius: 16px;
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
@@ -70,29 +70,23 @@
 
         /* --- Input Area (Center Panel) --- */
         .input-area {
-            flex: 1 1 600px; /* Allow more width for weekly card */
+            flex: 1 1 450px; /* Flexible width */
             padding: 0 10px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
         }
-        .input-area-header {
-             text-align: center;
-             margin-bottom: 15px;
-             padding-bottom: 10px;
-             border-bottom: 1px solid var(--border-light);
-        }
+        .input-area-header { text-align: center; margin-bottom: 20px; }
         .input-area h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
         .input-area h2 span { font-weight: 700; color: var(--accent-color); }
-        .input-area #week-ending-input-group { margin-bottom: 15px; max-width: 250px; margin-left: auto; margin-right: auto;}
-        .input-area #week-ending-input-group label { font-size: 0.9rem; }
 
         fieldset { border: none; padding: 0; margin: 0 0 15px 0; }
         legend { font-weight: 600; margin-bottom: 10px; font-size: 1.05rem; padding: 0; }
         label { font-weight: 500; color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 5px; }
-        input[type="time"], input[type="number"], input[type="date"] {
-            width: 100%; padding: 8px 10px; border: 1px solid var(--border-color);
-            border-radius: 6px; font-size: 0.95rem; background-color: var(--input-background);
+        /* Changed time input to text */
+        input[type="text"][name*="time"], input[type="number"], input[type="date"] {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
+            border-radius: 8px; font-size: 0.95rem; background-color: var(--input-background);
             color: var(--text-primary); appearance: none; -moz-appearance: none; -webkit-appearance: none;
             transition: border-color 0.2s ease, box-shadow 0.2s ease; margin-bottom: 3px;
         }
@@ -102,7 +96,7 @@
         }
         .form-row { display: flex; gap: 15px; align-items: flex-start; }
         .form-row > .input-group { flex: 1; }
-        .input-group { margin-bottom: 8px; }
+        .input-group { margin-bottom: 12px; }
 
         /* Stepper */
         .stepper-input-group { display: flex; align-items: center; gap: 6px; }
@@ -117,106 +111,109 @@
         .stepper-button:hover { background-color: var(--input-background); }
         .stepper-button:active { background-color: var(--subtle-grey); }
 
-        /* Weekly Time Card */
-        .time-card { display: grid; grid-template-columns: 60px repeat(4, 1fr); gap: 8px 12px; align-items: center; }
-        .time-card-header { font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); padding-bottom: 5px; text-align: center; }
-        .day-label { font-weight: 600; font-size: 0.95rem; text-align: right; padding-right: 10px; }
-        .time-input-group { display: flex; flex-direction: column; }
-        .ph-toggle-group { text-align: center; }
+        /* PH Toggle */
+        .ph-toggle-group { display: flex; align-items: center; margin-top: 10px; gap: 8px; }
         .ph-toggle { /* Custom checkbox styling */
             appearance: none; width: 20px; height: 20px; border: 1px solid var(--border-color);
-            border-radius: 4px; cursor: pointer; vertical-align: middle; position: relative;
+            border-radius: 4px; cursor: pointer; position: relative; flex-shrink: 0;
             background-color: var(--input-background); transition: background-color 0.2s ease;
         }
-        .ph-toggle:checked { background-color: var(--accent-color); border-color: var(--accent-color); }
+        .ph-toggle:checked { background-color: var(--success-color); border-color: var(--success-color); }
         .ph-toggle:checked::after { /* Checkmark */
             content: '✔'; color: white; font-size: 14px; position: absolute;
             top: 50%; left: 50%; transform: translate(-50%, -50%); line-height: 1;
         }
-        /* Style row when PH is checked */
-        /* Target the container div holding the row elements */
-        .day-row-container.is-ph { background-color: var(--ph-active-bg); border-radius: 4px; } /* Apply highlight to the container */
-        .day-row-container.is-ph .day-label { color: var(--accent-color); } /* Style label within highlighted row */
+        .ph-toggle-group label { margin-bottom: 0; font-size: 0.95rem; color: var(--text-primary); cursor: pointer;}
 
-
-        .daily-hours { font-size: 0.9rem; font-weight: 500; text-align: center; color: var(--text-secondary); min-height: 1.4em; }
-        .time-card .error-message { grid-column: 2 / -1; /* Span across input columns */ text-align: left; padding-left: 5px; } /* Position errors below inputs */
-
-
-        /* Calculate Button */
-        .calculate-button {
+        /* Log Button */
+        .log-button {
             width: 100%; padding: 12px; font-size: 1rem; font-weight: 600;
             border: none; border-radius: 10px; cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
-            background-color: var(--accent-color); color: white; margin-top: 25px;
+            background-color: var(--accent-color); color: white; margin-top: 20px;
         }
-        .calculate-button:hover { background-color: var(--accent-color-hover); transform: scale(1.01); }
-        .calculate-button:active { transform: scale(0.99); }
+        .log-button:hover { background-color: var(--accent-color-hover); transform: scale(1.01); }
+        .log-button:active { transform: scale(0.99); }
 
         /* Error Message */
         .error-message { font-size: 0.75rem; color: var(--danger-color); min-height: 1.2em; display: block; margin-top: 2px; }
+        .input-error { border-color: var(--danger-color) !important; }
 
-        /* --- Log Area (Right Panel) --- */
-        .log-area {
-            flex: 1 1 350px; /* Slightly narrower */
+        /* --- Log & Summary Area (Right Panel) --- */
+        .log-summary-area {
+            flex: 1 1 400px;
             border-left: 1px solid var(--border-light);
             padding-left: 20px;
             display: flex; flex-direction: column; overflow: hidden;
         }
-        .log-area h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+        .summary-section {
+            padding: 15px; margin-bottom: 15px; border-radius: 8px;
+            background-color: var(--input-background); border: 1px solid var(--border-light);
+            flex-shrink: 0;
+        }
+        .summary-section h3 { font-size: 1rem; font-weight: 600; margin-bottom: 10px; border-bottom: 1px solid var(--border-light); padding-bottom: 8px;}
+        .summary-section p { font-size: 0.9rem; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .summary-section p span:first-child { color: var(--text-secondary); }
+        .summary-section p span:last-child { font-weight: 600; color: var(--text-primary); }
+        .summary-section .ph-total { color: var(--success-color); }
+        .summary-section .lynette-summary-details { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border-light); font-size: 0.85rem; }
+        .summary-section .lynette-summary-details p span:last-child { font-weight: 500; }
+        .summary-section .lynette-summary-details .final-wage span { font-weight: 600; }
+        .summary-section .adjustment-positive { color: var(--success-color); }
+        .summary-section .adjustment-negative { color: var(--danger-color); }
+
+
+        .log-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .log-area h3 { font-size: 1rem; font-weight: 600; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
         #log-entries { list-style: none; overflow-y: auto; flex-grow: 1; padding-right: 5px; }
         .log-entry {
             background-color: var(--log-bg); border: 1px solid var(--border-light);
-            border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; font-size: 0.9rem;
+            border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.85rem;
+            position: relative;
         }
-        .log-entry strong { font-weight: 600; color: var(--accent-color); }
-        .log-entry p { margin-bottom: 4px; color: var(--text-secondary); }
+        .log-entry p { margin-bottom: 3px; color: var(--text-secondary); }
         .log-entry p span { color: var(--text-primary); font-weight: 500; }
-        .log-entry .ph-hours { color: var(--success-color); font-weight: 600; }
-        .log-entry .lynette-details { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-light); }
-        .log-entry .lynette-details p { font-size: 0.85rem; }
-
-        .log-controls { margin-top: 15px; flex-shrink: 0; }
-        .clear-log-button {
-             display: block; width: 100%; padding: 8px; font-size: 0.9rem; font-weight: 500;
-             border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;
-             background-color: transparent; color: var(--danger-color);
-             transition: background-color 0.2s ease, color 0.2s ease;
+        .log-entry .log-ph { color: var(--success-color); font-weight: 600; margin-left: 5px; }
+        .log-entry .delete-log-btn {
+            position: absolute; top: 5px; right: 5px; width: 20px; height: 20px;
+            border: none; background: var(--subtle-grey); color: var(--text-secondary);
+            border-radius: 50%; cursor: pointer; font-size: 12px; line-height: 18px; text-align: center;
+            opacity: 0.5; transition: opacity 0.2s ease, background-color 0.2s ease;
         }
-         .clear-log-button:hover { background-color: var(--danger-color); color: white; }
+        .log-entry:hover .delete-log-btn { opacity: 1; }
+        .delete-log-btn:hover { background-color: var(--danger-color); color: white; }
+
+        .log-controls { margin-top: 15px; flex-shrink: 0; display: flex; gap: 10px; }
+        .export-log-button, .clear-log-button {
+             flex: 1; padding: 8px; font-size: 0.9rem; font-weight: 500;
+             border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;
+             background-color: transparent; transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .export-log-button { color: var(--accent-color); }
+        .export-log-button:hover { background-color: var(--accent-color); color: white; }
+        .clear-log-button { color: var(--danger-color); }
+        .clear-log-button:hover { background-color: var(--danger-color); color: white; }
+
 
         /* Responsive adjustments */
-        @media (max-width: 1100px) { /* Adjust breakpoint for weekly view */
+        @media (max-width: 1100px) {
             .app-container { flex-direction: column; height: auto; max-height: none; }
-            .staff-list, .log-area { border: none; padding: 0; flex-basis: auto; max-height: 250px; overflow-y: auto; }
+            .staff-list, .log-summary-area { border: none; padding: 0; flex-basis: auto; max-height: 30vh; overflow-y: auto; } /* Limit height */
             .staff-list { border-bottom: 1px solid var(--border-light); padding-bottom: 15px; margin-bottom: 15px; }
-            .log-area { border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 15px; }
+            .log-summary-area { border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 15px; }
             .input-area { padding: 0; overflow-y: visible; flex-basis: auto; }
-            .time-card { grid-template-columns: 50px repeat(4, 1fr); font-size: 0.9rem; } /* Adjust grid slightly */
-            input[type="time"] { padding: 8px; } /* Smaller padding */
         }
          @media (max-width: 600px) {
              body { padding: 10px 5px; }
              .app-container { padding: 15px; }
-             .time-card { display: block; } /* Stack days vertically */
-             .day-row-container { display: block; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-light); background-color: transparent !important; /* Remove row highlight on mobile */ }
-             .day-row-container:last-child { border-bottom: none; margin-bottom: 0;}
-             .time-card-header { display: none; } /* Hide header in stacked view */
-             .day-label { text-align: left; margin-bottom: 5px; font-size: 1rem; }
-             .time-input-group { display: flex; gap: 10px; align-items: center; margin-bottom: 5px !important; }
-             .time-input-group label { flex-basis: 40px; margin-bottom: 0; font-size: 0.85rem; }
-             .time-input-group input { flex: 1; }
-             .ph-toggle-group { text-align: left; margin-top: 8px; padding-left: 0px; }
-             .ph-toggle-group label { display: inline-block; margin-left: 5px; vertical-align: middle; font-size: 0.9rem; color: var(--text-primary); } /* Style checkbox label */
-             .daily-hours { text-align: right; margin-top: -2.0em; padding-right: 5px; font-size: 0.95rem; } /* Position hours to the right */
              .form-row { flex-direction: column; gap: 0; }
-             h1 { font-size: 1.1rem; } .input-area h2 { font-size: 1rem; }
-             .log-area h2, .staff-list h2 { font-size: 1rem; }
-             .button, .calculate-button { font-size: 0.95rem; padding: 12px; }
+             h1, .input-area h2, .log-summary-area h2, .staff-list h2 { font-size: 1.1rem; }
+             .button, .log-button { font-size: 0.95rem; padding: 12px; }
+             input[type="text"][name*="time"], input[type="number"], input[type="date"] { font-size: 0.9rem; padding: 10px; }
+             .log-entry { font-size: 0.8rem; }
+             .summary-section p { font-size: 0.85rem; }
          }
-         /* Add input error class style */
-         .input-error { border-color: var(--danger-color) !important; }
-
+         .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 
     </style>
 </head>
@@ -231,17 +228,12 @@
         <main class="input-area">
             <div class="input-area-header">
                 <h2 id="current-staff-header">Select Staff</h2>
-                 <div id="week-ending-input-group" class="input-group">
-                     <label for="week_ending">Week Ending Date:</label>
-                     <input type="date" id="week_ending" name="week_ending">
-                     <span class="error-message" id="week_ending-error"></span>
-                 </div>
             </div>
 
             <form id="calculator-form" onsubmit="return false;">
 
                 <fieldset id="lynette-manager-inputs" style="display: none;">
-                    <legend>Manager Work (This Week)</legend>
+                    <legend>Manager Work (Period)</legend>
                     <div class="form-row">
                         <div class="input-group">
                             <label for="full_days">Full Days</label>
@@ -265,31 +257,59 @@
                 </fieldset>
 
                 <fieldset>
-                    <legend id="time-card-legend">Weekly Time Card</legend>
-                    <div class="time-card">
-                        <div class="time-card-header">Day</div>
-                        <div class="time-card-header">Start Time</div>
-                        <div class="time-card-header">End Time</div>
-                        <div class="time-card-header">Public Hol?</div>
-                        <div class="time-card-header">Hours</div>
-
+                    <legend id="time-entry-legend">Log Work Time</legend>
+                     <div class="input-group">
+                         <label for="entry_date">Date</label>
+                         <input type="date" id="entry_date" name="entry_date">
+                         <span class="error-message" id="entry_date-error"></span>
+                     </div>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="start_time">Start Time</label>
+                            <input type="text" id="start_time" name="start_time" placeholder="e.g., 9, 9a, 9:30p, 14:30" inputmode="numeric">
+                            <span class="error-message" id="start_time-error"></span>
                         </div>
-                     <span class="error-message" id="time_card-error"></span> </fieldset>
+                        <div class="input-group">
+                            <label for="end_time">End Time</label>
+                            <input type="text" id="end_time" name="end_time" placeholder="e.g., 11, 3p, 17:00, 1730" inputmode="numeric">
+                            <span class="error-message" id="end_time-error"></span>
+                        </div>
+                    </div>
+                     <div class="ph-toggle-group input-group">
+                        <input type="checkbox" class="ph-toggle" id="is_ph" name="is_ph">
+                        <label for="is_ph">Work on Public Holiday?</label>
+                    </div>
+                </fieldset>
 
                 <input type="hidden" id="full_day_rate" value="235">
                  <input type="hidden" id="half_day_rate" value="75">
                  <input type="hidden" id="cleaner_hourly_rate" value="24.70">
 
-                <button type="button" id="calculate-button" class="calculate-button">Calculate & Log Week</button>
+                <button type="button" id="log-button" class="log-button">Log Time Entry</button>
             </form>
         </main>
 
-        <aside class="log-area">
-            <h2>Time Log</h2>
-            <ul id="log-entries"></ul>
-            <div class="log-controls">
-                 <button type="button" id="clear-log-button" class="clear-log-button">Clear Log</button>
-            </div>
+        <aside class="log-summary-area">
+             <section id="summary-section" class="summary-section" style="display: none;">
+                <h3>Period Summary for <span id="summary-staff-name">Staff</span></h3>
+                <p><span>Total Standard Hours:</span> <span id="summary-std-hours">0.00</span></p>
+                <p><span>Total Public Holiday Hours:</span> <span id="summary-ph-hours" class="ph-hours">0.00</span></p>
+                <div id="lynette-summary-details" class="lynette-summary-details" style="display: none;">
+                     <p>Mgr Days (F/H): <span id="summary-mgr-days">0 / 0</span></p>
+                     <p>Base Mgr Wage: <span id="summary-base-mgr-wage">$0.00</span></p>
+                     <p>Value Adjustment: <span id="summary-adjustment">$0.00</span></p>
+                     <p class="final-wage">Final Mgr Wage Payable: <span id="summary-final-mgr-wage">$0.00</span></p>
+                </div>
+            </section>
+
+            <section class="log-area">
+                <h3>Time Log</h3>
+                <ul id="log-entries"></ul>
+                <div class="log-controls">
+                     <button type="button" id="export-log-button" class="export-log-button">Export Log (CSV)</button>
+                     <button type="button" id="clear-log-button" class="clear-log-button">Clear Log</button>
+                </div>
+            </section>
         </aside>
 
     </div>
@@ -297,7 +317,6 @@
     <script>
         // --- Constants and Staff Data ---
         const STAFF_LIST = ['Lynette', 'Upashna', 'Sarah', 'Shaun', 'Katherine'];
-        const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const IRD_TARGET_HOURS = 15;
         const PUBLIC_HOLIDAY_MULTIPLIER = 1.5;
         const DEFAULT_FULL_DAY_RATE = 235;
@@ -305,159 +324,252 @@
         const DEFAULT_CLEANER_RATE = 24.70;
         const DEFAULT_LYNETTE_FULL_DAYS = 2;
         const DEFAULT_LYNETTE_HALF_DAYS = 3;
+        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_v2_smart'; // Updated key
 
         // --- State ---
         let currentStaff = null;
-        let logEntries = []; // Array to store log entry objects
+        let logEntries = [];
+        let lynetteManagerDays = { full: DEFAULT_LYNETTE_FULL_DAYS, half: DEFAULT_LYNETTE_HALF_DAYS };
 
         // --- DOM Elements ---
         const staffListUI = document.getElementById('staff-list-ui');
         const currentStaffHeader = document.getElementById('current-staff-header');
         const calculatorForm = document.getElementById('calculator-form');
         const lynetteManagerInputs = document.getElementById('lynette-manager-inputs');
-        const timeCardContainer = document.querySelector('.time-card');
+        const timeEntryLegend = document.getElementById('time-entry-legend');
         const logEntriesUI = document.getElementById('log-entries');
-        const calculateButton = document.getElementById('calculate-button');
+        const logButton = document.getElementById('log-button');
         const clearLogButton = document.getElementById('clear-log-button');
-        const weekEndingInput = document.getElementById('week_ending');
+        const exportLogButton = document.getElementById('export-log-button');
+        const entryDateInput = document.getElementById('entry_date');
+        const startTimeInput = document.getElementById('start_time'); // Now text input
+        const endTimeInput = document.getElementById('end_time');   // Now text input
+        const isPhCheckbox = document.getElementById('is_ph');
         const fullDaysInput = document.getElementById('full_days');
         const halfDaysInput = document.getElementById('half_days');
         const fullDayRateInput = document.getElementById('full_day_rate');
         const halfDayRateInput = document.getElementById('half_day_rate');
         const cleanerHourlyRateInput = document.getElementById('cleaner_hourly_rate');
+        // Summary Elements
+        const summarySection = document.getElementById('summary-section');
+        const summaryStaffName = document.getElementById('summary-staff-name');
+        const summaryStdHours = document.getElementById('summary-std-hours');
+        const summaryPhHours = document.getElementById('summary-ph-hours');
+        const lynetteSummaryDetails = document.getElementById('lynette-summary-details');
+        const summaryMgrDays = document.getElementById('summary-mgr-days');
+        const summaryBaseMgrWage = document.getElementById('summary-base-mgr-wage');
+        const summaryAdjustment = document.getElementById('summary-adjustment');
+        const summaryFinalMgrWage = document.getElementById('summary-final-mgr-wage');
 
 
         // --- Utility Functions ---
         const formatHours = (hours) => isNaN(hours) || !hours || hours === 0 ? '0.00' : hours.toFixed(2);
         const formatCurrency = (value) => isNaN(value) ? '$0.00' : `$${value.toFixed(2)}`;
+        const formatDate = (dateStr) => {
+             if (!dateStr) return 'N/A';
+             try {
+                 const date = new Date(dateStr + 'T00:00:00');
+                 return date.toLocaleDateString('en-NZ', { weekday: 'short', day: '2-digit', month: 'short' });
+             } catch { return dateStr; }
+        };
+        // Format time to 12-hour AM/PM for display
+        const formatDisplayTime = (timeStr24) => {
+             if (!timeStr24 || typeof timeStr24 !== 'string' || !timeStr24.includes(':')) return 'N/A';
+             try {
+                 const [hour, minute] = timeStr24.split(':');
+                 const h = parseInt(hour);
+                 const suffix = h >= 12 ? 'PM' : 'AM';
+                 const h12 = h % 12 === 0 ? 12 : h % 12;
+                 return `${h12}:${minute} ${suffix}`;
+             } catch { return timeStr24; } // Fallback
+        }
 
-        // --- Time Calculation ---
-        const calculateDuration = (startStr, endStr) => {
-            if (!startStr || !endStr) return 0;
-            try {
-                const baseDate = "1970-01-01"; // Use a fixed date to avoid DST issues
-                const startDate = new Date(`${baseDate}T${startStr}`);
-                let endDate = new Date(`${baseDate}T${endStr}`);
-                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 0; // Invalid time format parsed
-
-                // Handle overnight shifts
-                if (endDate <= startDate) {
-                    endDate.setDate(endDate.getDate() + 1);
-                }
-                const diffMilliseconds = endDate - startDate;
-                if (diffMilliseconds < 0) return 0; // Should be caught by overnight logic
-
-                const diffHours = diffMilliseconds / (1000 * 60 * 60);
-                return Math.round(diffHours * 100) / 100; // Round to 2 decimal places
-            } catch (e) {
-                console.error("Error calculating duration:", startStr, endStr, e);
-                return 0;
+        // --- Smart Time Parsing ---
+        const parseAndFormatTime = (inputElement) => {
+            const rawValue = inputElement.value.trim().toLowerCase();
+            if (!rawValue) {
+                clearError(inputElement.id); // Clear error if field is emptied
+                return null; // Return null if empty
             }
+
+            let hour = NaN, minute = 0;
+            let explicitAM = false, explicitPM = false;
+
+            // Check for explicit AM/PM
+            if (rawValue.includes('a')) { explicitAM = true; }
+            if (rawValue.includes('p')) { explicitPM = true; }
+            let numStr = rawValue.replace(/[^0-9.:]/g, ''); // Keep numbers, colon, dot
+
+            // Handle different formats
+            if (numStr.includes(':') || numStr.includes('.')) {
+                const parts = numStr.split(/[:.]/);
+                hour = parseInt(parts[0]);
+                minute = parseInt(parts[1] || '0');
+            } else {
+                // Try parsing numbers like 9, 930, 14, 1430
+                const numVal = parseInt(numStr);
+                if (!isNaN(numVal)) {
+                    if (numStr.length <= 2) { // Assume hour only (e.g., 9, 14)
+                        hour = numVal;
+                        minute = 0;
+                    } else if (numStr.length === 3) { // Assume HMM (e.g., 930)
+                        hour = parseInt(numStr.substring(0, 1));
+                        minute = parseInt(numStr.substring(1));
+                    } else if (numStr.length === 4) { // Assume HHMM (e.g., 0930, 1430)
+                        hour = parseInt(numStr.substring(0, 2));
+                        minute = parseInt(numStr.substring(2));
+                    }
+                }
+            }
+
+            // Validate parsed numbers
+            if (isNaN(hour) || isNaN(minute) || minute < 0 || minute > 59) {
+                showError(inputElement.id, 'Invalid time format.');
+                return null;
+            }
+
+            // Apply Heuristics / AM/PM
+            if (explicitAM || explicitPM) {
+                if (hour < 1 || hour > 12) { showError(inputElement.id, 'Hour must be 1-12 with AM/PM.'); return null; }
+                if (explicitPM && hour !== 12) hour += 12;
+                if (explicitAM && hour === 12) hour = 0; // Midnight
+            } else {
+                // Heuristics only if AM/PM not specified
+                if (hour < 7) { // 1-6 typically PM for end times, or early AM start
+                     if (inputElement.id.includes('end') && hour <= 6) { // 1pm-6pm end
+                          hour += 12;
+                     } else if (inputElement.id.includes('start') && hour >= 5) {
+                          // Assume 5am/6am start is AM
+                     } else if (hour < 12) {
+                          // If not explicitly handled, maybe default based on typical hours?
+                          // Let's assume 1-6 are PM unless context suggests otherwise (difficult)
+                          // Defaulting to AM for 1-6 start, PM for 1-6 end might be safer
+                           if (inputElement.id.includes('end')) hour += 12;
+                     }
+                } else if (hour >= 7 && hour <= 11) {
+                    // Assume AM (7am-11am) - no change needed for 24hr format
+                } else if (hour === 12) {
+                     // If 12 entered with no AM/PM, assume 12 PM (noon)
+                     // hour = 12; // Already 12
+                }
+                // Hours > 12 are already 24-hour format
+            }
+
+             // Final validation on calculated 24hr time
+             if (hour < 0 || hour > 23) {
+                 showError(inputElement.id, 'Invalid hour.');
+                 return null;
+             }
+
+
+            // Format to HH:MM (24-hour)
+            const formattedTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+            inputElement.value = formattedTime; // Update the input field
+            clearError(inputElement.id); // Clear error on successful parse
+            return formattedTime; // Return the standardized format
         };
 
-        // --- Error Handling ---
+
+        // --- Time Calculation ---
+        const calculateDuration = (startStr24, endStr24) => {
+            // Expects "HH:MM" 24-hour format strings
+            if (!startStr24 || !endStr24) return 0;
+            try {
+                const baseDate = "1970-01-01";
+                const startDate = new Date(`${baseDate}T${startStr24}`);
+                let endDate = new Date(`${baseDate}T${endStr24}`);
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 0;
+
+                if (endDate <= startDate) { endDate.setDate(endDate.getDate() + 1); }
+                const diffMilliseconds = endDate - startDate;
+                if (diffMilliseconds < 0) return 0;
+
+                const diffHours = diffMilliseconds / (1000 * 60 * 60);
+                return Math.round(diffHours * 100) / 100;
+            } catch (e) { console.error("Error calculating duration:", startStr24, endStr24, e); return 0; }
+        };
+
+        // --- Error Handling (showError, clearError, clearAllErrors as before) ---
+        // (Error handling functions from previous version are suitable)
         const showError = (elementId, message) => {
             const errorEl = document.getElementById(`${elementId}-error`);
             const inputEl = document.getElementById(elementId);
             if (errorEl) errorEl.textContent = message;
-            // Apply error style to the input itself or its parent group
-            const parentGroup = inputEl?.closest('.input-group, .time-input-group');
-             if (parentGroup) {
-                 parentGroup.querySelectorAll('input').forEach(inp => inp.classList.add('input-error'));
-             } else if (inputEl) { // Fallback for inputs not in expected groups
-                 inputEl.classList.add('input-error');
-             }
+            inputEl?.classList.add('input-error');
         };
         const clearError = (elementId) => {
             const errorEl = document.getElementById(`${elementId}-error`);
             const inputEl = document.getElementById(elementId);
             if (errorEl) errorEl.textContent = '';
-             const parentGroup = inputEl?.closest('.input-group, .time-input-group');
-             if (parentGroup) {
-                 parentGroup.querySelectorAll('input').forEach(inp => inp.classList.remove('input-error'));
-             } else if (inputEl) {
-                 inputEl.classList.remove('input-error');
-             }
+            inputEl?.classList.remove('input-error');
         };
         const clearAllErrors = () => {
             calculatorForm.querySelectorAll('.error-message').forEach(el => el.textContent = '');
             calculatorForm.querySelectorAll('input.input-error').forEach(input => input.classList.remove('input-error'));
         };
-
-         // Inject CSS for input error state
          const style = document.createElement('style');
          style.textContent = `.input-error { border-color: var(--danger-color) !important; }`;
          document.head.appendChild(style);
 
 
         // --- Input Validation ---
-        const validateWeeklyInputs = () => {
+        const validateEntryInputs = () => {
             clearAllErrors();
             let isValid = true;
-            let hasAtLeastOneEntry = false;
 
-            if (!weekEndingInput.value) {
-                showError('week_ending', 'Week Ending Date required.'); isValid = false;
+            // Validate Date
+            if (!entryDateInput.value) { showError('entry_date', 'Date required.'); isValid = false; }
+            else { clearError('entry_date'); }
+
+            // Validate Times (Check if they contain the formatted HH:MM after parsing attempt)
+            const timeRegex = /^[0-2][0-9]:[0-5][0-9]$/;
+            const startVal = startTimeInput.value;
+            const endVal = endTimeInput.value;
+
+            if (!startVal) { showError('start_time', 'Start time required.'); isValid = false; }
+            else if (!timeRegex.test(startVal)) { showError('start_time', 'Invalid format (use HH:MM or smart entry).'); isValid = false; }
+            else { clearError('start_time'); }
+
+            if (!endVal) { showError('end_time', 'End time required.'); isValid = false; }
+            else if (!timeRegex.test(endVal)) { showError('end_time', 'Invalid format (use HH:MM or smart entry).'); isValid = false; }
+            else { clearError('end_time'); }
+
+            // Validate duration only if both times look valid
+            if (timeRegex.test(startVal) && timeRegex.test(endVal)) {
+                if (calculateDuration(startVal, endVal) <= 0) {
+                    showError('end_time', 'End must be after start.'); isValid = false;
+                } else {
+                     // Clear only the duration-specific error
+                     const endErrorEl = document.getElementById('end_time-error');
+                     if (endErrorEl && endErrorEl.textContent === 'End must be after start.') {
+                         clearError('end_time');
+                     }
+                }
             }
 
+            // Validate Lynette's manager days
             if (currentStaff === 'Lynette') {
-                const validateNumber = (inputId, min, max) => {
+                const validateMgrNumber = (inputId, min, max) => {
                     const inputEl = document.getElementById(inputId);
                     const value = parseInt(inputEl.value);
                     if (isNaN(value) || value < min || (max !== undefined && value > max)) {
-                        showError(inputId, `Must be between ${min} and ${max}.`); isValid = false;
-                    } else {
-                        clearError(inputId); // Clear error if valid
-                    }
+                        showError(inputId, `Must be ${min}-${max}.`); isValid = false;
+                    } else { clearError(inputId); }
                 };
-                validateNumber('full_days', 0, 7);
-                validateNumber('half_days', 0, 7);
+                validateMgrNumber('full_days', 0, 7);
+                validateMgrNumber('half_days', 0, 7);
             }
-
-            DAYS_OF_WEEK.forEach(dayLC => {
-                const startId = `start_${dayLC}`;
-                const endId = `end_${dayLC}`;
-                const startEl = document.getElementById(startId);
-                const endEl = document.getElementById(endId);
-
-                if (startEl?.value || endEl?.value) {
-                    hasAtLeastOneEntry = true;
-                    let dailyValid = true;
-                    if (!startEl?.value) { showError(startId, 'Start time needed.'); isValid = false; dailyValid = false; }
-                    if (!endEl?.value) { showError(endId, 'End time needed.'); isValid = false; dailyValid = false; }
-
-                    if (startEl?.value && endEl?.value) {
-                         const duration = calculateDuration(startEl.value, endEl.value);
-                         if (duration <= 0) { showError(endId, 'End must be after start.'); isValid = false; dailyValid = false; }
-                         // Update display during validation
-                         const hoursDisplay = document.getElementById(`hours_${dayLC}`);
-                         if (hoursDisplay) hoursDisplay.textContent = formatHours(duration);
-                    }
-                     // Clear errors for the row if it becomes valid *within this check*
-                     if (dailyValid && startEl?.value && endEl?.value) {
-                        clearError(startId);
-                        clearError(endId);
-                    }
-                } else {
-                    // Clear errors and hours display for empty rows
-                    clearError(startId); clearError(endId);
-                     const hoursDisplay = document.getElementById(`hours_${dayLC}`);
-                     if (hoursDisplay) hoursDisplay.textContent = '0.00';
-                }
-            });
-
-             const timeCardErrorEl = document.getElementById('time_card-error');
-             if (!hasAtLeastOneEntry) {
-                 if (timeCardErrorEl) timeCardErrorEl.textContent = 'Please enter time for at least one day.';
-                 // Allow logging zero hours
-             } else {
-                  if (timeCardErrorEl) timeCardErrorEl.textContent = '';
-             }
 
             return isValid;
         };
 
-        // --- UI Rendering ---
+        // --- Local Storage (as before) ---
+        const saveLog = () => { try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(logEntries)); } catch (e) { console.error("Error saving log:", e); } };
+        const loadLog = () => { try { const s = localStorage.getItem(LOCAL_STORAGE_KEY); logEntries = s ? JSON.parse(s) : []; } catch (e) { console.error("Error loading log:", e); logEntries = []; } };
+
+        // --- UI Rendering (renderStaffList, renderLog, updateSummary as before) ---
+        // (renderStaffList, renderLog, updateSummary functions from previous version are suitable,
+        // ensure renderLog uses formatDisplayTime for start/end times)
         const renderStaffList = () => {
             staffListUI.innerHTML = '';
             STAFF_LIST.forEach(name => {
@@ -471,60 +583,6 @@
             });
         };
 
-        const renderTimeCard = () => {
-            timeCardContainer.querySelectorAll('.day-row-container').forEach(row => row.remove()); // Remove previous rows by container
-            DAYS_OF_WEEK.forEach(day => {
-                const dayLC = day.toLowerCase();
-                // Create a container div for all elements of the row
-                const rowContainer = document.createElement('div');
-                rowContainer.classList.add('day-row-container');
-                rowContainer.style.display = 'contents'; // Make it part of the grid
-
-                rowContainer.innerHTML = `
-                    <div class="day-label">${day}</div>
-                    <div class="time-input-group">
-                        <input type="time" id="start_${dayLC}" name="start_${dayLC}" step="900">
-                        <span class="error-message" id="start_${dayLC}-error"></span>
-                    </div>
-                    <div class="time-input-group">
-                        <input type="time" id="end_${dayLC}" name="end_${dayLC}" step="900">
-                        <span class="error-message" id="end_${dayLC}-error"></span>
-                    </div>
-                    <div class="ph-toggle-group">
-                        <input type="checkbox" class="ph-toggle" id="ph_${dayLC}" name="ph_${dayLC}" title="Mark as Public Holiday">
-                        <label for="ph_${dayLC}" class="visually-hidden">Public Holiday ${day}</label> </div>
-                    <div class="daily-hours" id="hours_${dayLC}">0.00</div>`;
-                timeCardContainer.appendChild(rowContainer);
-
-                 const startInput = rowContainer.querySelector(`#start_${dayLC}`);
-                 const endInput = rowContainer.querySelector(`#end_${dayLC}`);
-                 const phCheckbox = rowContainer.querySelector(`#ph_${dayLC}`);
-                 const hoursDisplay = rowContainer.querySelector(`#hours_${dayLC}`);
-
-                 const updateDailyTotal = () => {
-                     clearError(`start_${dayLC}`); clearError(`end_${dayLC}`);
-                     const hours = calculateDuration(startInput.value, endInput.value);
-                     hoursDisplay.textContent = formatHours(hours);
-                     if (startInput.value && endInput.value && hours <= 0) {
-                         showError(`end_${dayLC}`, 'End must be after start.');
-                     }
-                     // Toggle PH highlight on the container
-                     rowContainer.classList.toggle('is-ph', phCheckbox.checked);
-                 };
-
-                 startInput.addEventListener('input', updateDailyTotal);
-                 endInput.addEventListener('input', updateDailyTotal);
-                 phCheckbox.addEventListener('change', updateDailyTotal);
-            });
-             // Add visually hidden class if not already defined
-             if (!document.querySelector('.visually-hidden')) {
-                 const hiddenStyle = document.createElement('style');
-                 hiddenStyle.textContent = `.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }`;
-                 document.head.appendChild(hiddenStyle);
-             }
-        };
-
-
         const renderLog = () => {
             logEntriesUI.innerHTML = '';
             if (logEntries.length === 0) {
@@ -534,28 +592,52 @@
             logEntries.slice().reverse().forEach((entry) => {
                 const li = document.createElement('li');
                 li.classList.add('log-entry');
-                let content = `<strong>${entry.staffName}</strong> (Week Ending: ${entry.weekEnding || 'N/A'})`;
+                li.dataset.entryId = entry.id;
 
-                if (entry.type === 'lynette') {
-                     content += `
-                        <p>Std Cleaner Hours: <span>${formatHours(entry.standardHours)}</span></p>
-                        ${entry.publicHolidayHours > 0 ? `<p>PH Cleaner Hours: <span class="ph-hours">${formatHours(entry.publicHolidayHours)}</span></p>` : ''}
-                        <div class="lynette-details">
-                            <p>Mgr Days (F/H): <span>${entry.managerFullDays} / ${entry.managerHalfDays}</span></p>
-                            <p>Base Mgr Wage: <span>${formatCurrency(entry.baseManagerWage)}</span></p>
-                            <p>Value Adjustment: <span class="${entry.adjustmentValue >= 0 ? 'adjustment-positive' : 'adjustment-negative'}">${formatCurrency(Math.abs(entry.adjustmentValue))} ${entry.adjustmentValue >= 0 ? '(Add)' : '(Deduct)'}</span></p>
-                            <p>Final Mgr Wage: <span>${formatCurrency(entry.finalManagerWagePayable)}</span></p>
-                        </div>`;
-                } else {
-                    content += `<p>Standard Hours: <span>${formatHours(entry.standardHours)}</span></p>`;
-                    if (entry.publicHolidayHours > 0) {
-                        content += `<p>Public Holiday Hours: <span class="ph-hours">${formatHours(entry.publicHolidayHours)}</span></p>`;
-                    }
-                }
+                let phMarker = entry.isPH ? '<span class="log-ph">(PH)</span>' : '';
+                let content = `
+                    <button type="button" class="delete-log-btn" title="Delete Entry">×</button>
+                    <p><strong>${entry.staffName}</strong> - ${formatDate(entry.date)}</p>
+                    <p>Time: <span>${formatDisplayTime(entry.start)} - ${formatDisplayTime(entry.end)}</span></p> <p>Hours: <span>${formatHours(entry.hours)} ${phMarker}</span></p>
+                `;
                 li.innerHTML = content;
                 logEntriesUI.appendChild(li);
             });
         };
+
+        const updateSummary = () => {
+             if (!currentStaff) { summarySection.style.display = 'none'; return; }
+             summarySection.style.display = 'block';
+             summaryStaffName.textContent = currentStaff;
+             const staffEntries = logEntries.filter(entry => entry.staffName === currentStaff);
+             let totalStandardHours = 0; let totalPublicHolidayHours = 0;
+             staffEntries.forEach(entry => { if (entry.isPH) { totalPublicHolidayHours += entry.hours; } else { totalStandardHours += entry.hours; } });
+             summaryStdHours.textContent = formatHours(totalStandardHours);
+             summaryPhHours.textContent = formatHours(totalPublicHolidayHours);
+             summaryPhHours.parentElement.style.display = totalPublicHolidayHours > 0 ? 'flex' : 'none';
+
+             if (currentStaff === 'Lynette') {
+                lynetteSummaryDetails.style.display = 'block';
+                const fullDays = lynetteManagerDays.full; const halfDays = lynetteManagerDays.half;
+                const fullDayRate = parseFloat(fullDayRateInput.value); const halfDayRate = parseFloat(halfDayRateInput.value);
+                const standardCleanerRate = parseFloat(cleanerHourlyRateInput.value);
+                const baseManagerWage = (fullDays * fullDayRate) + (halfDays * halfDayRate);
+                const actualStdCleanerValue = totalStandardHours * standardCleanerRate;
+                const actualPHCleanerValue = totalPublicHolidayHours * standardCleanerRate * PUBLIC_HOLIDAY_MULTIPLIER;
+                const totalActualEarnedValue = baseManagerWage + actualStdCleanerValue + actualPHCleanerValue;
+                const phHrsPaidInXero = Math.min(totalPublicHolidayHours, IRD_TARGET_HOURS);
+                const stdHrsPaidInXero = Math.max(0, IRD_TARGET_HOURS - phHrsPaidInXero);
+                const valuePaidCleanerInXero = (phHrsPaidInXero * standardCleanerRate * PUBLIC_HOLIDAY_MULTIPLIER) + (stdHrsPaidInXero * standardCleanerRate);
+                const finalManagerWagePayable = totalActualEarnedValue - valuePaidCleanerInXero;
+                const adjustmentValue = finalManagerWagePayable - baseManagerWage;
+                summaryMgrDays.textContent = `${fullDays} / ${halfDays}`;
+                summaryBaseMgrWage.textContent = formatCurrency(baseManagerWage);
+                summaryAdjustment.textContent = `${formatCurrency(Math.abs(adjustmentValue))} ${adjustmentValue >= -0.005 ? '(Add)' : '(Deduct)'}`;
+                summaryAdjustment.className = adjustmentValue >= -0.005 ? 'adjustment-positive' : 'adjustment-negative';
+                summaryFinalMgrWage.textContent = formatCurrency(finalManagerWagePayable);
+             } else { lynetteSummaryDetails.style.display = 'none'; }
+        };
+
 
         // --- Event Handlers ---
         const handleStaffSelect = (event) => {
@@ -565,154 +647,129 @@
             renderStaffList();
             currentStaffHeader.innerHTML = `Enter Time for <span>${currentStaff}</span>`;
             lynetteManagerInputs.style.display = currentStaff === 'Lynette' ? 'block' : 'none';
-            calculatorForm.reset();
-            renderTimeCard(); // Re-render blank card
-             if (currentStaff === 'Lynette') {
-                fullDaysInput.value = DEFAULT_LYNETTE_FULL_DAYS;
-                halfDaysInput.value = DEFAULT_LYNETTE_HALF_DAYS;
+            timeEntryLegend.textContent = currentStaff === 'Lynette' ? 'Log Cleaner Time Entry' : 'Log Work Time Entry';
+            if (currentStaff === 'Lynette') {
+                fullDaysInput.value = lynetteManagerDays.full;
+                halfDaysInput.value = lynetteManagerDays.half;
             }
-            const today = new Date();
-            // Default to upcoming Sunday for week ending
-            const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon,...
-            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? 0:7); // Adjust to Sunday
-            const weekEndingDate = new Date(today.setDate(diff));
-            weekEndingInput.value = weekEndingDate.toISOString().split('T')[0];
-
-            clearAllErrors();
+            startTimeInput.value = ''; endTimeInput.value = ''; isPhCheckbox.checked = false;
+            clearAllErrors(); updateSummary();
         };
 
-        const handleCalculateAndLogWeek = () => {
+        const handleManagerDaysChange = () => { /* As before */
+             if (currentStaff !== 'Lynette') return;
+             let fullDaysValid = true; let halfDaysValid = true;
+             const fullVal = parseInt(fullDaysInput.value); const halfVal = parseInt(halfDaysInput.value);
+             if(isNaN(fullVal) || fullVal < 0 || fullVal > 7) { showError('full_days', 'Must be 0-7.'); fullDaysValid = false;} else {clearError('full_days');}
+             if(isNaN(halfVal) || halfVal < 0 || halfVal > 7) { showError('half_days', 'Must be 0-7.'); halfDaysValid = false;} else {clearError('half_days');}
+             if(fullDaysValid && halfDaysValid) { lynetteManagerDays.full = fullVal; lynetteManagerDays.half = halfVal; updateSummary(); }
+        };
+
+        const handleCalculateAndLog = () => {
             if (!currentStaff) { alert('Please select a staff member first.'); return; }
-            if (!validateWeeklyInputs()) { return; }
+            // *** Trigger parsing on potentially unfocused fields before validation ***
+            const parsedStart = parseAndFormatTime(startTimeInput);
+            const parsedEnd = parseAndFormatTime(endTimeInput);
 
-            const weekEnding = weekEndingInput.value;
-            let totalStandardHours = 0;
-            let totalPublicHolidayHours = 0;
+            if (!validateEntryInputs()) { return; } // Validate *after* attempting parse/format
 
-            DAYS_OF_WEEK.forEach(dayLC => {
-                const startStr = document.getElementById(`start_${dayLC}`)?.value;
-                const endStr = document.getElementById(`end_${dayLC}`)?.value;
-                const isPH = document.getElementById(`ph_${dayLC}`)?.checked;
-                if (startStr && endStr) {
-                    const dailyHours = calculateDuration(startStr, endStr);
-                    if (isPH) { totalPublicHolidayHours += dailyHours; }
-                    else { totalStandardHours += dailyHours; }
-                }
-            });
+            // Use the potentially updated values after parsing attempt
+            const startTime24 = startTimeInput.value; // Already formatted by parseAndFormatTime if successful
+            const endTime24 = endTimeInput.value;
+            const entryDate = entryDateInput.value;
+            const isPH = isPhCheckbox.checked;
+            const hours = calculateDuration(startTime24, endTime24); // Calculate using 24hr format
 
-            const logEntry = {
-                id: Date.now(), staffName: currentStaff, weekEnding: weekEnding,
-                standardHours: totalStandardHours, publicHolidayHours: totalPublicHolidayHours,
+            const newEntry = {
+                id: Date.now(), staffName: currentStaff, date: entryDate,
+                start: startTime24, end: endTime24, hours: hours, isPH: isPH
             };
 
-            if (currentStaff === 'Lynette') {
-                const fullDays = parseInt(fullDaysInput.value);
-                const halfDays = parseInt(halfDaysInput.value);
-                const fullDayRate = parseFloat(fullDayRateInput.value);
-                const halfDayRate = parseFloat(halfDayRateInput.value);
-                const standardCleanerRate = parseFloat(cleanerHourlyRateInput.value);
+            logEntries.push(newEntry);
+            saveLog(); renderLog(); updateSummary();
 
-                const baseManagerWage = (fullDays * fullDayRate) + (halfDays * halfDayRate);
-
-                // *** CORRECTED CALCULATION LOGIC V2 ***
-                // Calculate total value actually earned
-                const actualStdCleanerValue = totalStandardHours * standardCleanerRate;
-                const actualPHCleanerValue = totalPublicHolidayHours * standardCleanerRate * PUBLIC_HOLIDAY_MULTIPLIER;
-                const totalActualEarnedValue = baseManagerWage + actualStdCleanerValue + actualPHCleanerValue;
-
-                // Calculate value of cleaner hours as paid in Xero (assuming PH paid first up to 15 total)
-                const phHrsPaidInXero = Math.min(totalPublicHolidayHours, IRD_TARGET_HOURS);
-                const stdHrsPaidInXero = Math.max(0, IRD_TARGET_HOURS - phHrsPaidInXero);
-                const valuePaidCleanerInXero = (phHrsPaidInXero * standardCleanerRate * PUBLIC_HOLIDAY_MULTIPLIER) + (stdHrsPaidInXero * standardCleanerRate);
-
-                // Calculate the manager wage needed to make the totals match
-                const finalManagerWagePayable = totalActualEarnedValue - valuePaidCleanerInXero;
-
-                // Calculate adjustment amount relative to base manager wage for logging display
-                const adjustmentValue = finalManagerWagePayable - baseManagerWage;
-                // *** END CORRECTED CALCULATION LOGIC V2 ***
-
-                logEntry.type = 'lynette';
-                logEntry.managerFullDays = fullDays;
-                logEntry.managerHalfDays = halfDays;
-                logEntry.baseManagerWage = baseManagerWage;
-                logEntry.adjustmentValue = adjustmentValue;
-                logEntry.finalManagerWagePayable = finalManagerWagePayable;
-            } else {
-                logEntry.type = 'standard';
-            }
-
-            logEntries.push(logEntry);
-            renderLog();
-            renderTimeCard(); // Clear card inputs
-            clearAllErrors();
-             // Optionally reset week ending date, or keep it for next staff? Keep it for now.
+            // Clear time entry inputs
+            startTimeInput.value = ''; endTimeInput.value = ''; isPhCheckbox.checked = false;
+            clearError('start_time'); clearError('end_time');
+            startTimeInput.focus();
         };
 
-        const handleStep = (event) => {
-            const button = event.target.closest('.stepper-button');
-            if (!button) return;
-            const targetInputId = button.dataset.target;
-            const step = parseInt(button.dataset.step);
+        const handleStep = (event) => { /* As before */
+            const button = event.target.closest('.stepper-button'); if (!button) return;
+            const targetInputId = button.dataset.target; const step = parseInt(button.dataset.step);
             const targetInput = document.getElementById(targetInputId);
             if (targetInput) {
-                let currentValue = parseInt(targetInput.value);
-                if (isNaN(currentValue)) currentValue = (step > 0 ? -1 : 1); // Step from blank
-                const min = parseInt(targetInput.min) || 0;
-                const max = parseInt(targetInput.max);
+                let currentValue = parseInt(targetInput.value); if (isNaN(currentValue)) currentValue = (step > 0 ? -1 : 1);
+                const min = parseInt(targetInput.min) || 0; const max = parseInt(targetInput.max);
                 let newValue = currentValue + step;
-                if (newValue < min) newValue = min;
-                if (max !== undefined && !isNaN(max) && newValue > max) newValue = max;
-                targetInput.value = newValue;
-                clearError(targetInputId);
+                if (newValue < min) newValue = min; if (max !== undefined && !isNaN(max) && newValue > max) newValue = max;
+                targetInput.value = newValue; handleManagerDaysChange(); // Update state & summary
             }
         };
 
-        const handleClearLog = () => {
-            if (logEntries.length > 0 && confirm('Are you sure you want to clear the entire time log?')) {
-                logEntries = [];
-                renderLog();
-                 // Optionally save cleared state to localStorage if persistence is added
+         const handleDeleteLogEntry = (event) => { /* As before */
+             const deleteButton = event.target.closest('.delete-log-btn'); if (!deleteButton) return;
+             const entryElement = deleteButton.closest('.log-entry'); const entryId = parseInt(entryElement.dataset.entryId);
+             if (isNaN(entryId)) return;
+             if (confirm('Are you sure you want to delete this log entry?')) {
+                 logEntries = logEntries.filter(entry => entry.id !== entryId);
+                 saveLog(); renderLog(); updateSummary();
+             }
+         };
+
+        const handleClearLog = () => { /* As before */
+            if (logEntries.length > 0 && confirm('Are you sure you want to clear the entire time log? This cannot be undone.')) {
+                logEntries = []; saveLog(); renderLog(); updateSummary();
             }
+        };
+
+        const handleExportLog = () => { /* As before */
+            if (logEntries.length === 0) { alert('Log is empty, nothing to export.'); return; }
+            let csvContent = "data:text/csv;charset=utf-8,Staff Name,Date,Start Time (24hr),End Time (24hr),Hours,Public Holiday\n";
+            logEntries.forEach(entry => {
+                const row = [`"${entry.staffName}"`, entry.date || '', entry.start || '', entry.end || '', formatHours(entry.hours), entry.isPH ? 'Yes' : 'No'].join(",");
+                csvContent += row + "\r\n";
+            });
+            const encodedUri = encodeURI(csvContent); const link = document.createElement("a");
+            link.setAttribute("href", encodedUri); const timestamp = new Date().toISOString().slice(0, 10);
+            link.setAttribute("download", `time_log_${timestamp}.csv`); document.body.appendChild(link);
+            link.click(); document.body.removeChild(link);
         };
 
         // --- Initialization ---
         const init = () => {
-            renderStaffList();
-            renderTimeCard();
-            renderLog();
-             const today = new Date();
-             const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon,...
-             const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? 0:7); // Adjust to upcoming Sunday
-             const weekEndingDate = new Date(today.setDate(diff));
-             weekEndingInput.value = weekEndingDate.toISOString().split('T')[0];
-
+            loadLog(); renderStaffList(); renderLog(); updateSummary();
+            const today = new Date().toISOString().split('T')[0]; entryDateInput.value = today;
 
             // Attach Event Listeners
             staffListUI.addEventListener('click', handleStaffSelect);
-            calculateButton.addEventListener('click', handleCalculateAndLogWeek);
+            logButton.addEventListener('click', handleCalculateAndLog);
             clearLogButton.addEventListener('click', handleClearLog);
-            calculatorForm.addEventListener('click', handleStep); // Steppers via delegation
+            exportLogButton.addEventListener('click', handleExportLog);
+            calculatorForm.addEventListener('click', handleStep); // Steppers
+            logEntriesUI.addEventListener('click', handleDeleteLogEntry); // Delete buttons
 
-             calculatorForm.querySelectorAll('input').forEach(input => {
+            // Add blur listeners for smart time parsing
+            startTimeInput.addEventListener('blur', (e) => parseAndFormatTime(e.target));
+            endTimeInput.addEventListener('blur', (e) => parseAndFormatTime(e.target));
+            // Optional: Add Enter key listener for parsing/moving focus
+             startTimeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); parseAndFormatTime(e.target); endTimeInput.focus();} });
+             endTimeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); parseAndFormatTime(e.target); isPhCheckbox.focus();} });
+
+
+            // Update summary if Lynette's manager days change
+            fullDaysInput.addEventListener('change', handleManagerDaysChange);
+            halfDaysInput.addEventListener('change', handleManagerDaysChange);
+
+            // Clear errors on input
+             calculatorForm.querySelectorAll('input[type="date"], input[type="number"], input[type="text"][name*="time"]').forEach(input => {
                 input.addEventListener('input', () => clearError(input.id));
             });
-             timeCardContainer.addEventListener('change', (event) => {
-                 if (event.target.type === 'checkbox' && event.target.id.startsWith('ph_')) {
-                     const dayLC = event.target.id.replace('ph_', '');
-                     clearError(`start_${dayLC}`); clearError(`end_${dayLC}`);
-                     // Update daily total to trigger row style update
-                     const startInput = document.getElementById(`start_${dayLC}`);
-                     const endInput = document.getElementById(`end_${dayLC}`);
-                     const hoursDisplay = document.getElementById(`hours_${dayLC}`);
-                     const phCheckbox = event.target;
-                     const dayRowContainer = phCheckbox.closest('.day-row-container');
 
-                     const hours = calculateDuration(startInput?.value, endInput?.value);
-                     if(hoursDisplay) hoursDisplay.textContent = formatHours(hours);
-                     if (dayRowContainer) dayRowContainer.classList.toggle('is-ph', phCheckbox.checked);
-                 }
-             });
+             if (!currentStaff && STAFF_LIST.length > 0) {
+                 const firstStaffButton = staffListUI.querySelector('button[data-staff-name]');
+                 if (firstStaffButton) { firstStaffButton.click(); }
+             }
         };
 
         // --- Run ---
@@ -721,3 +778,17 @@
     </script>
 </body>
 </html>
+```
+
+**Key Changes Implementing Smart Input:**
+
+1.  **HTML:** Changed `start_time` and `end_time` inputs from `type="time"` to `type="text"`. Added `placeholder` text as examples. Added `inputmode="numeric"` as a hint for mobile keyboards (though full parsing handles text).
+2.  **JavaScript:**
+    * **`parseAndFormatTime(inputElement)` function:** This new function contains the core logic. It takes the input element, reads the raw value, attempts to parse various formats ("9", "9a", "9:30", "1430", etc.), applies the AM/PM heuristics based on typical work hours and whether it's a start/end field, validates the result, and then **updates the input field's value** to the standard "HH:MM" (24-hour) format. It returns the formatted time string or `null` if parsing fails.
+    * **Event Listeners:** Added `blur` event listeners to the start and end time inputs. When the user tabs away or clicks out of the field, `parseAndFormatTime` is called for that field. Optional `keydown` listeners for the Enter key are added to parse and move focus.
+    * **`calculateDuration(startStr24, endStr24)`:** Now expects "HH:MM" 24-hour strings as input, which `parseAndFormatTime` provides.
+    * **`validateEntryInputs()`:** Updated to check if the `start_time` and `end_time` fields contain a valid "HH:MM" formatted string (using a simple Regex) after the parsing attempt on blur/enter. It also still checks if the duration is positive.
+    * **`handleCalculateAndLog()`:** Now explicitly calls `parseAndFormatTime` for both time fields *before* validation, ensuring any pending inputs are processed. It then uses the (potentially auto-formatted) values from the input fields for calculation.
+    * **`formatDisplayTime(timeStr24)`:** Added a utility to format the stored 24-hour time back to 12-hour AM/PM for display in the log, making the log easier to read.
+
+This version should allow much faster keyboard-based entry for common times while still handling explicit formats or edge cases correct
