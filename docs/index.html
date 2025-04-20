@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Time Tracker (NZ) - Smarter Time v6</title>
-    <style>
+    <title>Team Time Tracker (NZ) - Weekly Totals v7</title> <style>
         /* --- Base Styles & Variables --- */
         :root {
             --system-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -229,7 +228,7 @@
             border-left: 1px solid var(--border-light);
             display: flex; flex-direction: column; overflow: hidden;
         }
-        .summary-section {
+        .summary-section { /* Base class for both individual and weekly total summaries */
             padding: 18px; margin-bottom: 18px; border-radius: 12px; background-color: var(--input-background); border: 1px solid var(--border-light); flex-shrink: 0;
             max-height: 0;
             opacity: 0;
@@ -240,7 +239,7 @@
             visibility: hidden;
         }
         .summary-section.visible {
-            max-height: 500px;
+            max-height: 500px; /* Increased max-height to accommodate content */
             opacity: 1;
             padding-top: 18px; padding-bottom: 18px;
             margin-bottom: 18px;
@@ -251,8 +250,10 @@
         .summary-section p { font-size: 0.95rem; margin-bottom: 6px; display: flex; justify-content: space-between; }
         .summary-section p span:first-child { color: var(--text-secondary); }
         .summary-section p span:last-child { font-weight: 600; color: var(--text-primary); }
-        .summary-section .ph-total { color: var(--success-color); }
-        .summary-section .lynette-summary-details {
+        .summary-section .ph-total { color: var(--success-color); } /* Class for PH totals */
+
+        /* Individual Staff Summary Specifics */
+        #summary-section .lynette-summary-details {
             margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-light); font-size: 0.9rem;
             max-height: 0;
             opacity: 0;
@@ -261,17 +262,24 @@
             margin-top: 0; padding-top: 0;
             visibility: hidden;
         }
-         .summary-section .lynette-summary-details.visible {
+         #summary-section .lynette-summary-details.visible {
             max-height: 300px;
             opacity: 1;
             margin-top: 10px; padding-top: 10px;
             visibility: visible;
         }
-        .summary-section .lynette-summary-details p span:last-child { font-weight: 500; }
-        .summary-section .lynette-summary-details .final-wage span { font-weight: 600; font-size: 1rem; }
-        .summary-section .adjustment-positive { color: var(--success-color); }
-        .summary-section .adjustment-negative { color: var(--danger-color); }
-        .summary-section .current-rates { font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px; padding-top: 6px; border-top: 1px dotted var(--border-light); }
+        #summary-section .lynette-summary-details p span:last-child { font-weight: 500; }
+        #summary-section .lynette-summary-details .final-wage span { font-weight: 600; font-size: 1rem; }
+        #summary-section .adjustment-positive { color: var(--success-color); }
+        #summary-section .adjustment-negative { color: var(--danger-color); }
+        #summary-section .current-rates { font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px; padding-top: 6px; border-top: 1px dotted var(--border-light); }
+
+        /* Weekly Total Summary Specifics */
+        #weekly-total-summary {
+             border-top: 2px solid var(--border-color); /* Add a stronger separator */
+             margin-top: 0; /* Remove top margin if individual summary is hidden */
+             padding-top: 18px; /* Ensure padding is there when visible */
+        }
 
 
         .log-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -360,7 +368,7 @@
         /* --- Responsive Adjustments --- */
         @media (max-width: 1100px) {
             .app-container { flex-direction: column; height: auto; max-height: none; transition: height 0.3s ease; }
-            .staff-list, .log-summary-area { border: none; padding: 0; flex-basis: auto; max-height: 35vh; overflow-y: auto; }
+            .staff-list, .log-summary-area { border: none; padding: 0; flex-basis: auto; max-height: 45vh; /* Increased slightly */ overflow-y: auto; }
             .staff-list { border-bottom: 1px solid var(--border-light); padding-bottom: 15px; margin-bottom: 15px; }
             .log-summary-area { border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 15px; }
             .input-area { padding: 0; overflow-y: visible; flex-basis: auto; }
@@ -459,8 +467,7 @@
                  <h3>Summary for <span id="summary-staff-name">Staff</span></h3>
                  <p class="summary-scope-note">(Based on currently logged entries)</p>
                  <p><span>Total Standard Hours:</span> <span id="summary-std-hours">0.00</span></p>
-                 <p><span>Total Public Holiday Hours:</span> <span id="summary-ph-hours" class="ph-hours">0.00</span></p>
-                 <div id="lynette-summary-details" class="lynette-summary-details">
+                 <p><span>Total Public Holiday Hours:</span> <span id="summary-ph-hours" class="ph-total">0.00</span></p> <div id="lynette-summary-details" class="lynette-summary-details">
                       <p>Mgr Days (F/H): <span id="summary-mgr-days">0 / 0</span></p>
                       <p>Base Mgr Wage: <span id="summary-base-mgr-wage">$0.00</span></p>
                       <p>Value Adjustment: <span id="summary-adjustment">$0.00</span></p>
@@ -471,6 +478,13 @@
                           Cleaner: $<span id="summary-rate-cleaner">0</span>/hr
                       </div>
                  </div>
+             </section>
+
+             <section id="weekly-total-summary" class="summary-section weekly-total">
+                <h3>Weekly Totals (All Staff)</h3>
+                <p><span>Total Standard Hours:</span> <span id="weekly-total-std-hours">0.00</span></p>
+                <p><span>Total Public Holiday Hours:</span> <span id="weekly-total-ph-hours" class="ph-total">0.00</span></p>
+                <p><span><strong>Overall Total Hours:</strong></span> <strong><span id="weekly-overall-total-hours">0.00</span></strong></p>
              </section>
 
             <section class="log-area">
@@ -495,7 +509,7 @@
         const DEFAULT_CLEANER_RATE = 24.70;
         const DEFAULT_LYNETTE_FULL_DAYS = 2;
         const DEFAULT_LYNETTE_HALF_DAYS = 3;
-        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_smarter_v6'; // Updated key
+        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_smarter_v7_weekly'; // Updated key for new feature
         const ANIMATION_DURATION = 400; // ms, sync with --transition-slow CSS variable
         const LONG_SHIFT_THRESHOLD = 6; // Warn if calculated hours exceed this
 
@@ -523,7 +537,7 @@
         const fullDayRateInput = document.getElementById('full_day_rate');
         const halfDayRateInput = document.getElementById('half_day_rate');
         const cleanerHourlyRateInput = document.getElementById('cleaner_hourly_rate');
-        // Summary Elements
+        // Individual Summary Elements
         const summarySection = document.getElementById('summary-section');
         const summaryStaffName = document.getElementById('summary-staff-name');
         const summaryStdHours = document.getElementById('summary-std-hours');
@@ -536,6 +550,11 @@
         const summaryRateFull = document.getElementById('summary-rate-full');
         const summaryRateHalf = document.getElementById('summary-rate-half');
         const summaryRateCleaner = document.getElementById('summary-rate-cleaner');
+        // NEW: Weekly Total Summary Elements
+        const weeklyTotalSummarySection = document.getElementById('weekly-total-summary');
+        const weeklyTotalStdHoursElement = document.getElementById('weekly-total-std-hours');
+        const weeklyTotalPhHoursElement = document.getElementById('weekly-total-ph-hours');
+        const weeklyOverallTotalHoursElement = document.getElementById('weekly-overall-total-hours');
 
 
         // --- Utility Functions ---
@@ -829,6 +848,7 @@
             }
         };
 
+        // --- Individual Staff Summary Update ---
         const updateSummary = () => {
              if (!currentStaff) {
                  summarySection.classList.remove('visible');
@@ -864,6 +884,34 @@
              }
         };
 
+        // --- NEW: Weekly Total Summary Update ---
+        const updateWeeklyTotalSummary = () => {
+            if (logEntries.length === 0) {
+                weeklyTotalSummarySection.classList.remove('visible');
+                return;
+            }
+
+            let totalStd = 0;
+            let totalPh = 0;
+            logEntries.forEach(entry => {
+                if (entry.isPH) {
+                    totalPh += entry.hours;
+                } else {
+                    totalStd += entry.hours;
+                }
+            });
+
+            const overallTotal = totalStd + totalPh;
+
+            weeklyTotalStdHoursElement.textContent = formatHours(totalStd);
+            weeklyTotalPhHoursElement.textContent = formatHours(totalPh);
+            weeklyOverallTotalHoursElement.textContent = formatHours(overallTotal);
+
+            // Show section only if there are entries
+            weeklyTotalSummarySection.classList.add('visible');
+        };
+
+
         // --- Event Handlers ---
         const selectNextStaff = () => { if (!currentStaff) return STAFF_LIST[0] || null; const cI=STAFF_LIST.indexOf(currentStaff); const nI=(cI+1)%STAFF_LIST.length; return STAFF_LIST[nI]; };
 
@@ -892,7 +940,8 @@
             timeEntryLegend.textContent = currentStaff === 'Lynette' ? 'Log Cleaner Time Entry' : 'Log Work Time Entry';
             startTimeInput.value = ''; endTimeInput.value = ''; isPhCheckbox.checked = false;
             clearAllErrors();
-            updateSummary();
+            updateSummary(); // Update individual summary
+            // Weekly total summary updates automatically when log changes, no need to call here explicitly
             startTimeInput.focus();
         };
 
@@ -905,7 +954,8 @@
              if(fV && hV){
                  lynetteManagerDays.full=fVal;
                  lynetteManagerDays.half=hVal;
-                 updateSummary();
+                 updateSummary(); // Update individual summary (which includes Lynette's specific calcs)
+                 // No need to update weekly total here, as manager days don't affect total hours
              }
         };
 
@@ -997,7 +1047,8 @@
             logEntries.push(newEntry);
             saveLog();
             renderLog(newEntryId); // Pass the ID to trigger animation
-            updateSummary();
+            updateSummary(); // Update individual summary
+            updateWeeklyTotalSummary(); // NEW: Update weekly total summary
 
             // Clear time inputs for next entry
             startTimeInput.value = ''; endTimeInput.value = ''; isPhCheckbox.checked = false;
@@ -1011,7 +1062,7 @@
             // IMPORTANT: handleLogEntry() is called first.
             // It performs parsing, validation, and potential auto-correction.
             // It returns true ONLY if the entry is valid and successfully logged.
-            if (handleLogEntry()) {
+            if (handleLogEntry()) { // Calls handleLogEntry, which now also calls updateWeeklyTotalSummary on success
                 // This part only runs if handleLogEntry() returned true.
                 const nextStaff = selectNextStaff();
                 if (nextStaff) {
@@ -1038,7 +1089,8 @@
                     logEntries = logEntries.filter(e => e.id !== entryId);
                     saveLog();
                     entryElement.remove(); // Remove element from DOM after animation
-                    updateSummary();
+                    updateSummary(); // Update individual summary
+                    updateWeeklyTotalSummary(); // NEW: Update weekly total summary
                     // Check if log is now empty
                     if (logEntries.length === 0) {
                          renderLog(); // Re-render to show "No time logged yet" message
@@ -1056,11 +1108,12 @@
                         logEntries = [];
                         saveLog();
                         renderLog(); // Re-render to show empty state
-                        updateSummary();
+                        updateSummary(); // Update individual summary
+                        updateWeeklyTotalSummary(); // NEW: Update weekly total summary
                     }, ANIMATION_DURATION);
                 } else {
                     // Fallback if no elements were found (shouldn't happen if logEntries > 0)
-                    logEntries = []; saveLog(); renderLog(); updateSummary();
+                    logEntries = []; saveLog(); renderLog(); updateSummary(); updateWeeklyTotalSummary();
                 }
             }
         };
@@ -1092,7 +1145,8 @@
             loadLog();
             renderStaffList();
             renderLog(); // Initial render without highlighting
-            updateSummary();
+            updateSummary(); // Update individual summary
+            updateWeeklyTotalSummary(); // NEW: Update weekly total summary on load
 
             // Default date to upcoming Sunday
             const today = new Date(); const dayOfWeek = today.getDay(); const diff=today.getDate()-dayOfWeek+(dayOfWeek===0?0:7); const weekEndingDate = new Date(today.setDate(diff)); entryDateInput.value = weekEndingDate.toISOString().split('T')[0];
@@ -1121,8 +1175,7 @@
              } else if (currentStaff) {
                  // Ensure UI state matches loaded data if page is reloaded
                  if(currentStaff === 'Lynette') lynetteManagerInputs.classList.add('visible');
-                 summarySection.classList.add('visible');
-                 if(currentStaff === 'Lynette' && logEntries.some(e => e.staffName === 'Lynette')) lynetteSummaryDetails.classList.add('visible');
+                 // Visibility of summary sections is handled by their respective update functions
                  startTimeInput.focus();
              } else {
                  entryDateInput.focus();
