@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Time Tracker (NZ) - Final v10</title>
+    <title>Team Time Tracker (NZ) - Final v11</title>
     <style>
         /* --- Base Styles & Variables --- */
         :root {
@@ -541,7 +541,7 @@
         const DEFAULT_LYNETTE_FULL_DAYS = 2;
         const DEFAULT_LYNETTE_HALF_DAYS = 3;
         const DEFAULT_LYNETTE_STANDARD_HOURS = 15; // Default for new adjustable standard hours
-        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_enhanced_v10_adj_rate'; // Updated key for adjustable rate
+        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_enhanced_v11_adj_rate'; // Updated key for version 11
         const ANIMATION_DURATION = 400; // ms, sync with --transition-slow CSS variable
         const LONG_SHIFT_THRESHOLD = 6; // hours - Warn if calculated duration exceeds this
 
@@ -566,7 +566,7 @@
         let lynetteManagerDays = {
             full: DEFAULT_LYNETTE_FULL_DAYS,
             half: DEFAULT_LYNETTE_HALF_DAYS,
-            standardHours: DEFAULT_LYNETTE_STANDARD_HOURS // New state for standard hours
+            standardHours: DEFAULT_LYNETTE_STANDARD_HOURS // Expected cleaner hours for Lynette
         };
         let rates = {
             fullDay: DEFAULT_FULL_DAY_RATE,
@@ -600,7 +600,7 @@
             summaryPhHours: document.getElementById('summary-ph-hours'),
             lynetteSummaryDetails: document.getElementById('lynette-summary-details'),
             summaryMgrDays: document.getElementById('summary-mgr-days'),
-            summaryStdHoursCleaner: document.getElementById('summary-std-hours-cleaner'), // New element for cleaner hours
+            summaryStdHoursCleaner: document.getElementById('summary-std-hours-cleaner'),
             summaryBaseMgrWage: document.getElementById('summary-base-mgr-wage'),
             summaryAdjustment: document.getElementById('summary-adjustment'),
             summaryFinalMgrWage: document.getElementById('summary-final-mgr-wage'),
@@ -893,7 +893,10 @@
                     cleanerHourly: DEFAULT_CLEANER_RATE
                 };
             }
-            // Update UI with loaded cleaner rate
+            // Update UI with loaded values
+            ui.fullDaysInput.value = lynetteManagerDays.full;
+            ui.halfDaysInput.value = lynetteManagerDays.half;
+            ui.standardHoursInput.value = lynetteManagerDays.standardHours;
             ui.cleanerRateInput.value = rates.cleanerHourly.toFixed(2);
         };
 
@@ -1369,9 +1372,9 @@
             }
         };
 
-        // --- Application Initialization ---
+        // --- Initialize Application ---
 
-        const init = () => {
+        const initialize = () => {
             loadLog();
 
             renderStaffList();
@@ -1379,49 +1382,18 @@
             updateSummary();
             updateWeeklyTotalSummary();
 
-            try {
-                const today = new Date();
-                const dayOfWeek = today.getDay();
-                const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? 0 : 7);
-                const weekEndingDate = new Date(today.setDate(diff));
-                ui.entryDateInput.value = weekEndingDate.toISOString().split('T')[0];
-            } catch (e) {
-                console.error("Error setting default date:", e);
-                ui.entryDateInput.value = new Date().toISOString().split('T')[0];
-            }
-
             ui.staffList.addEventListener('click', handleStaffSelect);
             ui.logButton.addEventListener('click', handleLogEntry);
             ui.clearLogButton.addEventListener('click', handleClearLog);
             ui.exportLogButton.addEventListener('click', handleExportLog);
-            ui.calculatorForm.addEventListener('click', handleStep);
+            ui.calculatorForm.addEventListener('keydown', handleFormKeydown);
+            ui.calculatorForm.addEventListener('input', handleInputChange);
+            ui.calculatorForm.addEventListener('click', handleSteppedInput);
             ui.logEntriesList.addEventListener('click', handleDeleteLogEntry);
-
-            ui.startTimeInput.addEventListener('blur', (e) => parseAndFormatTime(e.target));
-            ui.endTimeInput.addEventListener('blur', (e) => parseAndFormatTime(e.target));
-
-            ui.calculatorForm.addEventListener('keydown', handleFormKeyDown);
-
-            ui.fullDaysInput.addEventListener('change', handleManagerDaysChange);
-            ui.halfDaysInput.addEventListener('change', handleManagerDaysChange);
-            ui.standardHoursInput.addEventListener('change', handleManagerDaysChange); // New listener
-
-            ui.calculatorForm.querySelectorAll('input[type="date"], input[type="number"], input[type="text"][name*="time"]').forEach(input => {
-                input.addEventListener('input', () => clearError(input.id));
-            });
-
-             if (!currentStaff && STAFF_LIST.length > 0) {
-                 handleStaffSelect(STAFF_LIST[0]);
-             } else if (currentStaff) {
-                 if (currentStaff === 'Lynette') ui.lynetteManagerInputs.classList.add('visible');
-                 ui.startTimeInput.focus();
-             } else {
-                 ui.entryDateInput.focus();
-             }
         };
 
-        document.addEventListener('DOMContentLoaded', init);
-
+        // Start the app
+        initialize();
     </script>
 </body>
 </html>
