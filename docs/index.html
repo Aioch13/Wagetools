@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Time Tracker (NZ) - Final v9</title>
+    <title>Team Time Tracker (NZ) - Final v10</title>
     <style>
         /* --- Base Styles & Variables --- */
         :root {
@@ -137,8 +137,16 @@
             border-color: var(--accent-color); outline: 0;
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); background-color: var(--card-background);
         }
-        .form-row { display: flex; gap: 18px; align-items: flex-start; }
-        .form-row > .input-group { flex: 1; }
+        .form-row {
+            display: flex;
+            gap: 12px; /* Reduced gap for three inputs */
+            align-items: flex-start;
+            flex-wrap: wrap; /* Allow wrapping on very narrow screens */
+        }
+        .form-row > .input-group {
+            flex: 1;
+            min-width: 100px; /* Ensure inputs don't get too narrow */
+        }
         .input-group { margin-bottom: 15px; }
         .stepper-input-group { display: flex; align-items: center; gap: 8px; }
         .stepper-input-group input { text-align: center; flex-grow: 1; margin-bottom: 0 !important; -moz-appearance: textfield; }
@@ -229,7 +237,6 @@
             100% { background-color: var(--card-background); }
         }
 
-
         /* --- Log & Summary Area (Right Panel) --- */
         .log-summary-area {
             flex: 1 1 420px;
@@ -291,7 +298,6 @@
              padding-top: 18px; /* Ensure padding is there when visible */
              background-color: #f8f9fa; /* Slightly different background for distinction */
         }
-
 
         .log-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .log-area h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
@@ -362,7 +368,6 @@
             background-color: var(--delete-bg);
         }
 
-
         .log-controls { margin-top: 15px; flex-shrink: 0; display: flex; gap: 10px; }
         .export-log-button, .clear-log-button {
             flex: 1; padding: 9px; font-size: 0.9rem; font-weight: 500; border: 1px solid;
@@ -429,15 +434,13 @@
                         </div>
                         <div class="input-group">
                             <label for="half_days">Half Days</label>
-                             <div class="stepper-input-group">
+                            <div class="stepper-input-group">
                                 <button type="button" class="stepper-button" aria-label="Decrease Half Days" data-target="half_days" data-step="-1">−</button>
                                 <input type="number" id="half_days" name="half_days" min="0" max="7" step="1" value="3" aria-describedby="half_days-error">
                                 <button type="button" class="stepper-button" aria-label="Increase Half Days" data-target="half_days" data-step="1">+</button>
                             </div>
                             <span class="error-message" id="half_days-error"></span>
                         </div>
-                    </div>
-                    <div class="form-row">
                         <div class="input-group">
                             <label for="standard_hours">Standard Hours</label>
                             <div class="stepper-input-group">
@@ -446,6 +449,17 @@
                                 <button type="button" class="stepper-button" aria-label="Increase Standard Hours" data-target="standard_hours" data-step="1">+</button>
                             </div>
                             <span class="error-message" id="standard_hours-error"></span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="cleaner_rate">Cleaner Rate ($/hr)</label>
+                            <div class="stepper-input-group">
+                                <button type="button" class="stepper-button" aria-label="Decrease Cleaner Rate" data-target="cleaner_rate" data-step="-0.1">−</button>
+                                <input type="number" id="cleaner_rate" name="cleaner_rate" min="0" max="100" step="0.1" value="24.70" aria-describedby="cleaner_rate-error">
+                                <button type="button" class="stepper-button" aria-label="Increase Cleaner Rate" data-target="cleaner_rate" data-step="0.1">+</button>
+                            </div>
+                            <span class="error-message" id="cleaner_rate-error"></span>
                         </div>
                     </div>
                 </fieldset>
@@ -489,6 +503,7 @@
                  <p><span>Total Public Holiday Hours:</span> <span id="summary-ph-hours" class="ph-total">0.00</span></p>
                  <div id="lynette-summary-details" class="lynette-summary-details">
                       <p>Mgr Days (F/H): <span id="summary-mgr-days">0 / 0</span></p>
+                      <p>Std Hours (Cleaner): <span id="summary-std-hours-cleaner">0</span></p>
                       <p>Base Mgr Wage: <span id="summary-base-mgr-wage">$0.00</span></p>
                       <p>Value Adjustment: <span id="summary-adjustment">$0.00</span></p>
                       <p class="final-wage">Final Mgr Wage Payable: <span id="summary-final-mgr-wage">$0.00</span></p>
@@ -526,7 +541,7 @@
         const DEFAULT_LYNETTE_FULL_DAYS = 2;
         const DEFAULT_LYNETTE_HALF_DAYS = 3;
         const DEFAULT_LYNETTE_STANDARD_HOURS = 15; // Default for new adjustable standard hours
-        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_enhanced_v9_std_hours'; // Updated key to include standard hours
+        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_enhanced_v10_adj_rate'; // Updated key for adjustable rate
         const ANIMATION_DURATION = 400; // ms, sync with --transition-slow CSS variable
         const LONG_SHIFT_THRESHOLD = 6; // hours - Warn if calculated duration exceeds this
 
@@ -577,13 +592,15 @@
             phToggleGroup: document.getElementById('ph-group'),
             fullDaysInput: document.getElementById('full_days'),
             halfDaysInput: document.getElementById('half_days'),
-            standardHoursInput: document.getElementById('standard_hours'), // New input reference
+            standardHoursInput: document.getElementById('standard_hours'),
+            cleanerRateInput: document.getElementById('cleaner_rate'), // New input reference
             summarySection: document.getElementById('summary-section'),
             summaryStaffName: document.getElementById('summary-staff-name'),
             summaryStdHours: document.getElementById('summary-std-hours'),
             summaryPhHours: document.getElementById('summary-ph-hours'),
             lynetteSummaryDetails: document.getElementById('lynette-summary-details'),
             summaryMgrDays: document.getElementById('summary-mgr-days'),
+            summaryStdHoursCleaner: document.getElementById('summary-std-hours-cleaner'), // New element for cleaner hours
             summaryBaseMgrWage: document.getElementById('summary-base-mgr-wage'),
             summaryAdjustment: document.getElementById('summary-adjustment'),
             summaryFinalMgrWage: document.getElementById('summary-final-mgr-wage'),
@@ -722,7 +739,7 @@
             if (errorElement) errorElement.textContent = message;
             if (inputElement) {
                 inputElement.classList.add('input-error');
-                if (['start_time', 'end_time', 'full_days', 'half_days', 'entry_date', 'standard_hours'].includes(elementId)) {
+                if (['start_time', 'end_time', 'full_days', 'half_days', 'entry_date', 'standard_hours', 'cleaner_rate'].includes(elementId)) {
                     inputElement.classList.remove('input-shake');
                     void inputElement.offsetWidth;
                     inputElement.classList.add('input-shake');
@@ -808,17 +825,19 @@
 
              if (currentStaff === 'Lynette') {
                  const validateNum = (id, inputEl, min, max) => {
-                     const val = parseInt(inputEl.value);
+                     const val = parseFloat(inputEl.value);
                      if (isNaN(val) || val < min || (max !== undefined && val > max)) {
                          showError(id, `Must be ${min}-${max}.`);
-                         isValid = false;
+                         return false;
                      } else {
                          clearError(id);
+                         return true;
                      }
                  };
                  validateNum('full_days', ui.fullDaysInput, 0, 7);
                  validateNum('half_days', ui.halfDaysInput, 0, 7);
                  validateNum('standard_hours', ui.standardHoursInput, 0, 40);
+                 validateNum('cleaner_rate', ui.cleanerRateInput, 0, 100);
              }
 
              return isValid;
@@ -830,7 +849,8 @@
             try {
                 const dataToSave = {
                     logEntries: logEntries,
-                    lynetteManagerDays: lynetteManagerDays // Save standard hours along with full/half days
+                    lynetteManagerDays: lynetteManagerDays,
+                    rates: rates // Save rates including cleaner hourly rate
                 };
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
             } catch (e) {
@@ -851,6 +871,13 @@
                             standardHours: parsedData.lynetteManagerDays.standardHours ?? DEFAULT_LYNETTE_STANDARD_HOURS
                         };
                     }
+                    if (parsedData.rates) {
+                        rates = {
+                            fullDay: parsedData.rates.fullDay ?? DEFAULT_FULL_DAY_RATE,
+                            halfDay: parsedData.rates.halfDay ?? DEFAULT_HALF_DAY_RATE,
+                            cleanerHourly: parsedData.rates.cleanerHourly ?? DEFAULT_CLEANER_RATE
+                        };
+                    }
                 }
             } catch (e) {
                 console.error("Error loading log from localStorage:", e);
@@ -860,7 +887,14 @@
                     half: DEFAULT_LYNETTE_HALF_DAYS,
                     standardHours: DEFAULT_LYNETTE_STANDARD_HOURS
                 };
+                rates = {
+                    fullDay: DEFAULT_FULL_DAY_RATE,
+                    halfDay: DEFAULT_HALF_DAY_RATE,
+                    cleanerHourly: DEFAULT_CLEANER_RATE
+                };
             }
+            // Update UI with loaded cleaner rate
+            ui.cleanerRateInput.value = rates.cleanerHourly.toFixed(2);
         };
 
         // --- UI Rendering Functions ---
@@ -962,7 +996,7 @@
 
                  const fullDays = lynetteManagerDays.full;
                  const halfDays = lynetteManagerDays.half;
-                 const standardHours = lynetteManagerDays.standardHours; // Use adjustable standard hours
+                 const standardHours = lynetteManagerDays.standardHours;
 
                  const baseMgrWage = (fullDays * fullDayRate) + (halfDays * halfDayRate);
 
@@ -980,6 +1014,7 @@
                  const adjValue = finalMgrWagePayable - baseMgrWage;
 
                  ui.summaryMgrDays.textContent = `${fullDays} / ${halfDays}`;
+                 ui.summaryStdHoursCleaner.textContent = standardHours;
                  ui.summaryBaseMgrWage.textContent = formatCurrency(baseMgrWage);
                  ui.summaryAdjustment.textContent = `${formatCurrency(Math.abs(adjValue))} ${adjValue >= -0.005 ? '(Add)' : '(Deduct)'}`;
                  ui.summaryAdjustment.className = adjValue >= -0.005 ? 'adjustment-positive' : 'adjustment-negative';
@@ -1047,7 +1082,8 @@
                 ui.lynetteManagerInputs.classList.add('visible');
                 ui.fullDaysInput.value = lynetteManagerDays.full;
                 ui.halfDaysInput.value = lynetteManagerDays.half;
-                ui.standardHoursInput.value = lynetteManagerDays.standardHours; // Set standard hours
+                ui.standardHoursInput.value = lynetteManagerDays.standardHours;
+                ui.cleanerRateInput.value = rates.cleanerHourly.toFixed(2);
             } else {
                 ui.lynetteManagerInputs.classList.remove('visible');
             }
@@ -1069,9 +1105,11 @@
              let fullDaysValid = true;
              let halfDaysValid = true;
              let standardHoursValid = true;
+             let cleanerRateValid = true;
              const fullVal = parseInt(ui.fullDaysInput.value);
              const halfVal = parseInt(ui.halfDaysInput.value);
              const standardHoursVal = parseInt(ui.standardHoursInput.value);
+             const cleanerRateVal = parseFloat(ui.cleanerRateInput.value);
 
              if (isNaN(fullVal) || fullVal < 0 || fullVal > 7) {
                  showError('full_days', 'Must be 0-7.');
@@ -1094,12 +1132,20 @@
                  clearError('standard_hours');
              }
 
-             if (fullDaysValid && halfDaysValid && standardHoursValid) {
+             if (isNaN(cleanerRateVal) || cleanerRateVal < 0 || cleanerRateVal > 100) {
+                 showError('cleaner_rate', 'Must be 0-100.');
+                 cleanerRateValid = false;
+             } else {
+                 clearError('cleaner_rate');
+             }
+
+             if (fullDaysValid && halfDaysValid && standardHoursValid && cleanerRateValid) {
                  lynetteManagerDays.full = fullVal;
                  lynetteManagerDays.half = halfVal;
                  lynetteManagerDays.standardHours = standardHoursVal;
+                 rates.cleanerHourly = cleanerRateVal;
                  updateSummary();
-                 saveLog(); // Save updated standard hours
+                 saveLog();
              }
         };
 
@@ -1193,7 +1239,12 @@
             ui.isPhCheckbox.checked = false;
             clearError('start_time');
             clearError('end_time');
-            ui.startTimeInput.focus();
+            clearError('entry_date');
+
+            const nextStaff = selectNextStaff();
+            if (nextStaff) {
+                handleStaffSelect(nextStaff);
+            }
 
             return true;
         };
@@ -1207,126 +1258,114 @@
             }
         };
 
-        const handleStep = (event) => {
-            const button = event.target.closest('.stepper-button');
-            if (!button) return;
-
-            const targetId = button.dataset.target;
-            const step = parseInt(button.dataset.step);
-            const targetInput = document.getElementById(targetId);
-
-            if (targetInput) {
-                let currentValue = parseInt(targetInput.value);
-                if (isNaN(currentValue)) currentValue = (step > 0 ? (parseInt(targetInput.min) || 0) - step : (parseInt(targetInput.max) || 7) - step);
-
-                const min = parseInt(targetInput.min) || 0;
-                const max = parseInt(targetInput.max);
-                let newValue = currentValue + step;
-
-                if (newValue < min) newValue = min;
-                if (max !== undefined && !isNaN(max) && newValue > max) newValue = max;
-
-                targetInput.value = newValue;
-                handleManagerDaysChange();
-            }
-        };
-
         const handleDeleteLogEntry = (event) => {
-            const deleteButton = event.target.closest('.delete-log-btn');
-            if (!deleteButton) return;
+            const deleteBtn = event.target.closest('.delete-log-btn');
+            if (!deleteBtn) return;
 
-            const entryElement = deleteButton.closest('.log-entry');
-            const entryId = parseInt(entryElement.dataset.entryId);
+            const li = deleteBtn.closest('.log-entry');
+            if (!li) return;
+
+            const entryId = parseInt(li.dataset.entryId);
             if (isNaN(entryId)) return;
 
-            if (confirm('Delete this log entry?')) {
-                entryElement.classList.add('removing');
-                setTimeout(() => {
-                    logEntries = logEntries.filter(e => e.id !== entryId);
-                    saveLog();
-                    entryElement.remove();
-                    updateSummary();
-                    updateWeeklyTotalSummary();
-                    if (logEntries.length === 0) {
-                         renderLog();
-                    }
-                }, ANIMATION_DURATION);
-            }
+            li.classList.add('removing');
+
+            setTimeout(() => {
+                logEntries = logEntries.filter(entry => entry.id !== entryId);
+                saveLog();
+                renderLog();
+                updateSummary();
+                updateWeeklyTotalSummary();
+            }, ANIMATION_DURATION);
         };
 
         const handleClearLog = () => {
-            if (logEntries.length > 0 && confirm('Clear the entire time log? This cannot be undone.')) {
-                const entriesToRemove = ui.logEntriesList.querySelectorAll('.log-entry');
-                if (entriesToRemove.length > 0) {
-                    entriesToRemove.forEach(el => el.classList.add('removing'));
-                    setTimeout(() => {
-                        logEntries = [];
-                        saveLog();
-                        renderLog();
-                        updateSummary();
-                        updateWeeklyTotalSummary();
-                    }, ANIMATION_DURATION);
-                } else {
-                    logEntries = []; saveLog(); renderLog(); updateSummary(); updateWeeklyTotalSummary();
-                }
-            }
+            if (!confirm('Are you sure you want to clear all log entries?')) return;
+            logEntries = [];
+            saveLog();
+            renderLog();
+            updateSummary();
+            updateWeeklyTotalSummary();
         };
 
         const handleExportLog = () => {
-            if (logEntries.length === 0) { alert('Log is empty. Nothing to export.'); return; }
+            if (logEntries.length === 0) {
+                alert('No log entries to export.');
+                return;
+            }
 
-            let csvContent = "data:text/csv;charset=utf-8,Staff Name,Date,Start Time (24hr),End Time (24hr),Hours,Public Holiday\n";
+            const headers = ['Staff Name', 'Date', 'Start Time', 'End Time', 'Hours', 'Public Holiday'];
+            const csvRows = [headers.join(',')];
 
             logEntries.forEach(entry => {
                 const row = [
                     `"${entry.staffName}"`,
-                    entry.date || '',
-                    entry.start || '',
-                    entry.end || '',
+                    entry.date,
+                    entry.start,
+                    entry.end,
                     formatHours(entry.hours),
                     entry.isPH ? 'Yes' : 'No'
-                ].join(",");
-                csvContent += row + "\r\n";
+                ];
+                csvRows.push(row.join(','));
             });
 
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            const timestamp = new Date().toISOString().slice(0, 10);
-            link.setAttribute("download", `time_log_${timestamp}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `time-tracker-log-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         };
 
-        // --- Keyboard Flow Event Listeners ---
+        const handleFormKeydown = (event) => {
+            const inputs = Array.from(ui.calculatorForm.querySelectorAll('input:not([type="checkbox"])'));
+            const currentIndex = inputs.indexOf(document.activeElement);
 
-        const handleFormKeyDown = (e) => {
-            const target = e.target;
-            const targetId = target.id;
+            if (event.key === 'Enter' && !event.ctrlKey) {
+                event.preventDefault();
+                const nextIndex = (currentIndex + 1) % inputs.length;
+                inputs[nextIndex].focus();
+            } else if (event.key === 'Enter' && event.ctrlKey) {
+                event.preventDefault();
+                handleLogEntry();
+            }
+        };
 
-            if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
-                 if (targetId === 'entry_date') {
-                     e.preventDefault();
-                     ui.startTimeInput.focus();
-                 }
-                 else if (targetId === 'start_time') {
-                     e.preventDefault();
-                     parseAndFormatTime(target);
-                     ui.endTimeInput.focus();
-                 }
-                 else if (targetId === 'end_time') {
-                     e.preventDefault();
-                     parseAndFormatTime(target);
-                     ui.logButton.focus();
-                 }
+        const handleSteppedInput = (event) => {
+            const button = event.target.closest('.stepper-button');
+            if (!button) return;
+
+            const inputId = button.dataset.target;
+            const step = parseFloat(button.dataset.step);
+            const input = document.getElementById(inputId);
+
+            if (!input) return;
+
+            const currentValue = parseFloat(input.value) || 0;
+            let newValue = currentValue + step;
+
+            newValue = Math.max(parseFloat(input.min), Math.min(parseFloat(input.max), newValue));
+
+            if (input.step === '0.1') {
+                newValue = parseFloat(newValue.toFixed(1));
+            } else {
+                newValue = Math.round(newValue);
             }
 
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                 if (target.closest('#calculator-form')) {
-                     e.preventDefault();
-                     handleLogAndSelectNextStaff();
-                 }
+            input.value = newValue;
+            handleManagerDaysChange();
+        };
+
+        const handleInputChange = (event) => {
+            const input = event.target;
+            if (['start_time', 'end_time'].includes(input.id)) {
+                parseAndFormatTime(input);
+            } else if (['full_days', 'half_days', 'standard_hours', 'cleaner_rate'].includes(input.id)) {
+                handleManagerDaysChange();
             }
         };
 
