@@ -147,7 +147,6 @@
         .rarity-tag-epic { background: #d8b4fe; color: #6b21a8; }
         .rarity-tag-legendary { background: #fef08a; color: #854d0e; }
         .rarity-tag-mythical { background: #f9a8d4; color: #831843; }
-        /* NEW STYLES */
         .equipment-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -346,7 +345,6 @@
                 <button onclick="openChest()" class="btn bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700 mb-4">Open Next Chest</button>
                 <button onclick="backToWelcome()" class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Back</button>
             </div>
-            <!-- Equipment and Inventory Sections -->
             <div class="mb-6">
                 <h3 class="text-xl font-bold mb-2">Equipment (8 Slots)</h3>
                 <div class="equipment-grid" id="equipment-grid"></div>
@@ -355,7 +353,6 @@
                 <h3 class="text-xl font-bold mb-2">Inventory</h3>
                 <div class="grid grid-cols-6 gap-2" id="inventory"></div>
             </div>
-            <!-- Battle UI -->
             <div id="battle-ui" class="hidden battle-ui">
                 <h2 class="text-2xl font-bold mb-4">Monster Encounter!</h2>
                 <div class="health-bar bg-gray-200 mb-4 h-4 rounded">
@@ -444,7 +441,7 @@
 
         // Placeholder for artifactsList - paste the generated list here
         // const artifactsList = [];
-      const artifactsList = [
+     const artifactsList = [
     // Common (50 items, 20%)
     { name: 'Vineweaver Satchel', rarity: 'common', price: 250, description: 'A satchel woven from enchanted jungle vines that mend themselves under moonlight.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 0, critChance: 0.05 },
     { name: 'Volcanic Ember Lantern', rarity: 'common', price: 350, description: 'A lantern glowing with the eternal embers of a slumbering volcano.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 0, critChance: 0.05 },
@@ -1495,7 +1492,6 @@
         critChance: 0.50 
     }
 ];
-
         class GameCharacter {
             constructor() {
                 this.level = 1;
@@ -1886,13 +1882,13 @@
 
         function handleVictory() {
             document.getElementById('battle-ui').classList.add('hidden');
-            currentUser.gold += 50; // Victory reward
+            currentUser.gold += 50;
             showResults((correctAnswers / totalQuestions) * 100, Math.floor((Date.now() - startTime) / 1000));
         }
 
         function handleDefeat() {
             document.getElementById('battle-ui').classList.add('hidden');
-            currentUser.currentHP = currentUser.maxHP; // Reset HP
+            currentUser.currentHP = currentUser.maxHP;
             document.getElementById('welcome-screen').classList.remove('hidden');
             renderUserList();
         }
@@ -1945,11 +1941,14 @@
             itemsForSale.forEach((item, index) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = `artifact-item artifact-rarity-${item.rarity}`;
+                itemDiv.dataset.index = index;
+                itemDiv.onmouseenter = (e) => showShopItemTooltip(e, itemsForSale);
+                itemDiv.onmouseleave = hideItemTooltip;
                 itemDiv.innerHTML = `
-                    <p class="font-bold">${item.name}</p>
-                    <p class="text-sm">${item.description}</p>
-                    <p class="text-yellow-600 font-semibold">${item.price} 💰</p>
-                    <div class="rarity-tag rarity-tag-${item.rarity}">${item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)}</div>
+                    <p class="font-bold">${item.name || 'Unknown Item'}</p>
+                    <p class="text-sm">${item.description || 'No description available'}</p>
+                    <p class="text-yellow-600 font-semibold">${item.price || 0} 💰</p>
+                    <div class="rarity-tag rarity-tag-${item.rarity}">${item.rarity ? item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1) : 'Unknown'}</div>
                     <button onclick="buyItem(${index})" class="btn bg-green-500 text-white text-sm mt-2">Buy</button>
                 `;
                 shopItems.appendChild(itemDiv);
@@ -1957,12 +1956,12 @@
         }
 
         function buyItem(index) {
-            const item = document.getElementById('shop-items').children[index].querySelector('p').innerText;
-            const artifact = artifactsList.find(a => a.name === item.split('\n')[0]);
-            if (currentUser.gold >= artifact.price) {
-                currentUser.gold -= artifact.price;
-                currentUser.inventory.push(artifact);
-                alert(`Purchased ${artifact.name}!`);
+            const itemsForSale = Array.from(document.getElementById('shop-items').children).map(child => artifactsList.find(a => a.name === child.querySelector('p').innerText));
+            const item = itemsForSale[index];
+            if (currentUser.gold >= item.price) {
+                currentUser.gold -= item.price;
+                currentUser.inventory.push(item);
+                alert(`Purchased ${item.name}!`);
                 renderShop();
                 renderInventory();
             } else {
@@ -2015,13 +2014,16 @@
             renderInventory();
             const artifactsDiv = document.getElementById('artifacts');
             artifactsDiv.innerHTML = '';
-            currentUser.artifacts.forEach(artifact => {
+            currentUser.artifacts.forEach((artifact, index) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = `artifact-item artifact-rarity-${artifact.rarity}`;
+                itemDiv.dataset.index = index;
+                itemDiv.onmouseenter = (e) => showArtifactTooltip(e, currentUser.artifacts);
+                itemDiv.onmouseleave = hideItemTooltip;
                 itemDiv.innerHTML = `
-                    <p class="font-bold">${artifact.name}</p>
-                    <p class="text-sm">${artifact.description}</p>
-                    <div class="rarity-tag rarity-tag-${artifact.rarity}">${artifact.rarity.charAt(0).toUpperCase() + artifact.rarity.slice(1)}</div>
+                    <p class="font-bold">${artifact.name || 'Unknown Item'}</p>
+                    <p class="text-sm">${artifact.description || 'No description available'}</p>
+                    <div class="rarity-tag rarity-tag-${artifact.rarity}">${artifact.rarity ? artifact.rarity.charAt(0).toUpperCase() + artifact.rarity.slice(1) : 'Unknown'}</div>
                 `;
                 artifactsDiv.appendChild(itemDiv);
             });
@@ -2097,10 +2099,12 @@
                     itemElement.className = 'equipped-item';
                     itemElement.draggable = true;
                     itemElement.ondragstart = handleDragStart;
+                    itemElement.onmouseenter = (e) => showEquippedItemTooltip(e, currentUser.equipment);
+                    itemElement.onmouseleave = hideItemTooltip;
                     itemElement.innerHTML = `
                         <div class="text-center">
-                            <div class="text-xl">${item.icon}</div>
-                            <div class="text-xs mt-1">${item.name}</div>
+                            <div class="text-xl">${item.icon || '❓'}</div>
+                            <div class="text-xs mt-1">${item.name || 'Unknown Item'}</div>
                         </div>
                     `;
                     slot.appendChild(itemElement);
@@ -2118,13 +2122,13 @@
                 itemElement.draggable = true;
                 itemElement.dataset.index = index;
                 itemElement.ondragstart = handleDragStart;
-                itemElement.onmouseenter = showItemTooltip;
+                itemElement.onmouseenter = (e) => showInventoryItemTooltip(e, currentUser.inventory);
                 itemElement.onmouseleave = hideItemTooltip;
                 itemElement.innerHTML = `
                     <div class="text-center">
-                        <div class="text-xl">${item.icon}</div>
-                        <div class="text-xs">${item.name}</div>
-                        <button onclick="sellItem(${index})" class="btn bg-red-500 text-white text-xs mt-1">Sell ($${Math.floor(item.value * 0.5)})</button>
+                        <div class="text-xl">${item.icon || '❓'}</div>
+                        <div class="text-xs">${item.name || 'Unknown Item'}</div>
+                        <button onclick="sellItem(${index})" class="btn bg-red-500 text-white text-xs mt-1">Sell ($${Math.floor(item.value * 0.5) || 0})</button>
                     </div>
                 `;
                 inventory.appendChild(itemElement);
@@ -2145,10 +2149,8 @@
             const toSlot = parseInt(e.target.dataset.slot);
             const fromSlot = parseInt(fromIndex);
             if (!isNaN(fromSlot)) {
-                // Swap within equipment
                 [currentUser.equipment[toSlot], currentUser.equipment[fromSlot]] = [currentUser.equipment[fromSlot], currentUser.equipment[toSlot]];
             } else {
-                // Move from inventory to equipment
                 const draggedItem = currentUser.inventory[fromIndex];
                 const existingItem = currentUser.equipment[toSlot];
                 currentUser.equipment[toSlot] = draggedItem;
@@ -2162,26 +2164,84 @@
         function sellItem(index) {
             const item = currentUser.inventory[index];
             if (item) {
-                currentUser.gold += Math.floor(item.value * 0.5);
+                currentUser.gold += Math.floor(item.value * 0.5) || 0;
                 currentUser.inventory.splice(index, 1);
                 renderInventory();
                 renderProfile();
             }
         }
 
-        function showItemTooltip(e) {
-            const index = e.target.dataset.index;
-            const item = currentUser.inventory[index];
+        function showInventoryItemTooltip(e, items) {
+            const index = e.target.closest('.inventory-item').dataset.index;
+            const item = items[index];
+            if (!item) return;
             const tooltip = document.createElement('div');
             tooltip.className = 'item-tooltip';
             tooltip.innerHTML = `
-                <h3 class="font-bold">${item.name}</h3>
-                <p>${item.description}</p>
+                <h3 class="font-bold">${item.name || 'Unknown Item'}</h3>
+                <p>${item.description || 'No description available'}</p>
                 <p class="mt-2">Attack: +${item.attack || 0}</p>
                 <p>Defense: +${item.defense || 0}</p>
                 <p>Crit Chance: +${(item.critChance * 100 || 0).toFixed(1)}%</p>
-                <p class="text-sm text-gray-600 mt-2">Rarity: ${item.rarity}</p>
-                <p>Value: $${item.value}</p>
+                <p class="text-sm text-gray-600 mt-2">Rarity: ${item.rarity || 'Unknown'}</p>
+                <p>Value: $${item.value || 0}</p>
+            `;
+            document.body.appendChild(tooltip);
+            positionTooltip(e, tooltip);
+        }
+
+        function showShopItemTooltip(e, items) {
+            const index = e.target.closest('.artifact-item').dataset.index;
+            const item = items[index];
+            if (!item) return;
+            const tooltip = document.createElement('div');
+            tooltip.className = 'item-tooltip';
+            tooltip.innerHTML = `
+                <h3 class="font-bold">${item.name || 'Unknown Item'}</h3>
+                <p>${item.description || 'No description available'}</p>
+                <p class="mt-2">Attack: +${item.attack || 0}</p>
+                <p>Defense: +${item.defense || 0}</p>
+                <p>Crit Chance: +${(item.critChance * 100 || 0).toFixed(1)}%</p>
+                <p class="text-sm text-gray-600 mt-2">Rarity: ${item.rarity || 'Unknown'}</p>
+                <p>Value: $${item.value || 0}</p>
+            `;
+            document.body.appendChild(tooltip);
+            positionTooltip(e, tooltip);
+        }
+
+        function showEquippedItemTooltip(e, items) {
+            const index = e.target.closest('.equipment-slot').dataset.slot;
+            const item = items[index];
+            if (!item) return;
+            const tooltip = document.createElement('div');
+            tooltip.className = 'item-tooltip';
+            tooltip.innerHTML = `
+                <h3 class="font-bold">${item.name || 'Unknown Item'}</h3>
+                <p>${item.description || 'No description available'}</p>
+                <p class="mt-2">Attack: +${item.attack || 0}</p>
+                <p>Defense: +${item.defense || 0}</p>
+                <p>Crit Chance: +${(item.critChance * 100 || 0).toFixed(1)}%</p>
+                <p class="text-sm text-gray-600 mt-2">Rarity: ${item.rarity || 'Unknown'}</p>
+                <p>Value: $${item.value || 0}</p>
+            `;
+            document.body.appendChild(tooltip);
+            positionTooltip(e, tooltip);
+        }
+
+        function showArtifactTooltip(e, items) {
+            const index = e.target.closest('.artifact-item').dataset.index;
+            const item = items[index];
+            if (!item) return;
+            const tooltip = document.createElement('div');
+            tooltip.className = 'item-tooltip';
+            tooltip.innerHTML = `
+                <h3 class="font-bold">${item.name || 'Unknown Item'}</h3>
+                <p>${item.description || 'No description available'}</p>
+                <p class="mt-2">Attack: +${item.attack || 0}</p>
+                <p>Defense: +${item.defense || 0}</p>
+                <p>Crit Chance: +${(item.critChance * 100 || 0).toFixed(1)}%</p>
+                <p class="text-sm text-gray-600 mt-2">Rarity: ${item.rarity || 'Unknown'}</p>
+                <p>Value: $${item.value || 0}</p>
             `;
             document.body.appendChild(tooltip);
             positionTooltip(e, tooltip);
