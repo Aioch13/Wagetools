@@ -1,2 +1,440 @@
-<h1>Hi Frank</h1>
-<p>Hi</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Question Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .level-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            background-color: #6b7280; /* Gray 500 */
+            color: white;
+        }
+
+        .level-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.15);
+            background-color: #9ca3af; /* Gray 400 */
+        }
+
+        .level-button.selected {
+            background-color: #f59e0b;
+            color: white;
+            transform: scale(1.2);
+            box-shadow: 0px 8px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .operation-button {
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s ease-in-out, color 0.3s;
+            margin: 0 8px;
+            font-weight: 600;
+            border: none;
+            background-color: #e0f2fe; /* Light Blue 100 */
+            color: #0369a1; /* Blue 800 */
+        }
+
+        .operation-button:hover {
+            background-color: #bae6fd; /* Light Blue 200 */
+            transform: scale(1.05);
+            color: #0369a1;
+        }
+
+        .operation-button.selected {
+            background-color: #38bdf8; /* Blue 400 */
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #start-test {
+            background-color: #8b5cf6; /* Purple 500 */
+            color: white;
+        }
+
+        #start-test:hover {
+            background-color: #9333ea; /* Purple 600 */
+        }
+
+        #results {
+            background-color: #f0fdf4; /* Light Green 100 */
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 24px;
+            text-align: center;
+            display: none;
+            border: 1px solid #d1fae5; /* Green 200 */
+        }
+
+        #restart-test {
+            background-color: #ef4444; /* Red 500 */
+            color: white;
+        }
+
+        #restart-test:hover {
+            background-color: #dc2626; /* Red 600 */
+        }
+
+        .feedback {
+            color: #15803d; /* Green 800 */
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .question-container {
+            background-color: #f5f5f5; /* Gray 100 */
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            display: none;
+            border: 1px solid #e0e0e0;
+        }
+
+        .answer-input-container {
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db; /* Gray 300 */
+            text-align: center;
+            font-size: 1.1em;
+            focus:ring-2 focus:ring-blue-400 focus:border-transparent;
+        }
+
+    </style>
+</head>
+<body class="bg-gradient-to-r from-blue-100 to-green-100 flex justify-center items-center min-h-screen p-4">
+    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md transition-transform hover:scale-105">
+        <h1 class="text-3xl font-bold text-blue-700 text-center mb-6">Primary Math Quiz</h1>
+
+        <div id="name-input-container" class="mb-6">
+            <label for="user-name" class="block text-gray-700 text-sm font-bold mb-2">Enter Your Name:</label>
+            <input type="text" id="user-name" placeholder="Your Name" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            <button id="name-submit" class="mt-4 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300 w-full">Next</button>
+        </div>
+
+        <div id="level-select" class="mb-6" style="display: none;">
+            <label for="difficulty-level" class="block text-gray-700 text-sm font-bold mb-4">Select Difficulty Level:</label>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button class="level-button" data-level="1">1</button>
+                <button class="level-button" data-level="2">2</button>
+                <button class="level-button" data-level="3">3</button>
+                <button class="level-button" data-level="4">4</button>
+                <button class="level-button" data-level="5">5</button>
+                <button class="level-button" data-level="6">6</button>
+                <button class="level-button" data-level="7">7</button>
+            </div>
+        </div>
+
+        <div id="operation-select" class="mb-6" style="display: none;">
+            <label for="operation" class="block text-gray-700 text-sm font-bold mb-4">Select Operation:</label>
+            <div class="flex flex-wrap justify-center gap-2">
+                <button class="operation-button" data-operation="+">Addition</button>
+                <button class="operation-button" data-operation="-">Subtraction</button>
+                <button class="operation-button" data-operation="*">Multiplication</button>
+                <button class="operation-button" data-operation="/">Division</button>
+            </div>
+        </div>
+
+        <div id="question-container" class="mb-4" style="display: none;">
+            <p id="question-text" class="text-lg text-gray-800 text-center">Loading...</p>
+        </div>
+        <div id="answer-input" class="mb-4" style="display: none;">
+            <input type="number" id="answer" placeholder="Enter your answer" class="w-full px-4 py-2 rounded-md border border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-center">
+        </div>
+        <div id="feedback" class="mb-4 text-center text-green-600 font-medium"></div>
+        <div class="flex justify-center gap-4">
+            <button id="check-answer" class="bg-green-500 hover:bg-green-600 text-white font-semibold rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-green-400 transition-colors duration-300" style="display: none;">Check Answer</button>
+            <button id="next-question" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300" style="display: none;">Next Question</button>
+            <button id="start-test" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors duration-300" style="display: none;">Start Test</button>
+        </div>
+        <div id="results" class="mt-6 text-center" style="display: none;">
+            <p class="text-lg font-semibold text-gray-800">Your Results:</p>
+            <p id="score" class="text-xl font-bold text-indigo-600"></p>
+            <button id="restart-test" class="mt-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-red-400 transition-colors duration-300">Restart Test</button>
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const questionText = document.getElementById('question-text');
+        const answerInput = document.getElementById('answer');
+        const checkAnswerButton = document.getElementById('check-answer');
+        const nextQuestionButton = document.getElementById('next-question');
+        const startTestButton = document.getElementById('start-test');
+        const resultsContainer = document.getElementById('results');
+        const scoreDisplay = document.getElementById('score');
+        const restartTestButton = document.getElementById('restart-test');
+        const feedback = document.getElementById('feedback');
+        const questionContainer = document.getElementById('question-container');
+        const answerInputContainer = document.getElementById('answer-input');
+        const levelSelect = document.getElementById('level-select');
+        const operationSelect = document.getElementById('operation');
+        const nameInput = document.getElementById('user-name');
+        const nameInputContainer = document.getElementById('name-input-container');
+        const nameSubmitButton = document.getElementById('name-submit');
+
+
+        // Game variables
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let testStarted = false;
+        let currentQuestion;
+        let difficultyLevel = 1;
+        let operation = '+';
+        let userName = '';
+
+        // Function to generate a random math question
+        function generateQuestion() {
+            const level = parseInt(levelSelect.querySelector('.level-button.selected').dataset.level);
+            const operationType = operationSelect.querySelector('.operation-button.selected').dataset.operation;
+
+
+            let maxNum1, maxNum2;
+            switch (level) {
+                case 1:
+                    maxNum1 = 9;
+                    maxNum2 = 9;
+                    break;
+                case 2:
+                    maxNum1 = 99;
+                    maxNum2 = 9;
+                    break;
+                case 3:
+                    maxNum1 = 99;
+                    maxNum2 = 99;
+                    break;
+                case 4:
+                    maxNum1 = 999;
+                    maxNum2 = 999;
+                    break;
+                case 5:
+                    maxNum1 = 9999;
+                    maxNum2 = 9999;
+                    break;
+                case 6:
+                    maxNum1 = 99999;
+                    maxNum2 = 99999;
+                    break;
+                case 7:
+                    maxNum1 = 999999;
+                    maxNum2 = 999999;
+                    break;
+            }
+
+            const num1 = Math.floor(Math.random() * (maxNum1 + 1));
+            const num2 = Math.floor(Math.random() * (maxNum2 + 1));
+
+
+            let questionString = `${num1} ${operationType} ${num2}`;
+            let correctAnswer;
+
+            try {
+                // Use eval with caution
+                correctAnswer = eval(questionString);
+            } catch (error) {
+                // Handle errors
+                return generateQuestion(); // Regenerate the question
+            }
+
+            if (operationType === '/') {
+                // Ensure no division by zero and that the result is a whole number
+                if (num2 === 0 || !Number.isInteger(correctAnswer)) {
+                    return generateQuestion(); // Regenerate if division by zero or not an integer
+                }
+            }
+
+            return {
+                question: questionString,
+                answer: correctAnswer,
+            };
+        }
+
+        // Function to generate an array of questions
+        function generateQuestions(numberOfQuestions) {
+            const generatedQuestions = [];
+            for (let i = 0; i < numberOfQuestions; i++) {
+                generatedQuestions.push(generateQuestion());
+            }
+            return generatedQuestions;
+        }
+
+        // Function to display a question
+        function displayQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                currentQuestion = questions[currentQuestionIndex];
+                questionText.textContent = `Question ${currentQuestionIndex + 1}: ${currentQuestion.question}`;
+                answerInput.value = '';
+                feedback.textContent = '';
+                checkAnswerButton.style.display = 'inline-block';
+                nextQuestionButton.style.display = 'none';
+                questionContainer.style.display = 'block'; //show question container
+                answerInputContainer.style.display = 'block';
+                answerInput.focus();
+            } else {
+                endTest();
+            }
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            const userAnswer = parseFloat(answerInput.value);
+            if (isNaN(userAnswer)) {
+                feedback.textContent = 'Please enter a valid number.';
+                return;
+            }
+
+            if (Math.abs(userAnswer - currentQuestion.answer) < 0.01) {
+                feedback.textContent = 'Correct!';
+                correctAnswers++;
+            } else {
+                feedback.textContent = `Incorrect. The correct answer was ${currentQuestion.answer.toFixed(2)}`;
+            }
+
+            checkAnswerButton.style.display = 'none';
+            nextQuestionButton.style.display = 'inline-block';
+        }
+
+        // Function to move to the next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            displayQuestion();
+        }
+
+        // Function to end the test
+        function endTest() {
+            questionContainer.style.display = 'none';
+            answerInputContainer.style.display = 'none';
+            checkAnswerButton.style.display = 'none';
+            nextQuestionButton.style.display = 'none';
+            resultsContainer.style.display = 'block';
+            let percentage = (correctAnswers / questions.length) * 100;
+            scoreDisplay.textContent = `${correctAnswers} / ${questions.length}  (${percentage.toFixed(2)}%)`;
+        }
+
+        // Function to start the test
+        function startTest() {
+            userName = nameInput.value.trim();
+            if (userName === '') {
+                userName = 'Student';
+            }
+
+            questions = generateQuestions(20);
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            resultsContainer.style.display = 'none';
+            startTestButton.style.display = 'none';
+            questionContainer.style.display = 'block';
+            answerInputContainer.style.display = 'block';
+            displayQuestion();
+            testStarted = true;
+            difficultyLevel = parseInt(levelSelect.querySelector('.level-button.selected').dataset.level);
+            operation = operationSelect.querySelector('.operation-button.selected').dataset.operation;
+            nameInputContainer.style.display = 'none';
+
+            // Display a personalized message
+            feedback.textContent = `Welcome, ${userName}! Let's begin the quiz!`;
+        }
+
+        // Event listeners
+        checkAnswerButton.addEventListener('click', checkAnswer);
+        nextQuestionButton.addEventListener('click', nextQuestion);
+        startTestButton.addEventListener('click', startTest);
+        restartTestButton.addEventListener('click', startTest);
+
+        answerInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (testStarted) {
+                    if (checkAnswerButton.style.display === 'inline-block') {
+                        checkAnswer();
+                    } else if (nextQuestionButton.style.display === 'inline-block') {
+                        nextQuestion();
+                    }
+                }
+            }
+        });
+
+        // Event listeners for level buttons
+        levelSelect.addEventListener('click', (event) => {
+            if (event.target.classList.contains('level-button')) {
+                const buttons = levelSelect.querySelectorAll('.level-button');
+                buttons.forEach(button => button.classList.remove('selected'));
+                event.target.classList.add('selected');
+            }
+        });
+
+        // Event listeners for operation buttons
+        operationSelect.addEventListener('click', (event) => {
+            if (event.target.classList.contains('operation-button')) {
+                const buttons = operationSelect.querySelectorAll('.operation-button');
+                buttons.forEach(button => button.classList.remove('selected'));
+                event.target.classList.add('selected');
+                operation = event.target.dataset.operation; // Update the 'operation' variable
+            }
+        });
+
+        // Event listener for name submit button
+        nameSubmitButton.addEventListener('click', () => {
+            userName = nameInput.value.trim();
+            if (userName === '') {
+                alert('Please enter your name before proceeding.');
+                return;
+            }
+
+            nameInputContainer.style.display = 'none';
+            levelSelect.style.display = 'block';
+            operationSelect.style.display = 'block';
+            // Select default level and operation
+            if (levelSelect.querySelector(`[data-level="${difficultyLevel}"]`)) {
+                levelSelect.querySelector(`[data-level="${difficultyLevel}"]`).classList.add('selected');
+            }
+            if (operationSelect.querySelector(`[data-operation="${operation}"]`)) {
+                operationSelect.querySelector(`[data-operation="${operation}"]`).classList.add('selected');
+            }
+        });
+
+        // Initial setup: Hide elements until the test starts
+        questionContainer.style.display = 'none';
+        answerInputContainer.style.display = 'none';
+        resultsContainer.style.display = 'none';
+        nextQuestionButton.style.display = 'none';
+        checkAnswerButton.style.display = 'none';
+        levelSelect.style.display = 'none';
+        operationSelect.style.display = 'none';
+
+        // Select default level and operation
+        if (levelSelect.querySelector(`[data-level="${difficultyLevel}"]`)) {
+            levelSelect.querySelector(`[data-level="${difficultyLevel}"]`).classList.add('selected');
+        }
+        if (operationSelect.querySelector(`[data-operation="${operation}"]`)) {
+            operationSelect.querySelector(`[data-operation="${operation}"]`).classList.add('selected');
+        }
+    </script>
+</body>
+</html>
