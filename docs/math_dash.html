@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Dash</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0f0f0; }
+        .screen { display: none; padding: 20px; background: white; border-radius: 10px; }
+        #game-screen, #shop-screen, #profile-screen, #battle-screen { margin-top: 20px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #inventory, #equipped { margin-top: 10px; }
+        .upgrade-tier { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div id="game-screen" class="screen">
+        <h2>Math Dash</h2>
+        <p>Level: <span id="level">1</span> | Gold: <span id="gold">0</span> | XP: <span id="xp">0</span></p>
+        <p id="question"></p>
+        <input type="number" id="answer" placeholder="Your answer">
+        <button onclick="submitAnswer()">Submit</button>
+        <button onclick="showShop()" id="shop-btn">Shop</button>
+        <button onclick="showProfile()" id="profile-btn">Profile</button>
+        <button onclick="startBattle('easy')" id="easy-battle-btn" disabled>Easy Battle</button>
+        <button onclick="startBattle('medium')" id="medium-battle-btn" disabled>Medium Battle</button>
+        <button onclick="startBattle('hard')" id="hard-battle-btn" disabled>Hard Battle</button>
+    </div>
+    <div id="shop-screen" class="screen">
+        <h2>Shop</h2>
+        <div id="shop-items"></div>
+        <button onclick="showGame()">Back</button>
+    </div>
+    <div id="profile-screen" class="screen">
+        <h2>Profile</h2>
+        <p>Level: <span id="profile-level"></span> | Gold: <span id="profile-gold"></span> | XP: <span id="profile-xp"></span></p>
+        <div id="equipped">Equipped: None</div>
+        <div id="inventory">Inventory: None</div>
+        <h3>Upgrades</h3>
+        <div id="upgrades"></div>
+        <button onclick="showGame()">Back</button>
+    </div>
+    <div id="battle-screen" class="screen">
+        <h2>Monster Battle</h2>
+        <p id="battle-message"></p>
+        <p id="battle-question"></p>
+        <input type="number" id="battle-answer" placeholder="Your answer">
+        <button onclick="submitBattleAnswer()">Submit</button>
+    </div>
+
+    <script>
+        // Initialize storage
+        if (!localStorage.getItem('level')) localStorage.setItem('level', '1');
+        if (!localStorage.getItem('gold')) localStorage.setItem('gold', '0');
+        if (!localStorage.getItem('xp')) localStorage.setItem('xp', '0');
+        if (!localStorage.getItem('inventory')) localStorage.setItem('inventory', JSON.stringify([]));
+        if (!localStorage.getItem('equippedArtifacts')) localStorage.setItem('equippedArtifacts', JSON.stringify([]));
+        if (!localStorage.getItem('upgradeTier')) localStorage.setItem('upgradeTier', '0');
+
+        // Placeholder for Artifact List (Insert the 250-item artifactsList here from artifacts.js)
+        const artifactsList = [const artifactsList = [
+    // Common (100 items, 40%)
+    { name: 'Vineweaver Satchel', rarity: 'common', price: 250, description: 'A satchel woven from enchanted jungle vines that mend themselves under moonlight.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 0 },
+    { name: 'Volcanic Ember Lantern', rarity: 'common', price: 350, description: 'A lantern glowing with the eternal embers of a slumbering volcano.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 0 },
+    { name: 'Elderwood Staff', rarity: 'common', price: 450, description: 'A gnarled staff carved from an ancient tree, whispering forest secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Bamboo Storm Bow', rarity: 'common', price: 400, description: 'A bow crafted from storm-tossed bamboo, its arrows singing with the wind.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Pearl Seahorse Bracelet', rarity: 'common', price: 300, description: 'A bracelet adorned with pearls that summon playful seahorse spirits.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Tin Star Compass', rarity: 'common', price: 350, description: 'A rugged compass forged under a forgotten constellation’s light.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 0 },
+    { name: 'Copper Tide Anklet', rarity: 'common', price: 300, description: 'An anklet humming with the rhythmic pulse of ocean tides.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Flint Ember Knife', rarity: 'common', price: 300, description: 'A knife sparked from flint, igniting foes with a flicker of flame.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Storm Boots', rarity: 'common', price: 400, description: 'Boots lined with storm-cloud velvet, dancing across watery paths.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Lead Thunder Hammer', rarity: 'common', price: 450, description: 'A heavy hammer infused with the crackle of a stormy sky.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Vortex Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets swirling with a whirlwind’s fury, forged in a tempest.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Whisper Bow', rarity: 'common', price: 400, description: 'A bow shaped from whispering willows, silent as a forest breeze.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Storm Boots', rarity: 'common', price: 350, description: 'Boots stitched from storm-hardened leather, gripping rain-soaked earth.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Tempest Chainmail', rarity: 'common', price: 500, description: 'Chainmail forged in a thunderous gale, shimmering with lightning’s touch.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Dawn Ring', rarity: 'common', price: 350, description: 'A ring glowing with the first light of dawn, banishing shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Solar Goblet', rarity: 'common', price: 500, description: 'A goblet warmed by captured sunbeams, turning water to golden nectar.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Galaxy Sash', rarity: 'common', price: 350, description: 'A sash embroidered with twinkling stars, hinting at cosmic wisdom.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Nebula Telescope', rarity: 'common', price: 500, description: 'A telescope peering into swirling nebulae, revealing starry secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Void Compass', rarity: 'common', price: 350, description: 'A compass glowing faintly in the abyss, guiding through darkness.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Lunar Knife', rarity: 'common', price: 400, description: 'A knife sparked by lunar flint, slicing with moonlit precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Twilight Hat', rarity: 'common', price: 350, description: 'A hat woven at twilight, revealing hidden paths in dusk.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Meteor Mace', rarity: 'common', price: 450, description: 'A mace forged from a fallen star, crashing with cosmic might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Gale Spear', rarity: 'common', price: 500, description: 'A spear carved by howling winds, piercing with airy force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Mist Bow', rarity: 'common', price: 450, description: 'A bow shrouded in misty willows, silent as morning fog.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Twilight Boots', rarity: 'common', price: 350, description: 'Boots crafted at twilight, stepping softly through shadowed lands.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Storm Helmet', rarity: 'common', price: 500, description: 'A helmet forged in a storm’s heart, deflecting thunderbolts.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Star Ring', rarity: 'common', price: 400, description: 'A ring twinkling with starlight, chasing away the night.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet cooled by lunar essence, offering a sip of dreams.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Lunar Vest', rarity: 'common', price: 350, description: 'A vest stitched with lunar threads, glowing under night skies.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Eclipse Telescope', rarity: 'common', price: 500, description: 'A telescope capturing eclipse shadows, unveiling hidden realms.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Nebula Compass', rarity: 'common', price: 350, description: 'A compass pulsing with nebula light, guiding through cosmic voids.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Star Knife', rarity: 'common', price: 400, description: 'A knife forged from starlit flint, cutting with celestial edge.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Nebula Hat', rarity: 'common', price: 350, description: 'A hat woven with nebula silk, revealing starry visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Void Mace', rarity: 'common', price: 450, description: 'A mace forged from void iron, crushing with dark energy.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Nebula Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets glowing with nebula energy, striking with cosmic force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Star Bow', rarity: 'common', price: 450, description: 'A bow crafted from starlit willows, silent under celestial skies.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic terrain.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Twilight Helmet', rarity: 'common', price: 500, description: 'A helmet forged in twilight’s glow, deflecting shadowy blows.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Lunar Ring', rarity: 'common', price: 400, description: 'A ring bathed in lunar glow, dispelling the deepest shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Void Goblet', rarity: 'common', price: 500, description: 'A goblet infused with void essence, offering a taste of mystery.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Star Vest', rarity: 'common', price: 350, description: 'A vest adorned with star patterns, whispering cosmic tales.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Twilight Telescope', rarity: 'common', price: 500, description: 'A telescope gazing into twilight realms, revealing hidden lore.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Eclipse Compass', rarity: 'common', price: 350, description: 'A compass aligned with eclipse shadows, guiding through dusk.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Void Knife', rarity: 'common', price: 400, description: 'A knife sparked from void flint, slicing with dark precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Star Hat', rarity: 'common', price: 350, description: 'A hat woven with starlight, illuminating hidden celestial trails.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Nebula Mace', rarity: 'common', price: 450, description: 'A mace forged from nebula iron, crushing with starry might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Twilight Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets tempered in twilight, striking with shadowy force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Void Bow', rarity: 'common', price: 450, description: 'A bow carved from void-touched willows, silent in shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Eclipse Boots', rarity: 'common', price: 350, description: 'Boots forged in eclipse light, stepping through darkened paths.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Nebula Helmet', rarity: 'common', price: 500, description: 'A helmet shaped by nebula storms, shielding against cosmic rays.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Twilight Ring', rarity: 'common', price: 400, description: 'A ring glowing with twilight hues, banishing lingering darkness.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Nebula Goblet', rarity: 'common', price: 500, description: 'A goblet filled with nebula essence, offering a sip of stardust.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Void Vest', rarity: 'common', price: 350, description: 'A vest embroidered with void patterns, hinting at unseen powers.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Star Telescope', rarity: 'common', price: 500, description: 'A telescope peering into starlit voids, revealing cosmic wonders.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Lunar Compass', rarity: 'common', price: 350, description: 'A compass glowing with lunar light, guiding through night’s embrace.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Nebula Knife', rarity: 'common', price: 400, description: 'A knife sparked from nebula flint, cutting with starry precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Lunar Hat', rarity: 'common', price: 350, description: 'A hat woven with lunar silk, revealing moonlit secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Twilight Mace', rarity: 'common', price: 450, description: 'A mace forged from twilight iron, smashing with shadowy might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Void Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets infused with void energy, striking with dark force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Star Bow', rarity: 'common', price: 450, description: 'A bow crafted from starlit willows, silent under celestial skies.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Void Boots', rarity: 'common', price: 350, description: 'Boots woven from void leather, stepping through unseen realms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Star Helmet', rarity: 'common', price: 500, description: 'A helmet forged from star iron, deflecting celestial blows.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Eclipse Ring', rarity: 'common', price: 400, description: 'A ring shimmering with eclipse light, banishing cosmic shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Twilight Goblet', rarity: 'common', price: 500, description: 'A goblet infused with twilight essence, offering a taste of dusk.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Nebula Vest', rarity: 'common', price: 350, description: 'A vest embroidered with nebula patterns, hinting at starry wisdom.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Void Telescope', rarity: 'common', price: 500, description: 'A telescope gazing into void realms, unveiling hidden mysteries.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Star Compass', rarity: 'common', price: 350, description: 'A compass forged under starry skies, guiding through celestial paths.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Eclipse Knife', rarity: 'common', price: 400, description: 'A knife sparked from eclipse flint, slicing with shadowy edge.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Void Hat', rarity: 'common', price: 350, description: 'A hat woven with void silk, revealing secrets of the abyss.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Star Mace', rarity: 'common', price: 450, description: 'A mace crafted from star iron, crushing with celestial might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Lunar Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets shimmering with lunar light, striking with moonlit force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Twilight Bow', rarity: 'common', price: 450, description: 'A bow carved from twilight willows, silent in dusk’s embrace.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic storms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Lunar Helmet', rarity: 'common', price: 500, description: 'A helmet forged under moonlight, shielding against night’s threats.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Void Ring', rarity: 'common', price: 400, description: 'A ring shimmering with void light, banishing lingering darkness.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Star Goblet', rarity: 'common', price: 500, description: 'A goblet infused with star essence, offering a sip of cosmic power.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Twilight Vest', rarity: 'common', price: 350, description: 'A vest adorned with twilight threads, glowing with evening magic.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Lunar Telescope', rarity: 'common', price: 500, description: 'A telescope peering into lunar realms, revealing moonlit secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Twilight Compass', rarity: 'common', price: 350, description: 'A compass glowing with twilight light, guiding through dusk’s embrace.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Star Knife', rarity: 'common', price: 400, description: 'A knife sparked from starlit flint, cutting with celestial precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Eclipse Hat', rarity: 'common', price: 350, description: 'A hat woven with eclipse silk, revealing shadowed visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Void Mace', rarity: 'common', price: 450, description: 'A mace forged from void iron, crushing with abyssal might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Star Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets shimmering with starlight, striking with cosmic power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Twilight Bow', rarity: 'common', price: 450, description: 'A bow carved from twilight willows, silent in dusk’s embrace.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic storms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Star Helmet', rarity: 'common', price: 500, description: 'A helmet forged from star iron, deflecting celestial strikes.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Twilight Ring', rarity: 'common', price: 400, description: 'A ring glowing with twilight hues, banishing lingering shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet cooled by lunar essence, offering a sip of dreams.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Void Vest', rarity: 'common', price: 350, description: 'A vest embroidered with void patterns, hinting at abyssal power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Star Telescope', rarity: 'common', price: 500, description: 'A telescope peering into starlit realms, revealing cosmic lore.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Void Compass', rarity: 'common', price: 350, description: 'A compass glowing with void light, guiding through unseen paths.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Twilight Knife', rarity: 'common', price: 400, description: 'A knife sparked from twilight flint, slicing with dusk’s edge.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Nebula Hat', rarity: 'common', price: 350, description: 'A hat woven with nebula silk, revealing starry visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Star Mace', rarity: 'common', price: 450, description: 'A mace crafted from star iron, crushing with celestial might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Void Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets infused with void energy, striking with dark force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Eclipse Bow', rarity: 'common', price: 450, description: 'A bow carved from eclipse willows, silent in shadowy realms.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Star Boots', rarity: 'common', price: 350, description: 'Boots woven from starlight leather, stepping through celestial realms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Lunar Helmet', rarity: 'common', price: 500, description: 'A helmet forged under moonlight, shielding against night’s threats.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Void Ring', rarity: 'common', price: 400, description: 'A ring shimmering with void light, banishing lingering darkness.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Star Goblet', rarity: 'common', price: 500, description: 'A goblet infused with star essence, offering a sip of cosmic power.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Nebula Vest', rarity: 'common', price: 350, description: 'A vest embroidered with nebula patterns, hinting at starry wisdom.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Lunar Telescope', rarity: 'common', price: 500, description: 'A telescope peering into lunar realms, revealing moonlit secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Twilight Compass', rarity: 'common', price: 350, description: 'A compass glowing with twilight light, guiding through dusk’s embrace.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Nebula Knife', rarity: 'common', price: 400, description: 'A knife sparked from nebula flint, cutting with starry precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Eclipse Hat', rarity: 'common', price: 350, description: 'A hat woven with eclipse silk, revealing shadowed visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Void Mace', rarity: 'common', price: 450, description: 'A mace forged from void iron, crushing with abyssal might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Star Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets shimmering with starlight, striking with cosmic power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Twilight Bow', rarity: 'common', price: 450, description: 'A bow carved from twilight willows, silent in dusk’s embrace.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic storms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Star Helmet', rarity: 'common', price: 500, description: 'A helmet forged from star iron, deflecting celestial strikes.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Twilight Ring', rarity: 'common', price: 400, description: 'A ring glowing with twilight hues, banishing lingering shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet cooled by lunar essence, offering a sip of dreams.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Void Vest', rarity: 'common', price: 350, description: 'A vest embroidered with void patterns, hinting at abyssal power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Star Telescope', rarity: 'common', price: 500, description: 'A telescope peering into starlit realms, revealing cosmic lore.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Void Compass', rarity: 'common', price: 350, description: 'A compass glowing with void light, guiding through unseen paths.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Twilight Knife', rarity: 'common', price: 400, description: 'A knife sparked from twilight flint, slicing with dusk’s edge.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Nebula Hat', rarity: 'common', price: 350, description: 'A hat woven with nebula silk, revealing starry visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Star Mace', rarity: 'common', price: 450, description: 'A mace crafted from star iron, crushing with celestial might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Void Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets infused with void energy, striking with dark force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Eclipse Bow', rarity: 'common', price: 450, description: 'A bow carved from eclipse willows, silent in shadowy realms.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Star Boots', rarity: 'common', price: 350, description: 'Boots woven from starlight leather, stepping through celestial realms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Lunar Helmet', rarity: 'common', price: 500, description: 'A helmet forged under moonlight, shielding against night’s threats.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Void Ring', rarity: 'common', price: 400, description: 'A ring shimmering with void light, banishing lingering darkness.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Star Goblet', rarity: 'common', price: 500, description: 'A goblet infused with star essence, offering a sip of cosmic power.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Nebula Vest', rarity: 'common', price: 350, description: 'A vest embroidered with nebula patterns, hinting at starry wisdom.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Lunar Telescope', rarity: 'common', price: 500, description: 'A telescope peering into lunar realms, revealing moonlit secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Twilight Compass', rarity: 'common', price: 350, description: 'A compass glowing with twilight light, guiding through dusk’s embrace.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Nebula Knife', rarity: 'common', price: 400, description: 'A knife sparked from nebula flint, cutting with starry precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Eclipse Hat', rarity: 'common', price: 350, description: 'A hat woven with eclipse silk, revealing shadowed visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Void Mace', rarity: 'common', price: 450, description: 'A mace forged from void iron, crushing with abyssal might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Star Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets shimmering with starlight, striking with cosmic power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Twilight Bow', rarity: 'common', price: 450, description: 'A bow carved from twilight willows, silent in dusk’s embrace.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic storms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Star Helmet', rarity: 'common', price: 500, description: 'A helmet forged from star iron, deflecting celestial strikes.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Twilight Ring', rarity: 'common', price: 400, description: 'A ring glowing with twilight hues, banishing lingering shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet cooled by lunar essence, offering a sip of dreams.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Void Vest', rarity: 'common', price: 350, description: 'A vest embroidered with void patterns, hinting at abyssal power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Star Telescope', rarity: 'common', price: 500, description: 'A telescope peering into starlit realms, revealing cosmic lore.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Void Compass', rarity: 'common', price: 350, description: 'A compass glowing with void light, guiding through unseen paths.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Twilight Knife', rarity: 'common', price: 400, description: 'A knife sparked from twilight flint, slicing with dusk’s edge.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Nebula Hat', rarity: 'common', price: 350, description: 'A hat woven with nebula silk, revealing starry visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Star Mace', rarity: 'common', price: 450, description: 'A mace crafted from star iron, crushing with celestial might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Void Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets infused with void energy, striking with dark force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Eclipse Bow', rarity: 'common', price: 450, description: 'A bow carved from eclipse willows, silent in shadowy realms.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Star Boots', rarity: 'common', price: 350, description: 'Boots woven from starlight leather, stepping through celestial realms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Lunar Helmet', rarity: 'common', price: 500, description: 'A helmet forged under moonlight, shielding against night’s threats.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Void Ring', rarity: 'common', price: 400, description: 'A ring shimmering with void light, banishing lingering darkness.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Star Goblet', rarity: 'common', price: 500, description: 'A goblet infused with star essence, offering a sip of cosmic power.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Nebula Vest', rarity: 'common', price: 350, description: 'A vest embroidered with nebula patterns, hinting at starry wisdom.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Lunar Telescope', rarity: 'common', price: 500, description: 'A telescope peering into lunar realms, revealing moonlit secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Twilight Compass', rarity: 'common', price: 350, description: 'A compass glowing with twilight light, guiding through dusk’s embrace.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Nebula Knife', rarity: 'common', price: 400, description: 'A knife sparked from nebula flint, cutting with starry precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Eclipse Hat', rarity: 'common', price: 350, description: 'A hat woven with eclipse silk, revealing shadowed visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Void Mace', rarity: 'common', price: 450, description: 'A mace forged from void iron, crushing with abyssal might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Star Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets shimmering with starlight, striking with cosmic power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Twilight Bow', rarity: 'common', price: 450, description: 'A bow carved from twilight willows, silent in dusk’s embrace.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic storms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Star Helmet', rarity: 'common', price: 500, description: 'A helmet forged from star iron, deflecting celestial strikes.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Twilight Ring', rarity: 'common', price: 400, description: 'A ring glowing with twilight hues, banishing lingering shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet cooled by lunar essence, offering a sip of dreams.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Void Vest', rarity: 'common', price: 350, description: 'A vest embroidered with void patterns, hinting at abyssal power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Star Telescope', rarity: 'common', price: 500, description: 'A telescope peering into starlit realms, revealing cosmic lore.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Void Compass', rarity: 'common', price: 350, description: 'A compass glowing with void light, guiding through unseen paths.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Twilight Knife', rarity: 'common', price: 400, description: 'A knife sparked from twilight flint, slicing with dusk’s edge.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Nebula Hat', rarity: 'common', price: 350, description: 'A hat woven with nebula silk, revealing starry visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Star Mace', rarity: 'common', price: 450, description: 'A mace crafted from star iron, crushing with celestial might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Void Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets infused with void energy, striking with dark force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Eclipse Bow', rarity: 'common', price: 450, description: 'A bow carved from eclipse willows, silent in shadowy realms.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Star Boots', rarity: 'common', price: 350, description: 'Boots woven from starlight leather, stepping through celestial realms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Lunar Helmet', rarity: 'common', price: 500, description: 'A helmet forged under moonlight, shielding against night’s threats.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Void Ring', rarity: 'common', price: 400, description: 'A ring shimmering with void light, banishing lingering darkness.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Star Goblet', rarity: 'common', price: 500, description: 'A goblet infused with star essence, offering a sip of cosmic power.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Nebula Vest', rarity: 'common', price: 350, description: 'A vest embroidered with nebula patterns, hinting at starry wisdom.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Lunar Telescope', rarity: 'common', price: 500, description: 'A telescope peering into lunar realms, revealing moonlit secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Twilight Compass', rarity: 'common', price: 350, description: 'A compass glowing with twilight light, guiding through dusk’s embrace.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Nebula Knife', rarity: 'common', price: 400, description: 'A knife sparked from nebula flint, cutting with starry precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Eclipse Hat', rarity: 'common', price: 350, description: 'A hat woven with eclipse silk, revealing shadowed visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Void Mace', rarity: 'common', price: 450, description: 'A mace forged from void iron, crushing with abyssal might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Star Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets shimmering with starlight, striking with cosmic power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Twilight Bow', rarity: 'common', price: 450, description: 'A bow carved from twilight willows, silent in dusk’s embrace.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic storms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Star Helmet', rarity: 'common', price: 500, description: 'A helmet forged from star iron, deflecting celestial strikes.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Twilight Ring', rarity: 'common', price: 400, description: 'A ring glowing with twilight hues, banishing lingering shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet cooled by lunar essence, offering a sip of dreams.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Void Vest', rarity: 'common', price: 350, description: 'A vest embroidered with void patterns, hinting at abyssal power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Star Telescope', rarity: 'common', price: 500, description: 'A telescope peering into starlit realms, revealing cosmic lore.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Void Compass', rarity: 'common', price: 350, description: 'A compass glowing with void light, guiding through unseen paths.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Twilight Knife', rarity: 'common', price: 400, description: 'A knife sparked from twilight flint, slicing with dusk’s edge.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Nebula Hat', rarity: 'common', price: 350, description: 'A hat woven with nebula silk, revealing starry visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Star Mace', rarity: 'common', price: 450, description: 'A mace crafted from star iron, crushing with celestial might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Void Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets infused with void energy, striking with dark force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Eclipse Bow', rarity: 'common', price: 450, description: 'A bow carved from eclipse willows, silent in shadowy realms.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Star Boots', rarity: 'common', price: 350, description: 'Boots woven from starlight leather, stepping through celestial realms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Lunar Helmet', rarity: 'common', price: 500, description: 'A helmet forged under moonlight, shielding against night’s threats.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Void Ring', rarity: 'common', price: 400, description: 'A ring shimmering with void light, banishing lingering darkness.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Star Goblet', rarity: 'common', price: 500, description: 'A goblet infused with star essence, offering a sip of cosmic power.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Nebula Vest', rarity: 'common', price: 350, description: 'A vest embroidered with nebula patterns, hinting at starry wisdom.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Lunar Telescope', rarity: 'common', price: 500, description: 'A telescope peering into lunar realms, revealing moonlit secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Twilight Compass', rarity: 'common', price: 350, description: 'A compass glowing with twilight light, guiding through dusk’s embrace.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Nebula Knife', rarity: 'common', price: 400, description: 'A knife sparked from nebula flint, cutting with starry precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Eclipse Hat', rarity: 'common', price: 350, description: 'A hat woven with eclipse silk, revealing shadowed visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Void Mace', rarity: 'common', price: 450, description: 'A mace forged from void iron, crushing with abyssal might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Star Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets shimmering with starlight, striking with cosmic power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Twilight Bow', rarity: 'common', price: 450, description: 'A bow carved from twilight willows, silent in dusk’s embrace.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic storms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Star Helmet', rarity: 'common', price: 500, description: 'A helmet forged from star iron, deflecting celestial strikes.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Twilight Ring', rarity: 'common', price: 400, description: 'A ring glowing with twilight hues, banishing lingering shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet cooled by lunar essence, offering a sip of dreams.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Void Vest', rarity: 'common', price: 350, description: 'A vest embroidered with void patterns, hinting at abyssal power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Star Telescope', rarity: 'common', price: 500, description: 'A telescope peering into starlit realms, revealing cosmic lore.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Void Compass', rarity: 'common', price: 350, description: 'A compass glowing with void light, guiding through unseen paths.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Twilight Knife', rarity: 'common', price: 400, description: 'A knife sparked from twilight flint, slicing with dusk’s edge.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Nebula Hat', rarity: 'common', price: 350, description: 'A hat woven with nebula silk, revealing starry visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Star Mace', rarity: 'common', price: 450, description: 'A mace crafted from star iron, crushing with celestial might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Void Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets infused with void energy, striking with dark force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Eclipse Bow', rarity: 'common', price: 450, description: 'A bow carved from eclipse willows, silent in shadowy realms.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Star Boots', rarity: 'common', price: 350, description: 'Boots woven from starlight leather, stepping through celestial realms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Lunar Helmet', rarity: 'common', price: 500, description: 'A helmet forged under moonlight, shielding against night’s threats.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Void Ring', rarity: 'common', price: 400, description: 'A ring shimmering with void light, banishing lingering darkness.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Star Goblet', rarity: 'common', price: 500, description: 'A goblet infused with star essence, offering a sip of cosmic power.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Nebula Vest', rarity: 'common', price: 350, description: 'A vest embroidered with nebula patterns, hinting at starry wisdom.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Lunar Telescope', rarity: 'common', price: 500, description: 'A telescope peering into lunar realms, revealing moonlit secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Twilight Compass', rarity: 'common', price: 350, description: 'A compass glowing with twilight light, guiding through dusk’s embrace.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Nebula Knife', rarity: 'common', price: 400, description: 'A knife sparked from nebula flint, cutting with starry precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Eclipse Hat', rarity: 'common', price: 350, description: 'A hat woven with eclipse silk, revealing shadowed visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Void Mace', rarity: 'common', price: 450, description: 'A mace forged from void iron, crushing with abyssal might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Star Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets shimmering with starlight, striking with cosmic power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Twilight Bow', rarity: 'common', price: 450, description: 'A bow carved from twilight willows, silent in dusk’s embrace.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic storms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Star Helmet', rarity: 'common', price: 500, description: 'A helmet forged from star iron, deflecting celestial strikes.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Twilight Ring', rarity: 'common', price: 400, description: 'A ring glowing with twilight hues, banishing lingering shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet cooled by lunar essence, offering a sip of dreams.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Void Vest', rarity: 'common', price: 350, description: 'A vest embroidered with void patterns, hinting at abyssal power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Star Telescope', rarity: 'common', price: 500, description: 'A telescope peering into starlit realms, revealing cosmic lore.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Void Compass', rarity: 'common', price: 350, description: 'A compass glowing with void light, guiding through unseen paths.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Twilight Knife', rarity: 'common', price: 400, description: 'A knife sparked from twilight flint, slicing with dusk’s edge.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Nebula Hat', rarity: 'common', price: 350, description: 'A hat woven with nebula silk, revealing starry visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Star Mace', rarity: 'common', price: 450, description: 'A mace crafted from star iron, crushing with celestial might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Void Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets infused with void energy, striking with dark force.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Eclipse Bow', rarity: 'common', price: 450, description: 'A bow carved from eclipse willows, silent in shadowy realms.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Star Boots', rarity: 'common', price: 350, description: 'Boots woven from starlight leather, stepping through celestial realms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Lunar Helmet', rarity: 'common', price: 500, description: 'A helmet forged under moonlight, shielding against night’s threats.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Void Ring', rarity: 'common', price: 400, description: 'A ring shimmering with void light, banishing lingering darkness.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Star Goblet', rarity: 'common', price: 500, description: 'A goblet infused with star essence, offering a sip of cosmic power.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Nebula Vest', rarity: 'common', price: 350, description: 'A vest embroidered with nebula patterns, hinting at starry wisdom.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Lunar Telescope', rarity: 'common', price: 500, description: 'A telescope peering into lunar realms, revealing moonlit secrets.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3, defense: 0 },
+    { name: 'Tin Twilight Compass', rarity: 'common', price: 350, description: 'A compass glowing with twilight light, guiding through dusk’s embrace.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Flint Nebula Knife', rarity: 'common', price: 400, description: 'A knife sparked from nebula flint, cutting with starry precision.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Velvet Eclipse Hat', rarity: 'common', price: 350, description: 'A hat woven with eclipse silk, revealing shadowed visions.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Lead Void Mace', rarity: 'common', price: 450, description: 'A mace forged from void iron, crushing with abyssal might.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 5, defense: 0 },
+    { name: 'Steel Star Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets shimmering with starlight, striking with cosmic power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 3, defense: 2 },
+    { name: 'Willow Twilight Bow', rarity: 'common', price: 450, description: 'A bow carved from twilight willows, silent in dusk’s embrace.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 4, defense: 0 },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 350, description: 'Boots woven from nebula leather, stepping through cosmic storms.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Iron Star Helmet', rarity: 'common', price: 500, description: 'A helmet forged from star iron, deflecting celestial strikes.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 4 },
+    { name: 'Copper Twilight Ring', rarity: 'common', price: 400, description: 'A ring glowing with twilight hues, banishing lingering shadows.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 2, defense: 0 },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet cooled by lunar essence, offering a sip of dreams.', goldMultiplier: 0.01, xpMultiplier: 0.00, attack: 0, defense: 2 },
+    { name: 'Satin Void Vest', rarity: 'common', price: 350, description: 'A vest embroidered with void patterns, hinting at abyssal power.', goldMultiplier: 0.02, xpMultiplier: 0.00, attack: 0, defense: 3 },
+    { name: 'Brass Star Telescope', rarity: 'common', price: 500, description: 'A telescope peering into starlit realms, revealing cosmic lore.', goldMultiplier: 0.015, xpMultiplier: 0.00, attack: 3,]; // Replace with: const artifactsList = [...]; (from previous artifact list)
+
+        const difficultyZones = {
+            easy: { minLevel: 2, monsterHP: 50, monsterAttack: 5, baseGold: 50, baseXP: 20, dropRarity: 'common' },
+            medium: { minLevel: 4, monsterHP: 100, monsterAttack: 10, baseGold: 200, baseXP: 50, dropRarity: 'uncommon' },
+            hard: { minLevel: 5, monsterHP: 200, monsterAttack: 15, baseGold: 500, baseXP: 100, dropRarity: 'rare' }
+        };
+
+        const upgradeTiers = [
+            { cost: 0, atkBonus: 0, defBonus: 0, goldMultiplier: 1.0, xpMultiplier: 1.0 },
+            { cost: 500, atkBonus: 2, defBonus: 2, goldMultiplier: 1.05, xpMultiplier: 1.05 },
+            { cost: 1000, atkBonus: 4, defBonus: 4, goldMultiplier: 1.10, xpMultiplier: 1.10 },
+            { cost: 2000, atkBonus: 6, defBonus: 6, goldMultiplier: 1.15, xpMultiplier: 1.15 },
+            { cost: 3000, atkBonus: 8, defBonus: 8, goldMultiplier: 1.20, xpMultiplier: 1.20 },
+            { cost: 4000, atkBonus: 10, defBonus: 10, goldMultiplier: 1.25, xpMultiplier: 1.25 },
+            { cost: 5000, atkBonus: 12, defBonus: 12, goldMultiplier: 1.30, xpMultiplier: 1.30 },
+            { cost: 6000, atkBonus: 14, defBonus: 14, goldMultiplier: 1.35, xpMultiplier: 1.35 },
+            { cost: 7000, atkBonus: 16, defBonus: 16, goldMultiplier: 1.40, xpMultiplier: 1.40 },
+            { cost: 8000, atkBonus: 18, defBonus: 18, goldMultiplier: 1.45, xpMultiplier: 1.45 },
+            { cost: 9000, atkBonus: 20, defBonus: 20, goldMultiplier: 1.50, xpMultiplier: 1.50 },
+            { cost: 10000, atkBonus: 22, defBonus: 22, goldMultiplier: 1.55, xpMultiplier: 1.55 },
+            { cost: 11000, atkBonus: 24, defBonus: 24, goldMultiplier: 1.60, xpMultiplier: 1.60 },
+            { cost: 12000, atkBonus: 26, defBonus: 26, goldMultiplier: 1.65, xpMultiplier: 1.65 },
+            { cost: 13000, atkBonus: 28, defBonus: 28, goldMultiplier: 1.70, xpMultiplier: 1.70 },
+            { cost: 15000, atkBonus: 30, defBonus: 30, goldMultiplier: 1.75, xpMultiplier: 1.75 }
+        ];
+
+        let currentMonster = null;
+        let playerHP = 100;
+        let battleActive = false;
+        let answerTimer = null;
+        let correctAnswer = null;
+
+        function updateUI() {
+            const level = parseInt(localStorage.getItem('level'));
+            document.getElementById('level').textContent = level;
+            document.getElementById('gold').textContent = localStorage.getItem('gold');
+            document.getElementById('xp').textContent = localStorage.getItem('xp');
+            document.getElementById('profile-level').textContent = level;
+            document.getElementById('profile-gold').textContent = localStorage.getItem('gold');
+            document.getElementById('profile-xp').textContent = localStorage.getItem('xp');
+            const equipped = JSON.parse(localStorage.getItem('equippedArtifacts')) || [];
+            document.getElementById('equipped').textContent = `Equipped: ${equipped.map(a => a.name).join(', ') || 'None'}`;
+            document.getElementById('easy-battle-btn').disabled = level < 2;
+            document.getElementById('medium-battle-btn').disabled = level < 4;
+            document.getElementById('hard-battle-btn').disabled = level < 5;
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            document.getElementById(screenId).style.display = 'block';
+            if (screenId === 'game-screen') updateUI();
+            if (screenId === 'shop-screen') populateShop();
+            if (screenId === 'profile-screen') updateProfile();
+        }
+
+        function showGame() { showScreen('game-screen'); }
+        function showShop() { showScreen('shop-screen'); }
+        function showProfile() { showScreen('profile-screen'); }
+
+        function populateShop() {
+            const shopItems = document.getElementById('shop-items');
+            shopItems.innerHTML = '';
+            artifactsList.forEach(artifact => {
+                const div = document.createElement('div');
+                div.innerHTML = `${artifact.name} (${artifact.rarity}) - ${artifact.price} gold <button onclick="buyArtifact('${artifact.name}')">Buy</button>`;
+                shopItems.appendChild(div);
+            });
+        }
+
+        function buyArtifact(name) {
+            const gold = parseInt(localStorage.getItem('gold'));
+            const artifact = artifactsList.find(a => a.name === name);
+            if (gold >= artifact.price) {
+                localStorage.setItem('gold', gold - artifact.price);
+                const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+                inventory.push(artifact);
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                updateUI();
+                populateShop();
+            } else {
+                alert('Not enough gold!');
+            }
+        }
+
+        function sellArtifact(name) {
+            const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+            const artifact = inventory.find(a => a.name === name);
+            if (artifact) {
+                const gold = parseInt(localStorage.getItem('gold')) || 0;
+                const sellPrice = Math.floor(artifact.price * 0.5);
+                localStorage.setItem('gold', gold + sellPrice);
+                inventory.splice(inventory.indexOf(artifact), 1);
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                updateProfile();
+                updateUI();
+            }
+        }
+
+        function equipArtifact(name) {
+            const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+            const artifact = inventory.find(a => a.name === name);
+            if (artifact) {
+                const equipped = JSON.parse(localStorage.getItem('equippedArtifacts')) || [];
+                equipped.push(artifact);
+                inventory.splice(inventory.indexOf(artifact), 1);
+                localStorage.setItem('equippedArtifacts', JSON.stringify(equipped));
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                updateProfile();
+            }
+        }
+
+        function unequipArtifact(name) {
+            const equipped = JSON.parse(localStorage.getItem('equippedArtifacts')) || [];
+            const artifact = equipped.find(a => a.name === name);
+            if (artifact) {
+                const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+                inventory.push(artifact);
+                equipped.splice(equipped.indexOf(artifact), 1);
+                localStorage.setItem('equippedArtifacts', JSON.stringify(equipped));
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                updateProfile();
+            }
+        }
+
+        function upgradeTier() {
+            const currentTier = parseInt(localStorage.getItem('upgradeTier')) || 0;
+            const nextTier = currentTier + 1;
+            if (nextTier >= upgradeTiers.length) return;
+            const gold = parseInt(localStorage.getItem('gold')) || 0;
+            if (gold >= upgradeTiers[nextTier].cost) {
+                localStorage.setItem('gold', gold - upgradeTiers[nextTier].cost);
+                localStorage.setItem('upgradeTier', nextTier);
+                updateProfile();
+                updateUI();
+            } else {
+                alert('Not enough gold to upgrade!');
+            }
+        }
+
+        function updateProfile() {
+            updateUI();
+            const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+            const equipped = JSON.parse(localStorage.getItem('equippedArtifacts')) || [];
+            document.getElementById('inventory').innerHTML = 'Inventory: ' + (inventory.length ? inventory.map(a => `<span onclick="equipArtifact('${a.name}')" style="cursor: pointer; color: blue;">${a.name}</span> <span onclick="sellArtifact('${a.name}')" style="cursor: pointer; color: red;">(Sell for ${Math.floor(a.price * 0.5)} gold)</span>`).join(', ') : 'None');
+            document.getElementById('equipped').innerHTML = 'Equipped: ' + (equipped.length ? equipped.map(a => `<span onclick="unequipArtifact('${a.name}')" style="cursor: pointer; color: green;">${a.name}</span>`).join(', ') : 'None');
+
+            const upgradesDiv = document.getElementById('upgrades');
+            upgradesDiv.innerHTML = '';
+            const currentTier = parseInt(localStorage.getItem('upgradeTier')) || 0;
+            upgradeTiers.forEach((tier, index) => {
+                const div = document.createElement('div');
+                div.className = 'upgrade-tier';
+                if (index <= currentTier) {
+                    div.innerHTML = `Tier ${index}: ATK +${tier.atkBonus}, DEF +${tier.defBonus}, Gold ${tier.goldMultiplier}x, XP ${tier.xpMultiplier}x (Unlocked)`;
+                } else {
+                    div.innerHTML = `Tier ${index}: ATK +${tier.atkBonus}, DEF +${tier.defBonus}, Gold ${tier.goldMultiplier}x, XP ${tier.xpMultiplier}x - ${tier.cost} gold <button onclick="upgradeTier()">Upgrade</button>`;
+                }
+                upgradesDiv.appendChild(div);
+            });
+        }
+
+        function generateQuestion() {
+            const level = parseInt(localStorage.getItem('level'));
+            const num1 = Math.floor(Math.random() * (10 + level * 5)) + 1;
+            const num2 = Math.floor(Math.random() * (10 + level * 5)) + 1;
+            correctAnswer = num1 + num2;
+            document.getElementById('question').textContent = `${num1} + ${num2} = ?`;
+            document.getElementById('answer').value = '';
+            startAnswerTimer();
+        }
+
+        function startAnswerTimer() {
+            let timeLeft = 10;
+            answerTimer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(answerTimer);
+                    alert('Time out! Try again.');
+                    generateQuestion();
+                }
+            }, 1000);
+        }
+
+        function rollForMonster() {
+            const level = parseInt(localStorage.getItem('level'));
+            const easyChance = level >= 2 ? 0.10 : 0;
+            const mediumChance = level >= 4 ? 0.05 : 0;
+            const hardChance = level >= 5 ? 0.03 : 0;
+            const roll = Math.random();
+            if (roll < hardChance) return 'hard';
+            if (roll < hardChance + mediumChance) return 'medium';
+            if (roll < hardChance + mediumChance + easyChance) return 'easy';
+            return null;
+        }
+
+        function submitAnswer() {
+            clearInterval(answerTimer);
+            const playerAnswer = parseInt(document.getElementById('answer').value);
+            if (playerAnswer === correctAnswer) {
+                const gold = parseInt(localStorage.getItem('gold')) || 0;
+                const xp = parseInt(localStorage.getItem('xp')) || 0;
+                const equipped = JSON.parse(localStorage.getItem('equippedArtifacts')) || [];
+                const tier = parseInt(localStorage.getItem('upgradeTier')) || 0;
+                const goldBonus = equipped.reduce((sum, artifact) => sum + (artifact.goldMultiplier || 0), 0);
+                const baseGold = 10;
+                const totalGold = Math.floor(baseGold * (1 + goldBonus) * upgradeTiers[tier].goldMultiplier);
+                const baseXP = 5;
+                const totalXP = Math.floor(baseXP * upgradeTiers[tier].xpMultiplier);
+                localStorage.setItem('gold', gold + totalGold);
+                localStorage.setItem('xp', xp + totalXP);
+                const level = parseInt(localStorage.getItem('level'));
+                const xpForNextLevel = level * 100;
+                if (xp + totalXP >= xpForNextLevel) {
+                    localStorage.setItem('level', level + 1);
+                    localStorage.setItem('xp', 0);
+                }
+                updateUI();
+                const monsterDifficulty = rollForMonster();
+                if (monsterDifficulty) {
+                    setTimeout(() => startBattle(monsterDifficulty), 1000);
+                } else {
+                    generateQuestion();
+                }
+            } else {
+                alert('Wrong answer! Try again.');
+                generateQuestion();
+            }
+        }
+
+        function startBattle(difficulty) {
+            const playerLevel = parseInt(localStorage.getItem('level')) || 1;
+            const zone = difficultyZones[difficulty];
+
+            if (playerLevel < zone.minLevel) {
+                document.getElementById('battle-message').textContent = `You need to reach Level ${zone.minLevel} to fight in the ${difficulty} zone!`;
+                setTimeout(show => showGame(), 2000);
+                return;
+            }
+
+            const equippedArtifacts = JSON.parse(localStorage.getItem('equippedArtifacts')) || [];
+            const tier = parseInt(localStorage.getItem('upgradeTier')) || 0;
+            let playerAttack = equippedArtifacts.reduce((sum, artifact) => sum + (artifact.attack || 0), 0) + upgradeTiers[tier].atkBonus;
+            let playerDefense = equippedArtifacts.reduce((sum, artifact) => sum + (artifact.defense || 0), 0) + upgradeTiers[tier].defBonus;
+            playerHP = 100 + (playerLevel - 1) * 10;
+
+            currentMonster = {
+                difficulty: difficulty,
+                hp: zone.monsterHP,
+                attack: zone.monsterAttack,
+                baseGold: zone.baseGold,
+                baseXP: zone.baseXP,
+                dropRarity: zone.dropRarity
+            };
+
+            battleActive = true;
+            showScreen('battle-screen');
+            document.getElementById('battle-message').textContent = `A ${difficulty} monster appears! HP: ${currentMonster.hp}`;
+            correctAnswer = generateBattleQuestion(difficulty);
+            startBattleTimer();
+        }
+
+        function generateBattleQuestion(difficulty) {
+            let num1, num2;
+            if (difficulty === 'easy') {
+                num1 = Math.floor(Math.random() * 10) + 1;
+                num2 = Math.floor(Math.random() * 10) + 1;
+            } else if (difficulty === 'medium') {
+                num1 = Math.floor(Math.random() * 20) + 10;
+                num2 = Math.floor(Math.random() * 20) + 10;
+            } else {
+                num1 = Math.floor(Math.random() * 50) + 20;
+                num2 = Math.floor(Math.random() * 50) + 20;
+            }
+            const answer = num1 + num2;
+            document.getElementById('battle-question').textContent = `${num1} + ${num2} = ?`;
+            document.getElementById('battle-answer').value = '';
+            return answer;
+        }
+
+        function startBattleTimer() {
+            let timeLeft = 10;
+            answerTimer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(answerTimer);
+                    monsterAttack('timeout');
+                }
+            }, 1000);
+        }
+
+        function submitBattleAnswer() {
+            if (!battleActive) return;
+            clearInterval(answerTimer);
+
+            const playerAnswer = parseInt(document.getElementById('battle-answer').value);
+            const equippedArtifacts = JSON.parse(localStorage.getItem('equippedArtifacts')) || [];
+            const tier = parseInt(localStorage.getItem('upgradeTier')) || 0;
+            let playerAttack = equippedArtifacts.reduce((sum, artifact) => sum + (artifact.attack || 0), 0) + upgradeTiers[tier].atkBonus;
+            const timeTaken = 10 - (answerTimer ? 10 : 0); // Simplified
+
+            if (playerAnswer === correctAnswer) {
+                const bonus = timeTaken <= 5 ? 1.5 : 1;
+                const damage = Math.max(1, playerAttack * bonus);
+                currentMonster.hp -= damage;
+                document.getElementById('battle-message').textContent = `Hit! Monster HP: ${currentMonster.hp}`;
+            } else {
+                monsterAttack('wrong');
+            }
+
+            if (currentMonster.hp <= 0) {
+                endBattle(true);
+            } else {
+                correctAnswer = generateBattleQuestion(currentMonster.difficulty);
+                startBattleTimer();
+            }
+        }
+
+        function monsterAttack(reason) {
+            const equippedArtifacts = JSON.parse(localStorage.getItem('equippedArtifacts')) || [];
+            const tier = parseInt(localStorage.getItem('upgradeTier')) || 0;
+            let playerDefense = equippedArtifacts.reduce((sum, artifact) => sum + (artifact.defense || 0), 0) + upgradeTiers[tier].defBonus;
+            let damage = reason === 'wrong' ? currentMonster.attack * 2 : currentMonster.attack;
+            damage = Math.max(1, damage - playerDefense);
+            playerHP -= damage;
+            document.getElementById('battle-message').textContent += `\nMonster attacks! Player HP: ${playerHP}`;
+
+            if (playerHP <= 0) {
+                endBattle(false);
+            } else {
+                correctAnswer = generateBattleQuestion(currentMonster.difficulty);
+                startBattleTimer();
+            }
+        }
+
+        function rollForDrop(difficulty) {
+            const roll = Math.random();
+            const chestChance = 0.20;
+            const rarityRoll = Math.random();
+            let maxRarity = difficulty === 'hard' ? 'mythical' : difficulty === 'medium' ? 'uncommon' : 'common';
+            let artifact = null;
+
+            if (roll < chestChance) {
+                if (rarityRoll < 0.001) artifact = artifactsList.find(a => a.rarity === 'mythical');
+                else if (rarityRoll < 0.01) artifact = artifactsList.find(a => a.rarity === 'legendary');
+                else if (rarityRoll < 0.05) artifact = artifactsList.find(a => a.rarity === 'epic');
+                else if (rarityRoll < 0.20) artifact = artifactsList.find(a => a.rarity === 'rare');
+                else if (rarityRoll < 0.50) artifact = artifactsList.find(a => a.rarity === 'uncommon');
+                else artifact = artifactsList.find(a => a.rarity === 'common');
+                return { type: 'chest', artifact: artifact };
+            } else {
+                if (difficulty === 'hard' && rarityRoll < 0.001) artifact = artifactsList.find(a => a.rarity === 'mythical');
+                else if (difficulty === 'hard' && rarityRoll < 0.01) artifact = artifactsList.find(a => a.rarity === 'legendary');
+                else if (difficulty === 'hard' && rarityRoll < 0.05) artifact = artifactsList.find(a => a.rarity === 'epic');
+                else if (difficulty === 'hard' && rarityRoll < 0.20) artifact = artifactsList.find(a => a.rarity === 'rare');
+                else if (difficulty === 'medium' && rarityRoll < 0.50) artifact = artifactsList.find(a => a.rarity === 'uncommon');
+                else artifact = artifactsList.find(a => a.rarity === 'common');
+                return { type: 'direct', artifact: artifact };
+            }
+        }
+
+        function endBattle(playerWon) {
+            battleActive = false;
+            clearInterval(answerTimer);
+            const equippedArtifacts = JSON.parse(localStorage.getItem('equippedArtifacts')) || [];
+            const tier = parseInt(localStorage.getItem('upgradeTier')) || 0;
+            const goldBonus = equippedArtifacts.reduce((sum, artifact) => sum + (artifact.goldMultiplier || 0), 0);
+            const xpBonus = equippedArtifacts.reduce((sum, artifact) => sum + (artifact.xpMultiplier || 0), 0);
+            const totalGold = Math.floor(currentMonster.baseGold * (1 + goldBonus) * upgradeTiers[tier].goldMultiplier);
+            const totalXP = Math.floor(currentMonster.baseXP * (1 + xpBonus) * upgradeTiers[tier].xpMultiplier);
+
+            if (playerWon) {
+                const gold = parseInt(localStorage.getItem('gold')) || 0;
+                const xp = parseInt(localStorage.getItem('xp')) || 0;
+                localStorage.setItem('gold', gold + totalGold);
+                localStorage.setItem('xp', xp + totalXP);
+                const level = parseInt(localStorage.getItem('level'));
+                const xpForNextLevel = level * 100;
+                if (xp + totalXP >= xpForNextLevel) {
+                    localStorage.setItem('level', level + 1);
+                    localStorage.setItem('xp', 0);
+                }
+
+                const drop = rollForDrop(currentMonster.difficulty);
+                const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+                if (drop.artifact) {
+                    inventory.push(drop.artifact);
+                    localStorage.setItem('inventory', JSON.stringify(inventory));
+                    document.getElementById('battle-message').textContent = `Victory! You gained ${totalGold} gold, ${totalXP} XP, and a ${drop.artifact.name} (${drop.artifact.rarity}) from a ${drop.type === 'chest' ? 'chest' : 'direct drop'}!`;
+                } else {
+                    document.getElementById('battle-message').textContent = `Victory! You gained ${totalGold} gold and ${totalXP} XP!`;
+                }
+            } else {
+                const gold = parseInt(localStorage.getItem('gold')) || 0;
+                const goldLost = Math.floor(gold * 0.1);
+                localStorage.setItem('gold', gold - goldLost);
+                document.getElementById('battle-message').textContent = `Defeated! You lost ${goldLost} gold.`;
+            }
+            setTimeout(() => {
+                showScreen('game-screen');
+                updateUI();
+                generateQuestion();
+            }, 2000);
+        }
+
+        // Initialize game
+        showScreen('game-screen');
+        generateQuestion();
+        updateUI();
+    </script>
+</body>
+</html>
