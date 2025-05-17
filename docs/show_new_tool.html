@@ -3,28 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Master - Fun Learning Game</title>
+    <title>Math Dash - Race to Victory!</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Comic Neue', cursive;
-            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            font-family: 'Poppins', sans-serif;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
             margin: 0;
             overflow-y: auto;
+            transition: background 0.5s ease;
+        }
+        .space-theme {
+            background: linear-gradient(135deg, #1a237e 0%, #4a148c 100%);
+            color: white;
+        }
+        .jungle-theme {
+            background: linear-gradient(135deg, #2e7d32 0%, #a5d6a7 100%);
+        }
+        .ocean-theme {
+            background: linear-gradient(135deg, #0288d1 0%, #4fc3f7 100%);
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             background: white;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             padding: 2rem;
             margin: 2rem;
             animation: fadeIn 1s ease-in;
+        }
+        .sidebar {
+            width: 220px;
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-right: 1rem;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
@@ -59,213 +75,412 @@
             75% { transform: translateX(-10px); }
             100% { transform: translateX(0); }
         }
+        .mascot-track {
+            font-family: monospace;
+            white-space: pre;
+            overflow: hidden;
+            font-size: 48px;
+            line-height: 1.2;
+        }
+        .mascot-running {
+            display: inline-block;
+            animation: bounce 0.5s ease infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+        .medal-display {
+            font-size: 4rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .answer-btn {
+            min-width: 120px;
+            margin: 0.5rem;
+        }
+        .high-scores {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .streak-counter {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
     </style>
 </head>
-<body>
-    <div class="container">
-        <!-- Welcome Screen -->
-        <div id="welcome-screen" class="text-center">
-            <h1 class="text-4xl font-bold text-indigo-600 mb-6">Math Master</h1>
-            <p class="text-lg text-gray-600 mb-4">Enter your name to start the adventure!</p>
+<body class="ocean-theme">
+    <div class="flex">
+        <!-- Sidebar for User Selection -->
+        <div class="sidebar">
+            <h3 class="text-lg font-bold text-blue-600 mb-4">Players</h3>
+            <div id="user-list"></div>
             <input
-                id="user-name"
+                id="new-user"
                 type="text"
-                placeholder="Your Name"
-                class="border-2 border-indigo-300 rounded-lg p-3 w-full max-w-xs mb-4 focus:outline-none focus:border-indigo-500"
+                placeholder="New Player Name"
+                class="border-2 border-blue-300 rounded-lg p-2 w-full mb-2 focus:outline-none focus:border-blue-500"
             />
             <button
-                onclick="startGame()"
-                class="btn bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700"
+                onclick="addUser()"
+                class="btn bg-green-500 text-white w-full py-2 rounded-lg hover:bg-green-600"
             >
-                Let's Go!
+                Add Player
             </button>
+            <div id="progress" class="mt-4 text-sm text-gray-600"></div>
         </div>
 
-        <!-- Setup Screen -->
-        <div id="setup-screen" class="hidden text-center">
-            <h2 id="greeting" class="text-3xl font-bold text-indigo-600 mb-6"></h2>
-            <p class="text-lg text-gray-600 mb-4">Choose your difficulty level:</p>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                <button onclick="setDifficulty(1)" class="btn bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Level 1</button>
-                <button onclick="setDifficulty(2)" class="btn bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Level 2</button>
-                <button onclick="setDifficulty(3)" class="btn bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">Level 3</button>
-                <button onclick="setDifficulty(4)" class="btn bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">Level 4</button>
-                <button onclick="setDifficulty(5)" class="btn bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">Level 5</button>
-                <button onclick="setDifficulty(6)" class="btn bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">Level 6</button>
-                <button onclick="setDifficulty(7)" class="btn bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">Level 7</button>
+        <div class="container">
+            <!-- Mascot Track -->
+            <div class="mascot-track bg-gray-100 p-4 rounded-lg mb-6 text-center">
+                <pre id="mascot" class="text-4xl"></pre>
+                <p id="mascot-message" class="text-sm text-gray-600 mt-2">Let's race to the finish!</p>
             </div>
-            <p class="text-lg text-gray-600 mb-4">Choose an operation:</p>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                <button onclick="setOperation('+')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Addition</button>
-                <button onclick="setOperation('-')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Subtraction</button>
-                <button onclick="setOperation('*')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Multiplication</button>
-                <button onclick="setOperation('/')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Division</button>
-            </div>
-            <button
-                onclick="startQuiz()"
-                class="btn bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700"
-            >
-                Start Quiz
-            </button>
-        </div>
 
-        <!-- Quiz Screen -->
-        <div id="quiz-screen" class="hidden text-center">
-            <h2 class="text-2xl font-bold text-indigo-600 mb-4">Question <span id="question-number">1</span> of 20</h2>
-            <div class="w-full bg-gray-200 rounded-full h-4 mb-6">
-                <div id="progress-bar" class="progress-bar bg-indigo-600 h-4 rounded-full" style="width: 5%"></div>
+            <!-- Welcome Screen -->
+            <div id="welcome-screen" class="text-center">
+                <h1 class="text-4xl font-bold text-blue-600 mb-6">Math Dash</h1>
+                <p class="text-lg text-gray-600 mb-4">Select a player or add a new one!</p>
             </div>
-            <p id="question" class="text-xl text-gray-800 mb-6"></p>
-            <input
-                id="answer-input"
-                type="text"
-                placeholder="Your Answer"
-                class="border-2 border-indigo-300 rounded-lg p-3 w-full max-w-xs mb-4 focus:outline-none focus:border-indigo-500"
-            />
-            <p id="feedback" class="text-lg mb-4"></p>
-            <button
-                onclick="checkAnswer()"
-                class="btn bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700"
-            >
-                Submit Answer
-            </button>
-            <button
-                id="next-button"
-                onclick="nextQuestion()"
-                class="hidden btn bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600"
-            >
-                Next Question
-            </button>
-        </div>
 
-        <!-- Results Screen -->
-        <div id="results-screen" class="hidden text-center">
-            <h2 class="text-3xl font-bold text-indigo-600 mb-6">Results</h2>
-            <p id="score" class="text-2xl text-gray-800 mb-4"></p>
-            <p id="percentage" class="text-2xl text-gray-800 mb-6"></p>
-            <button
-                onclick="restartGame()"
-                class="btn bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700"
-            >
-                Play Again
-            </button>
+            <!-- Mascot Selection Screen -->
+            <div id="mascot-screen" class="hidden text-center">
+                <h2 class="text-3xl font-bold text-blue-600 mb-6">Choose Your Mascot, <span id="mascot-user"></span>!</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
+                    <button onclick="setMascot('🐰')" class="btn bg-purple-500 text-white text-2xl py-4 rounded-lg hover:bg-purple-600">🐰 Bunny</button>
+                    <button onclick="setMascot('🐱')" class="btn bg-purple-500 text-white text-2xl py-4 rounded-lg hover:bg-purple-600">🐱 Kitty</button>
+                    <button onclick="setMascot('🦊')" class="btn bg-purple-500 text-white text-2xl py-4 rounded-lg hover:bg-purple-600">🦊 Fox</button>
+                    <button onclick="setMascot('🐶')" class="btn bg-purple-500 text-white text-2xl py-4 rounded-lg hover:bg-purple-600">🐶 Puppy</button>
+                    <button onclick="setMascot('🐻')" class="btn bg-purple-500 text-white text-2xl py-4 rounded-lg hover:bg-purple-600">🐻 Bear</button>
+                </div>
+                <p class="text-lg text-gray-600 mb-4">Choose a theme:</p>
+                <div class="flex justify-center gap-4 mb-6">
+                    <button onclick="setTheme('ocean')" class="btn bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Ocean</button>
+                    <button onclick="setTheme('jungle')" class="btn bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">Jungle</button>
+                    <button onclick="setTheme('space')" class="btn bg-indigo-500 text-white py-2 px-4 rounded-lg hover:bg-indigo-600">Space</button>
+                </div>
+                <button
+                    onclick="proceedToSetup()"
+                    class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700"
+                >
+                    Next
+                </button>
+            </div>
+
+            <!-- Setup Screen -->
+            <div id="setup-screen" class="hidden text-center">
+                <h2 id="greeting" class="text-3xl font-bold text-blue-600 mb-6"></h2>
+                <p class="text-lg text-gray-600 mb-4">Choose your difficulty level:</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <button onclick="setDifficulty(1)" class="btn bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Level 1</button>
+                    <button onclick="setDifficulty(2)" class="btn bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Level 2</button>
+                    <button onclick="setDifficulty(3)" class="btn bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">Level 3</button>
+                    <button onclick="setDifficulty(4)" class="btn bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">Level 4</button>
+                    <button onclick="setDifficulty(5)" class="btn bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">Level 5</button>
+                    <button onclick="setDifficulty(6)" class="btn bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">Level 6</button>
+                    <button onclick="setDifficulty(7)" class="btn bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">Level 7</button>
+                </div>
+                <p class="text-lg text-gray-600 mb-4">Choose an operation:</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <button onclick="setOperation('+')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Addition</button>
+                    <button onclick="setOperation('-')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Subtraction</button>
+                    <button onclick="setOperation('*')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Multiplication</button>
+                    <button onclick="setOperation('/')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Division</button>
+                </div>
+                <button
+                    onclick="startQuiz()"
+                    class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700"
+                >
+                    Start Quiz
+                </button>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quiz-screen" class="hidden text-center">
+                <h2 class="text-2xl font-bold text-blue-600 mb-4">Question <span id="question-number">1</span> of 15</h2>
+                <div class="w-full bg-gray-200 rounded-full h-4 mb-4">
+                    <div id="progress-bar" class="progress-bar bg-blue-600 h-4 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="streak" class="streak-counter text-orange-500 mb-4">Streak: 0</p>
+                <p id="question" class="text-xl text-gray-800 mb-6"></p>
+                <div id="answer-choices" class="flex flex-row justify-center gap-4 mb-4">
+                    <button onclick="checkAnswer(0)" class="answer-btn btn bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"><span class="font-bold">A:</span> <span id="choice-0"></span></button>
+                    <button onclick="checkAnswer(1)" class="answer-btn btn bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"><span class="font-bold">S:</span> <span id="choice-1"></span></button>
+                    <button onclick="checkAnswer(2)" class="answer-btn btn bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"><span class="font-bold">D:</span> <span id="choice-2"></span></button>
+                    <button onclick="checkAnswer(3)" class="answer-btn btn bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"><span class="font-bold">F:</span> <span id="choice-3"></span></button>
+                </div>
+                <p id="feedback" class="text-lg mb-4"></p>
+                <button
+                    onclick="quitGame()"
+                    class="btn bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600"
+                >
+                    Quit
+                </button>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="results-screen" class="hidden text-center">
+                <h2 class="text-3xl font-bold text-blue-600 mb-6">Race Complete!</h2>
+                <p id="medal" class="medal-display mb-4"></p>
+                <p id="score" class="text-2xl text-gray-800 mb-4"></p>
+                <p id="percentage" class="text-2xl text-gray-800 mb-4"></p>
+                <p id="time" class="text-xl text-gray-600 mb-6"></p>
+                <h3 class="text-xl font-bold text-blue-600 mb-4">High Scores</h3>
+                <div id="high-scores" class="high-scores text-left text-sm text-gray-600 mb-6 mx-auto max-w-md"></div>
+                <button
+                    onclick="restartGame()"
+                    class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700"
+                >
+                    Race Again!
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        let userName = '';
+        let currentUser = null;
         let difficulty = 1;
         let operation = '+';
+        const totalQuestions = 15;
         let currentQuestion = 0;
         let correctAnswers = 0;
-        let totalQuestions = 20;
+        let streak = 0;
         let questions = [];
+        let startTime = 0;
+        let highScores = {};
+        let mascotAnimation = null;
 
-        const difficultyRanges = {
-            1: { min: 1, max: 10 },
-            2: { min: 1, max: 50 },
-            3: { min: 1, max: 100 },
-            4: { min: 10, max: 200 },
-            5: { min: 50, max: 500 },
-            6: { min: 100, max: 1000 },
-            7: { min: 500, max: 10000 }
+        const users = {
+            Lucas: { mascot: '🐰', theme: 'ocean', games: [] },
+            Alycia: { mascot: '🐱', theme: 'jungle', games: [] }
         };
 
-        const correctSound = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
-        const incorrectSound = new Audio('https://www.soundjay.com/buttons/beep-02.mp3');
+        const difficultyRanges = {
+            1: { num1: { min: 1, max: 9 }, num2: { min: 1, max: 9 } }, // Single x Single
+            2: { num1: { min: 10, max: 99 }, num2: { min: 1, max: 9 } }, // Double x Single
+            3: { num1: { min: 10, max: 99 }, num2: { min: 10, max: 99 } }, // Double x Double
+            4: { num1: { min: 100, max: 999 }, num2: { min: 1, max: 9 } }, // Triple x Single
+            5: { num1: { min: 100, max: 999 }, num2: { min: 10, max: 99 } }, // Triple x Double
+            6: { num1: { min: 100, max: 999 }, num2: { min: 100, max: 999 } }, // Triple x Triple
+            7: { num1: { min: 1000, max: 9999 }, num2: { min: 10, max: 99 } } // Quad x Double
+        };
 
-        function startGame() {
-            userName = document.getElementById('user-name').value.trim();
-            if (!userName) {
-                alert('Please enter your name!');
+        const mascotMessages = [
+            "You're zooming along!",
+            "Super speedy answers!",
+            "Halfway there, champ!",
+            "You're a math wizard!",
+            "Sprint to the finish!"
+        ];
+
+        const mascotFrames = {
+            '🐰': ['🐰➡️', '🐰🏃'],
+            '🐱': ['🐱➡️', '🐱🏃'],
+            '🦊': ['🦊➡️', '🦊🏃'],
+            '🐶': ['🐶➡️', '🐶🏃'],
+            '🐻': ['🐻➡️', '🐻🏃']
+        };
+
+        function renderUserList() {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+            Object.keys(users).forEach(user => {
+                const button = document.createElement('button');
+                button.className = 'btn bg-blue-500 text-white w-full py-2 rounded-lg mb-2 hover:bg-blue-600';
+                button.textContent = user;
+                button.onclick = () => selectUser(user);
+                userList.appendChild(button);
+            });
+            updateProgress();
+        }
+
+        function addUser() {
+            const newUser = document.getElementById('new-user').value.trim();
+            if (!newUser) {
+                alert('Please enter a player name!');
                 return;
             }
+            if (users[newUser]) {
+                alert('Player already exists!');
+                return;
+            }
+            users[newUser] = { mascot: '🐰', theme: 'ocean', games: [] };
+            document.getElementById('new-user').value = '';
+            renderUserList();
+        }
+
+        function selectUser(user) {
+            currentUser = user;
             document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('mascot-screen').classList.remove('hidden');
+            document.getElementById('mascot-user').textContent = user;
+            document.getElementById('mascot').textContent = `${users[currentUser].mascot}  ---🏁`;
+            setTheme(users[currentUser].theme);
+        }
+
+        function setMascot(mascot) {
+            users[currentUser].mascot = mascot;
+            document.getElementById('mascot').textContent = `${mascot}  ---🏁`;
+            document.querySelectorAll('.btn.bg-purple-500').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-blue-300');
+            });
+            event.target.classList.add('ring-4', 'ring-blue-300');
+        }
+
+        function setTheme(theme) {
+            users[currentUser].theme = theme;
+            document.body.className = `${theme}-theme`;
+            document.querySelectorAll('.btn.bg-blue-500, .btn.bg-green-500, .btn.bg-indigo-500').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-blue-300');
+            });
+            const themeBtn = document.querySelector(`button[onclick="setTheme('${theme}')"]`);
+            if (themeBtn) themeBtn.classList.add('ring-4', 'ring-blue-300');
+        }
+
+        function proceedToSetup() {
+            document.getElementById('mascot-screen').classList.add('hidden');
             document.getElementById('setup-screen').classList.remove('hidden');
-            document.getElementById('greeting').textContent = `Hello, ${userName}!`;
+            document.getElementById('greeting').textContent = `Ready, ${currentUser}?`;
         }
 
         function setDifficulty(level) {
             difficulty = level;
             document.querySelectorAll('.btn.bg-green-500, .btn.bg-yellow-500, .btn.bg-orange-500, .btn.bg-red-500').forEach(btn => {
-                btn.classList.remove('ring-4', 'ring-indigo-300');
+                btn.classList.remove('ring-4', 'ring-blue-300');
             });
-            event.target.classList.add('ring-4', 'ring-indigo-300');
+            event.target.classList.add('ring-4', 'ring-blue-300');
         }
 
         function setOperation(op) {
             operation = op;
             document.querySelectorAll('.btn.bg-blue-500').forEach(btn => {
-                btn.classList.remove('ring-4', 'ring-indigo-300');
+                btn.classList.remove('ring-4', 'ring-blue-300');
             });
-            event.target.classList.add('ring-4', 'ring-indigo-300');
+            event.target.classList.add('ring-4', 'ring-blue-300');
         }
 
         function generateQuestion() {
             const range = difficultyRanges[difficulty];
-            let num1 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-            let num2 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+            let num1 = Math.floor(Math.random() * (range.num1.max - range.num1.min + 1)) + range.num1.min;
+            let num2 = Math.floor(Math.random() * (range.num2.max - range.num2.min + 1)) + range.num2.min;
             let answer;
 
             if (operation === '+') {
                 answer = num1 + num2;
-                return { question: `${num1} + ${num2} = ?`, answer };
             } else if (operation === '-') {
                 if (num1 < num2) [num1, num2] = [num2, num1];
                 answer = num1 - num2;
-                return { question: `${num1} - ${num2} = ?`, answer };
             } else if (operation === '*') {
                 answer = num1 * num2;
-                return { question: `${num1} × ${num2} = ?`, answer };
             } else {
                 answer = num1;
                 num1 = num1 * num2;
-                return { question: `${num1} ÷ ${num2} = ?`, answer };
             }
+
+            const choices = [answer];
+            while (choices.length < 4) {
+                const deviation = Math.floor(answer * (Math.random() * 0.6 - 0.3));
+                const choice = answer + deviation;
+                if (!choices.includes(choice) && choice !== 0) {
+                    choices.push(choice);
+                }
+            }
+            choices.sort(() => Math.random() - 0.5);
+
+            return {
+                question: operation === '/' ? `${num1} ÷ ${num2} = ?` : `${num1} ${operation} ${num2} = ?`,
+                answer,
+                choices,
+                correctIndex: choices.indexOf(answer)
+            };
+        }
+
+        function updateMascot() {
+            if (mascotAnimation) clearInterval(mascotAnimation);
+            const progress = currentQuestion / totalQuestions;
+            const trackLength = 15;
+            const position = Math.floor(progress * trackLength);
+            const frames = mascotFrames[users[currentUser].mascot];
+            let frameIndex = 0;
+
+            const updateFrame = () => {
+                const mascot = document.getElementById('mascot');
+                mascot.innerHTML = `<span class="mascot-running">${' '.repeat(position) + frames[frameIndex] + ' '.repeat(trackLength - position) + '🏁'}</span>`;
+                frameIndex = (frameIndex + 1) % frames.length;
+            };
+
+            updateFrame();
+            mascotAnimation = setInterval(updateFrame, 300);
+
+            const messageIndex = Math.min(Math.floor(progress * mascotMessages.length), mascotMessages.length - 1);
+            document.getElementById('mascot-message').textContent = mascotMessages[messageIndex];
+        }
+
+        function stopMascotAnimation() {
+            if (mascotAnimation) clearInterval(mascotAnimation);
+            const mascot = document.getElementById('mascot');
+            mascot.innerHTML = `<span class="mascot-running">${mascot.textContent}</span>`;
+            mascotAnimation = setInterval(() => {
+                mascot.classList.toggle('mascot-running');
+            }, 500);
+        }
+
+        function updateProgress() {
+            const progressDiv = document.getElementById('progress');
+            progressDiv.innerHTML = '';
+            Object.keys(users).forEach(user => {
+                const games = users[user].games;
+                const div = document.createElement('div');
+                div.className = 'mt-2';
+                div.textContent = games.length
+                    ? `${user}: ${games[games.length - 1].medal} (${games[games.length - 1].percentage.toFixed(2)}%)`
+                    : `${user}: No games yet`;
+                progressDiv.appendChild(div);
+            });
         }
 
         function startQuiz() {
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('total-questions').textContent = totalQuestions;
             questions = Array.from({ length: totalQuestions }, () => generateQuestion());
             currentQuestion = 0;
             correctAnswers = 0;
+            streak = 0;
+            startTime = Date.now();
             showQuestion();
         }
 
         function showQuestion() {
             document.getElementById('question-number').textContent = currentQuestion + 1;
             document.getElementById('question').textContent = questions[currentQuestion].question;
-            document.getElementById('answer-input').value = '';
             document.getElementById('feedback').textContent = '';
-            document.getElementById('next-button').classList.add('hidden');
+            document.getElementById('streak').textContent = `Streak: ${streak}`;
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`choice-${i}`).textContent = questions[currentQuestion].choices[i];
+            }
             document.getElementById('progress-bar').style.width = `${((currentQuestion + 1) / totalQuestions) * 100}%`;
+            updateMascot();
         }
 
-        function checkAnswer() {
-            const userAnswer = document.getElementById('answer-input').value.trim();
+        function checkAnswer(choiceIndex) {
             const feedback = document.getElementById('feedback');
+            const correctIndex = questions[currentQuestion].correctIndex;
             const correctAnswer = questions[currentQuestion].answer;
 
-            if (!/^-?\d+$/.test(userAnswer)) {
-                feedback.textContent = 'Please enter a valid number!';
-                feedback.classList.add('text-red-500', 'incorrect-animation');
-                incorrectSound.play();
-                return;
-            }
-
-            if (parseInt(userAnswer) === correctAnswer) {
+            if (choiceIndex === correctIndex) {
                 feedback.textContent = 'Correct!';
                 feedback.classList.add('text-green-500', 'correct-animation');
                 correctAnswers++;
-                correctSound.play();
+                streak++;
             } else {
                 feedback.textContent = `Incorrect. The correct answer was ${correctAnswer}.`;
                 feedback.classList.add('text-red-500', 'incorrect-animation');
-                incorrectSound.play();
+                streak = 0;
             }
 
-            document.getElementById('next-button').classList.remove('hidden');
+            document.getElementById('streak').textContent = `Streak: ${streak}`;
+            setTimeout(nextQuestion, 500);
         }
 
         function nextQuestion() {
@@ -277,28 +492,90 @@
             }
         }
 
+        function quitGame() {
+            if (mascotAnimation) clearInterval(mascotAnimation);
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            currentUser = null;
+        }
+
+        function getMedal(percentage) {
+            if (percentage >= 90) return { medal: '🥇 Gold', color: 'text-yellow-500' };
+            if (percentage >= 80) return { medal: '🥈 Silver', color: 'text-gray-400' };
+            if (percentage >= 70) return { medal: '🥉 Bronze', color: 'text-orange-600' };
+            return { medal: '🎖️ Try Again', color: 'text-blue-600' };
+        }
+
+        function updateHighScores(timeTaken) {
+            const mode = `${difficulty}-${operation}`;
+            if (!highScores[mode]) highScores[mode] = [];
+            highScores[mode].push({ user: currentUser, time: timeTaken, percentage: (correctAnswers / totalQuestions) * 100 });
+            highScores[mode].sort((a, b) => a.time - b.time);
+            highScores[mode] = highScores[mode].slice(0, 5);
+        }
+
+        function displayHighScores() {
+            const mode = `${difficulty}-${operation}`;
+            const scores = highScores[mode] || [];
+            const highScoresDiv = document.getElementById('high-scores');
+            highScoresDiv.innerHTML = scores.length
+                ? scores.map((score, i) => `${i + 1}. ${score.user}: ${score.time.toFixed(1)}s (${score.percentage.toFixed(2)}%)`).join('<br>')
+                : 'No high scores yet!';
+        }
+
+        function triggerConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
         function showResults() {
+            if (mascotAnimation) clearInterval(mascotAnimation);
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('results-screen').classList.remove('hidden');
             const percentage = (correctAnswers / totalQuestions) * 100;
+            const { medal, color } = getMedal(percentage);
+            const timeTaken = (Date.now() - startTime) / 1000;
+            users[currentUser].games.push({ medal, percentage, correct: correctAnswers, total: totalQuestions });
+            updateHighScores(timeTaken);
+            document.getElementById('medal').textContent = medal;
+            document.getElementById('medal').classList.add(color);
             document.getElementById('score').textContent = `Score: ${correctAnswers} out of ${totalQuestions}`;
             document.getElementById('percentage').textContent = `Percentage: ${percentage.toFixed(2)}%`;
+            document.getElementById('time').textContent = `Time: ${timeTaken.toFixed(1)} seconds`;
+            document.getElementById('mascot').textContent = `${users[currentUser].mascot}🏁 Yay!`;
+            document.getElementById('mascot-message').textContent = 'You made it! Awesome job!';
+            updateProgress();
+            displayHighScores();
+            if (percentage >= 80) triggerConfetti();
         }
 
         function restartGame() {
+            if (mascotAnimation) clearInterval(mascotAnimation);
             document.getElementById('results-screen').classList.add('hidden');
             document.getElementById('welcome-screen').classList.remove('hidden');
-            document.getElementById('user-name').value = '';
+            currentUser = null;
         }
 
-        // Handle Enter key for answer submission
-        document.getElementById('answer-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !document.getElementById('next-button').classList.contains('hidden')) {
-                nextQuestion();
-            } else if (e.key === 'Enter') {
-                checkAnswer();
-            }
+        // Handle keyboard shortcuts for answer selection
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('quiz-screen').classList.contains('hidden')) return;
+            const key = e.key.toLowerCase();
+            if (key === 'a') checkAnswer(0);
+            else if (key === 's') checkAnswer(1);
+            else if (key === 'd') checkAnswer(2);
+            else if (key === 'f') checkAnswer(3);
         });
+
+        // Handle Enter key for adding user
+        document.getElementById('new-user').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addUser();
+        });
+
+        // Initialize user list
+        renderUserList();
     </script>
 </body>
 </html>
