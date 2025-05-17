@@ -133,6 +133,20 @@
         .artifact-rarity-uncommon { border: 2px solid #10b981; background: #ecfdf5; }
         .artifact-rarity-common { border: 2px solid #6b7280; background: #f3f4f6; }
         .operation-theme { font-size: 1.2rem; font-weight: 600; color: #555; }
+        .rarity-tag {
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-top: 0.25rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 0.25rem;
+            display: inline-block;
+        }
+        .rarity-tag-common { background: #d1d5db; color: #374151; }
+        .rarity-tag-uncommon { background: #6ee7b7; color: #065f46; }
+        .rarity-tag-rare { background: #93c5fd; color: #1e40af; }
+        .rarity-tag-epic { background: #d8b4fe; color: #6b21a8; }
+        .rarity-tag-legendary { background: #fef08a; color: #854d0e; }
+        .rarity-tag-mythical { background: #f9a8d4; color: #831843; }
     </style>
 </head>
 <body class="ocean-theme">
@@ -187,11 +201,11 @@
                     <button onclick="setDifficulty(7)" class="btn bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">Level 7</button>
                 </div>
                 <p class="text-lg text-gray-600 mb-4">Choose an operation:</p>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                    <button onclick="setOperation('+')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Addition (Field)</button>
-                    <button onclick="setOperation('-')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Subtraction (Lake)</button>
-                    <button onclick="setOperation('*')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Multiplication (Forest)</button>
-                    <button onclick="setOperation('/')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Division (Volcanic Mountain)</button>
+                <div id="operation-buttons" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <button onclick="setOperation('+')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Addition (Sunlit Field)</button>
+                    <button onclick="setOperation('-')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Subtraction (Mystic Lake)</button>
+                    <button onclick="setOperation('*')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Multiplication (Enchanted Forest)</button>
+                    <button onclick="setOperation('/')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Division (Volcanic Abyss)</button>
                 </div>
                 <p class="text-lg text-gray-600 mb-4">Sound effects:</p>
                 <div class="flex justify-center gap-4 mb-6">
@@ -261,6 +275,7 @@
                 <div id="artifacts" class="artifact-grid mb-4"></div>
                 <h3 class="text-xl font-bold text-blue-600 mb-2">Game History</h3>
                 <div id="game-history" class="text-left text-sm text-gray-600 mb-6 mx-auto max-w-md"></div>
+                <button onclick="openChest()" class="btn bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700 mb-4">Open Next Chest</button>
                 <button onclick="backToWelcome()" class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Back</button>
             </div>
         </div>
@@ -292,10 +307,16 @@
             7: { min: 500, max: 1000, goldBase: 40, goldMultiplier: 3 }
         };
         const operationThemes = {
-            '+': 'Field',
-            '-': 'Lake',
-            '*': 'Forest',
-            '/': 'Volcanic Mountain'
+            '+': 'Sunlit Field - A vibrant meadow where glowing flora hums with energy.',
+            '-': 'Mystic Lake - A shimmering lake where ghostly fish whisper ancient secrets.',
+            '*': 'Enchanted Forest - A dense forest where trees whisper multiplicative riddles.',
+            '/': 'Volcanic Abyss - A fiery chasm where molten challenges test your precision.'
+        };
+        const operationUnlockLevels = {
+            '+': 1,
+            '-': 3,
+            '*': 6,
+            '/': 9
         };
         const goalObjects = {
             ocean: ['🏝️', '⚓', '🐚'],
@@ -305,464 +326,549 @@
         const ranks = [
             { name: 'Initiate', xp: 0 },
             { name: 'Novice', xp: 100 },
-            { name: 'Apprentice', xp: 250 },
-            { name: 'Journeyman', xp: 500 },
+            { name: 'Apprentice', xp: 300 },
+            { name: 'Journeyman', xp: 600 },
             { name: 'Expert', xp: 1000 },
-            { name: 'Adept', xp: 2000 },
-            { name: 'Master', xp: 3500 },
-            { name: 'Grandmaster', xp: 5000 },
-            { name: 'Legend', xp: 7500 },
+            { name: 'Adept', xp: 1500 },
+            { name: 'Master', xp: 2500 },
+            { name: 'Grandmaster', xp: 4000 },
+            { name: 'Legend', xp: 6000 },
             { name: 'Immortal', xp: 10000 }
         ];
         const properties = [
-            { tier: 0, name: 'None', cost: 0, description: '' },
-            { tier: 1, name: 'Campfire', cost: 100, description: 'A small fire to keep you warm.' },
-            { tier: 2, name: 'Tent', cost: 200, description: 'A cozy tent for shelter.' },
-            { tier: 3, name: 'Cabin', cost: 500, description: 'A wooden cabin with a fireplace.' },
-            { tier: 4, name: 'House', cost: 1000, description: 'A comfortable house with a garden.' },
-            { tier: 5, name: 'Mansion', cost: 5000, description: 'A luxurious mansion with many rooms.' },
-            { tier: 6, name: 'Castle', cost: 10000, description: 'A grand castle fit for a king.' }
-        ];
-        const artifactsList = [
-            { name: 'Golden Scepter', rarity: 'legendary', price: 5000, description: 'A scepter of pure gold, radiating royal authority.' },
-            { name: 'Moonlit Dagger', rarity: 'rare', price: 800, description: 'A dagger that glows faintly under moonlight, perfect for stealth.' },
-            { name: 'Emerald Compass', rarity: 'epic', price: 1500, description: 'A magical compass with an emerald inlay, guiding to hidden treasures.' },
-            { name: 'Wooden Flute', rarity: 'common', price: 150, description: 'A simple flute carved from oak, playing soothing tunes.' },
-            { name: 'Sapphire Cloak', rarity: 'legendary', price: 4500, description: 'A cloak woven with sapphire threads, granting invisibility at night.' },
-            { name: 'Iron Lantern', rarity: 'common', price: 200, description: 'A sturdy lantern that lights up dark jungle paths.' },
-            { name: 'Ruby Talisman', rarity: 'rare', price: 900, description: 'A talisman with a ruby core, boosting courage in battle.' },
-            { name: 'Bronze Gauntlets', rarity: 'uncommon', price: 350, description: 'Heavy gauntlets offering protection in melee combat.' },
-            { name: 'Diamond Orb', rarity: 'legendary', price: 6000, description: 'An orb encrusted with diamonds, holding ancient wisdom.' },
-            { name: 'Steel Bow', rarity: 'common', price: 250, description: 'A reliable steel bow for long-range attacks.' },
-            { name: 'Amethyst Pendant', rarity: 'epic', price: 1200, description: 'A pendant with an amethyst gem, protecting against curses.' },
-            { name: 'Obsidian Blade', rarity: 'rare', price: 1000, description: 'A razor-sharp blade carved from obsidian, deadly in skilled hands.' },
-            { name: 'Platinum Chalice', rarity: 'legendary', price: 5500, description: 'A chalice of platinum, said to purify any liquid poured into it.' },
-            { name: 'Leather Satchel', rarity: 'common', price: 180, description: 'A rugged satchel for carrying jungle supplies.' },
-            { name: 'Topaz Ring', rarity: 'uncommon', price: 400, description: 'A ring with a glowing topaz, enhancing focus.' },
-            { name: 'Cedar Staff', rarity: 'common', price: 220, description: 'A staff made of cedar wood, used for channeling nature magic.' },
-            { name: 'Garnet Brooch', rarity: 'rare', price: 850, description: 'A brooch with a fiery garnet, increasing stamina.' },
-            { name: 'Onyx Amulet', rarity: 'epic', price: 1300, description: 'An amulet with a dark onyx stone, granting stealth in shadows.' },
-            { name: 'Copper Telescope', rarity: 'uncommon', price: 300, description: 'A telescope for spotting distant dangers in the jungle.' },
-            { name: 'Coral Bracelet', rarity: 'common', price: 200, description: 'A bracelet made of ocean coral, bringing calmness.' },
-            { name: 'Ivory Horn', rarity: 'legendary', price: 5200, description: 'A horn carved from ivory, summoning allies with its call.' },
-            { name: 'Quartz Wand', rarity: 'rare', price: 950, description: 'A wand topped with a quartz crystal, amplifying spells.' },
-            { name: 'Silk Scarf', rarity: 'uncommon', price: 320, description: 'A silk scarf with jungle patterns, enhancing agility.' },
-            { name: 'Jade Mask', rarity: 'epic', price: 1400, description: 'A mask carved from jade, offering spiritual protection.' },
-            { name: 'Tin Cup', rarity: 'common', price: 150, description: 'A simple tin cup for drinking water on long journeys.' },
-            { name: 'Turquoise Necklace', rarity: 'rare', price: 800, description: 'A necklace with turquoise stones, boosting endurance.' },
-            { name: 'Brass Bell', rarity: 'uncommon', price: 280, description: 'A brass bell that wards off evil spirits with its chime.' },
-            { name: 'Crystal Globe', rarity: 'legendary', price: 5800, description: 'A globe of crystal that reveals hidden paths.' },
-            { name: 'Velvet Boots', rarity: 'common', price: 230, description: 'Soft velvet boots with a sturdy sole for jungle treks.' },
-            { name: 'Opal Earrings', rarity: 'epic', price: 1100, description: 'Earrings with shimmering opals, enhancing intuition.' },
-            { name: 'Lead Hammer', rarity: 'common', price: 260, description: 'A heavy hammer for breaking through obstacles.' },
-            { name: 'Aquamarine Ring', rarity: 'uncommon', price: 400, description: 'A ring with an aquamarine gem, promoting serenity.' },
-            { name: 'Silver Lyre', rarity: 'rare', price: 900, description: 'A silver lyre that plays melodies to calm wild beasts.' },
-            { name: 'Marble Statue', rarity: 'legendary', price: 6000, description: 'A statue of a jungle deity, radiating divine energy.' },
-            { name: 'Copper Anklet', rarity: 'common', price: 180, description: 'A simple anklet with etched symbols of strength.' },
-            { name: 'Lapis Lazuli Amulet', rarity: 'epic', price: 1250, description: 'An amulet with a deep blue lapis lazuli, enhancing wisdom.' },
-            { name: 'Iron Chainmail', rarity: 'uncommon', price: 450, description: 'Durable chainmail for moderate protection in battle.' },
-            { name: 'Moonstone Ring', rarity: 'rare', price: 850, description: 'A ring with a glowing moonstone, improving night vision.' },
-            { name: 'Golden Flute', rarity: 'legendary', price: 5100, description: 'A golden flute with enchanting tones, soothing the jungle.' },
-            { name: 'Ebony Wand', rarity: 'epic', price: 1300, description: 'A wand of ebony wood, channeling dark magic.' },
-            { name: 'Satin Sash', rarity: 'common', price: 200, description: 'A satin sash with jungle embroidery, adding elegance.' },
-            { name: 'Citrine Pendant', rarity: 'uncommon', price: 380, description: 'A pendant with a bright citrine stone, boosting energy.' },
-            { name: 'Brass Compass', rarity: 'common', price: 250, description: 'A brass compass for navigating through dense jungles.' },
-            { name: 'Pearl Tiara', rarity: 'rare', price: 950, description: 'A tiara with lustrous pearls, fit for a jungle queen.' },
-            { name: 'Obsidian Spear', rarity: 'epic', price: 1400, description: 'A spear with an obsidian tip, perfect for hunting.' },
-            { name: 'Platinum Crown', rarity: 'legendary', price: 6200, description: 'A platinum crown with embedded gems, symbolizing power.' },
-            { name: 'Wooden Bow', rarity: 'common', price: 220, description: 'A sturdy wooden bow for accurate long-range shots.' },
-            { name: 'Aquamarine Necklace', rarity: 'uncommon', price: 400, description: 'A necklace with an aquamarine stone, promoting peace.' },
-            { name: 'Steel Gauntlets', rarity: 'common', price: 300, description: 'Heavy gauntlets offering superior hand protection.' },
-            { name: 'Amethyst Ring', rarity: 'rare', price: 800, description: 'A ring with a deep amethyst, protecting against dark magic.' },
-            { name: 'Gold Medallion', rarity: 'legendary', price: 5000, description: 'A medallion with ancient symbols, granting luck.' },
-            { name: 'Leather Boots', rarity: 'common', price: 200, description: 'Tough leather boots with jungle tread for exploration.' },
-            { name: 'Topaz Brooch', rarity: 'uncommon', price: 350, description: 'A brooch with a radiant topaz, enhancing charisma.' },
-            { name: 'Iron Spear', rarity: 'common', price: 280, description: 'A sturdy iron spear for close combat.' },
-            { name: 'Garnet Ring', rarity: 'epic', price: 1200, description: 'A ring with fiery garnet stones, increasing vitality.' },
-            { name: 'Onyx Pendant', rarity: 'rare', price: 900, description: 'A pendant with a dark onyx stone, granting stealth.' },
-            { name: 'Flint Knife', rarity: 'common', price: 180, description: 'A rugged flint knife for survival tasks.' },
-            { name: 'Coral Ring', rarity: 'uncommon', price: 320, description: 'A ring made of vibrant coral, evoking the ocean’s spirit.' },
-            { name: 'Ivory Necklace', rarity: 'rare', price: 850, description: 'A necklace carved from ivory, boosting agility.' },
-            { name: 'Quartz Crystal', rarity: 'epic', price: 1300, description: 'A raw quartz crystal that amplifies magical abilities.' },
-            { name: 'Silk Belt', rarity: 'common', price: 200, description: 'A silk belt with jungle patterns, adding style.' },
-            { name: 'Turquoise Pendant', rarity: 'uncommon', price: 400, description: 'A pendant with turquoise stones, enhancing endurance.' },
-            { name: 'Brass Goblet', rarity: 'common', price: 250, description: 'A brass goblet with etched designs, used for ceremonies.' },
-            { name: 'Crystal Spear', rarity: 'legendary', price: 5500, description: 'A spear with a crystal tip, channeling pure energy.' },
-            { name: 'Velvet Hat', rarity: 'uncommon', price: 300, description: 'A velvet hat with a jungle feather, enhancing mobility.' },
-            { name: 'Jade Ring', rarity: 'rare', price: 900, description: 'A ring with a carved jade stone, offering spiritual protection.' },
-            { name: 'Lead Mace', rarity: 'common', price: 280, description: 'A heavy lead mace for crushing opponents.' },
-            { name: 'Silver Harp', rarity: 'epic', price: 1400, description: 'A silver harp that plays soothing melodies to influence foes.' },
-            { name: 'Marble Plaque', rarity: 'legendary', price: 5800, description: 'A marble plaque with jungle carvings, used for blessings.' },
-            { name: 'Copper Ring', rarity: 'common', price: 180, description: 'A simple copper ring with etched strength symbols.' },
-            { name: 'Opal Pendant', rarity: 'rare', price: 850, description: 'A pendant with a shimmering opal, enhancing foresight.' },
-            { name: 'Iron Helmet', rarity: 'uncommon', price: 400, description: 'A sturdy iron helmet with a jungle crest.' },
-            { name: 'Lapis Lazuli Ring', rarity: 'epic', price: 1200, description: 'A ring with a deep blue lapis lazuli, promoting wisdom.' },
-            { name: 'Golden Lyre', rarity: 'legendary', price: 5100, description: 'A golden lyre with enchanting tones, calming the jungle.' },
-            { name: 'Ebony Staff', rarity: 'rare', price: 950, description: 'An ebony staff with carved runes, channeling dark magic.' },
-            { name: 'Satin Vest', rarity: 'common', price: 220, description: 'A satin vest with jungle embroidery, adding elegance.' },
-            { name: 'Citrine Ring', rarity: 'uncommon', price: 350, description: 'A ring with a bright citrine stone, boosting energy.' },
-            { name: 'Brass Telescope', rarity: 'common', price: 260, description: 'A brass telescope for spotting distant treasures.' },
-            { name: 'Pearl Ring', rarity: 'rare', price: 900, description: 'A ring with a lustrous pearl, fit for a jungle queen.' },
-            { name: 'Obsidian Bow', rarity: 'epic', price: 1300, description: 'A sleek obsidian bow with deadly accuracy.' },
-            { name: 'Gold Anklet', rarity: 'legendary', price: 5000, description: 'An anklet with golden charms, granting luck in travel.' },
-            { name: 'Leather Gloves', rarity: 'common', price: 200, description: 'Tough leather gloves for climbing jungle vines.' },
-            { name: 'Topaz Necklace', rarity: 'uncommon', price: 400, description: 'A necklace with a radiant topaz, enhancing charisma.' },
-            { name: 'Iron Bow', rarity: 'common', price: 280, description: 'A sturdy iron bow with a powerful draw.' },
-            { name: 'Amethyst Necklace', rarity: 'rare', price: 850, description: 'A necklace with a deep amethyst, protecting against curses.' },
-            { name: 'Platinum Bracelet', rarity: 'legendary', price: 5200, description: 'A bracelet with a platinum chain, symbolizing wealth.' },
-            { name: 'Flint Spear', rarity: 'common', price: 200, description: 'A rugged flint spear for survival in the wild.' },
-            { name: 'Coral Necklace', rarity: 'uncommon', price: 350, description: 'A necklace made of vibrant coral, evoking the sea.' },
-            { name: 'Ivory Ring', rarity: 'rare', price: 900, description: 'A ring carved from ivory, enhancing agility.' },
-            { name: 'Quartz Pendant', rarity: 'epic', price: 1200, description: 'A pendant with a raw quartz crystal, amplifying magic.' },
-            { name: 'Silk Sash', rarity: 'common', price: 220, description: 'A silk sash with jungle patterns, adding style.' },
-            { name: 'Onyx Ring', rarity: 'rare', price: 850, description: 'A ring with a dark onyx stone, granting stealth.' },
-            { name: 'Tin Whistle', rarity: 'uncommon', price: 300, description: 'A tin whistle that mimics jungle bird calls.' },
-            { name: 'Garnet Pendant', rarity: 'epic', price: 1300, description: 'A pendant with fiery garnet stones, boosting stamina.' },
-            { name: 'Bronze Mirror', rarity: 'common', price: 200, description: 'A bronze mirror with etched designs, revealing truths.' },
-            { name: 'Crystal Wand', rarity: 'legendary', price: 5500, description: 'A wand topped with a clear crystal, channeling pure magic.' },
-            { name: 'Velvet Cloak', rarity: 'uncommon', price: 400, description: 'A velvet cloak with a jungle vine border, enhancing mobility.' },
-            { name: 'Jade Amulet', rarity: 'rare', price: 900, description: 'An amulet with a carved jade stone, offering protection.' },
-            { name: 'Lead Club', rarity: 'common', price: 260, description: 'A heavy lead club for overwhelming opponents.' },
-            { name: 'Turquoise Ring', rarity: 'uncommon', price: 350, description: 'A ring with turquoise stones, enhancing endurance.' },
-            { name: 'Silver Flute', rarity: 'epic', price: 1400, description: 'A silver flute that plays enchanting melodies.' },
-            { name: 'Marble Bowl', rarity: 'legendary', price: 5800, description: 'A marble bowl with jungle motifs, used for rituals.' },
-            { name: 'Copper Bracelet', rarity: 'common', price: 200, description: 'A simple copper bracelet with etched symbols.' },
-            { name: 'Opal Ring', rarity: 'rare', price: 850, description: 'A ring with a shimmering opal, enhancing foresight.' },
-            { name: 'Iron Armor', rarity: 'uncommon', price: 450, description: 'Heavy iron armor offering superior protection.' },
-            { name: 'Lapis Lazuli Pendant', rarity: 'epic', price: 1200, description: 'A pendant with a deep blue lapis lazuli, promoting wisdom.' },
-            { name: 'Golden Harp', rarity: 'legendary', price: 5100, description: 'A golden harp with soothing tones, calming chaos.' },
-            { name: 'Ebony Spear', rarity: 'rare', price: 900, description: 'A spear of ebony wood, channeling dark energy.' },
-            { name: 'Satin Cloak', rarity: 'common', price: 220, description: 'A satin cloak with jungle embroidery, adding elegance.' },
-            { name: 'Citrine Necklace', rarity: 'uncommon', price: 400, description: 'A necklace with a bright citrine stone, boosting energy.' },
-            { name: 'Brass Lantern', rarity: 'common', price: 250, description: 'A brass lantern for illuminating dark paths.' },
-            { name: 'Pearl Necklace', rarity: 'rare', price: 950, description: 'A necklace with lustrous pearls, fit for royalty.' },
-            { name: 'Obsidian Ring', rarity: 'epic', price: 1300, description: 'A ring with an obsidian gem, granting stealth.' },
-            { name: 'Cursed Blade', rarity: 'epic', price: 1800, description: 'A blade imbued with dark magic, whispering secrets.' },
-            { name: 'Vampire Fang', rarity: 'rare', price: 600, description: 'A fang from an ancient vampire, glowing faintly.' },
-            { name: 'Shadow Puppy', rarity: 'uncommon', price: 250, description: 'A playful pet that blends into the shadows.' },
-            { name: 'Fire Kitten', rarity: 'rare', price: 700, description: 'A companion with a fiery tail, warming your journey.' },
-            { name: 'Mythical Dragon Egg', rarity: 'mythical', price: 10000, description: 'A rare egg that might hatch into a dragon.' },
-            { name: 'Eternal Phoenix', rarity: 'mythical', price: 12000, description: 'A mythical companion reborn from ashes, fiery brilliance.' }
+            { tier: 0, name: 'Wanderer’s Clearing', cost: 0, description: 'An empty clearing under the stars, your journey begins here.' },
+            { tier: 1, name: 'Firefly Hollow', cost: 100, description: 'A cozy hollow lit by glowing fireflies, offering warmth and minor protection.' },
+            { tier: 2, name: 'Whispering Grove Tent', cost: 300, description: 'A sturdy tent nestled in a grove where trees whisper secrets, improving rest.' },
+            { tier: 3, name: 'Moonlit Stream Cabin', cost: 700, description: 'A quaint cabin by a moonlit stream, its waters heal minor wounds.' },
+            { tier: 4, name: 'Starwood Cottage', cost: 1500, description: 'A cottage built from starwood, its glow boosts your magical aura.' },
+            { tier: 5, name: 'Crystal Vale House', cost: 3000, description: 'A house in a vale of shimmering crystals, amplifying your wisdom.' },
+            { tier: 6, name: 'Skyreach Manor', cost: 6000, description: 'A manor perched on a cliff, its height grants visions of distant lands.' },
+            { tier: 7, name: 'Obsidian Spire', cost: 10000, description: 'A spire of obsidian, its dark energy shields against curses.' },
+            { tier: 8, name: 'Celestial Citadel', cost: 15000, description: 'A citadel touched by the stars, enhancing all your abilities.' },
+            { tier: 9, name: 'Ethereal Palace', cost: 25000, description: 'A palace of ethereal light, its halls grant eternal youth.' },
+            { tier: 10, name: 'Divine Sanctuary', cost: 50000, description: 'A sanctuary blessed by the gods, radiating divine power.' }
         ];
 
-        function safeGetElement(id) {
-            const element = document.getElementById(id);
-            if (!element) console.error(`Element with ID ${id} not found`);
-            return element;
-        }
+        // Placeholder for artifactsList - paste the generated list here
+        const artifactsList = [{ name: 'Astral Compass', rarity: 'legendary', price: 7500, description: 'A celestial navigation tool forged by starlight, guiding through cosmic storms with precision.' },
+    { name: 'Serpent’s Fang Dagger', rarity: 'rare', price: 1200, description: 'Crafted from a jungle viper’s venomous tooth, this dagger paralyzes foes with a single strike.' },
+    { name: 'Lunar Prism', rarity: 'epic', price: 2000, description: 'A crystal prism harvested under a blood moon, refracting light into beams of healing energy.' },
+    { name: 'Coral Whisperer Flute', rarity: 'common', price: 300, description: 'Made from ocean coral, its melodies summon marine life to aid in underwater quests.' },
+    { name: 'Eclipse Cloak', rarity: 'legendary', price: 7000, description: 'Woven from shadow silk during a solar eclipse, it cloaks the wearer in impenetrable darkness.' },
+    { name: 'Volcanic Ember Lantern', rarity: 'common', price: 350, description: 'Fueled by molten lava fragments, this lantern burns eternally in the harshest volcanic caves.' },
+    { name: 'Tiger’s Eye Amulet', rarity: 'uncommon', price: 500, description: 'Carved from a rare tiger’s eye gem, it grants the wearer feline agility in jungle hunts.' },
+    { name: 'Frostbite Gauntlets', rarity: 'rare', price: 1300, description: 'Forged in icy peaks, these gauntlets freeze enemies with every punch.' },
+    { name: 'Starfall Orb', rarity: 'legendary', price: 8000, description: 'A meteorite shard orb that unleashes a shower of stardust to obliterate foes.' },
+    { name: 'Bamboo Storm Bow', rarity: 'common', price: 400, description: 'Crafted from enchanted bamboo, its arrows whistle like a tropical storm.' },
+    { name: 'Sapphire Dreamcatcher', rarity: 'epic', price: 1800, description: 'Woven with sapphire threads, it traps nightmares and grants prophetic dreams.' },
+    { name: 'Obsidian Dragon Blade', rarity: 'rare', price: 1400, description: 'Forged from a dragon’s obsidian scale, it slices through armor with ease.' },
+    { name: 'Celestial Chalice', rarity: 'legendary', price: 6500, description: 'A chalice blessed by constellations, turning water into stardust elixir.' },
+    { name: 'Vineweaver Satchel', rarity: 'common', price: 250, description: 'Woven from living jungle vines, it magically repairs itself over time.' },
+    { name: 'Sunstone Ring', rarity: 'uncommon', price: 600, description: 'A ring glowing with captured sunlight, boosting energy in dark realms.' },
+    { name: 'Elderwood Staff', rarity: 'common', price: 450, description: 'Carved from a thousand-year-old tree, it channels the forest’s ancient magic.' },
+    { name: 'Bloodruby Brooch', rarity: 'rare', price: 1100, description: 'A brooch dripping with ruby blood, enhancing vitality in combat.' },
+    { name: 'Shadowveil Amulet', rarity: 'epic', price: 1900, description: 'Crafted in the underworld, it bends light to cloak the wearer from sight.' },
+    { name: 'Aetherial Spyglass', rarity: 'uncommon', price: 550, description: 'A spyglass that pierces dimensions, revealing hidden treasures across planes.' },
+    { name: 'Pearl Seahorse Bracelet', rarity: 'common', price: 300, description: 'Adorned with pearls, it summons a spectral seahorse for underwater travel.' },
+    { name: 'Phoenix Ivory Horn', rarity: 'legendary', price: 7200, description: 'Carved from a phoenix’s rebirth bone, its call resurrects fallen allies.' },
+    { name: 'Crystal Tide Wand', rarity: 'rare', price: 1250, description: 'A wand infused with ocean tides, casting waves to disorient enemies.' },
+    { name: 'Silk Mirage Scarf', rarity: 'uncommon', price: 650, description: 'Woven with desert spider silk, it creates illusory duplicates of the wearer.' },
+    { name: 'Emerald Jaguar Mask', rarity: 'epic', price: 2100, description: 'A mask blessed by a jungle jaguar spirit, granting stealth and speed.' },
+    { name: 'Tin Star Compass', rarity: 'common', price: 350, description: 'A rugged tin compass aligned with a forgotten constellation.' },
+    { name: 'Aquamarine Trident', rarity: 'rare', price: 1300, description: 'Forged from sea glass, it commands the ocean’s currents in battle.' },
+    { name: 'Golden Chime Bell', rarity: 'uncommon', price: 600, description: 'A bell that rings with golden tones, warding off spectral entities.' },
+    { name: 'Nebula Globe', rarity: 'legendary', price: 8500, description: 'A globe containing a captured nebula, revealing cosmic secrets.' },
+    { name: 'Velvet Storm Boots', rarity: 'common', price: 400, description: 'Boots lined with storm-cloud velvet, allowing swift movement on water.' },
+    { name: 'Opal Phoenix Earrings', rarity: 'epic', price: 2000, description: 'Earrings with opal flames, granting rebirth after near-death.' },
+    { name: 'Lead Thunder Hammer', rarity: 'common', price: 450, description: 'A hammer infused with thunder essence, striking with electric force.' },
+    { name: 'Iceberg Ring', rarity: 'uncommon', price: 700, description: 'A ring carved from ancient ice, cooling the wearer in fiery battles.' },
+    { name: 'Silver Moon Lyre', rarity: 'rare', price: 1400, description: 'A lyre that plays lunar melodies, enchanting listeners into a trance.' },
+    { name: 'Marble Phoenix Statue', rarity: 'legendary', price: 9000, description: 'A statue that radiates phoenix fire, reviving the fallen nearby.' },
+    { name: 'Copper Tide Anklet', rarity: 'common', price: 300, description: 'An anklet that hums with ocean tides, aiding swimmers.' },
+    { name: 'Lapis Sky Amulet', rarity: 'epic', price: 2200, description: 'An amulet with lapis lazuli, connecting the wearer to the heavens.' },
+    { name: 'Iron Tempest Chainmail', rarity: 'uncommon', price: 800, description: 'Chainmail forged in a storm, deflecting lightning strikes.' },
+    { name: 'Moonshadow Ring', rarity: 'rare', price: 1300, description: 'A ring that glows with moonshadow, enhancing night vision.' },
+    { name: 'Sunfire Flute', rarity: 'legendary', price: 7500, description: 'A flute that plays with solar flames, igniting the battlefield.' },
+    { name: 'Ebony Void Wand', rarity: 'epic', price: 2300, description: 'A wand drawing from the void, casting dark tendrils to bind foes.' },
+    { name: 'Satin Galaxy Sash', rarity: 'common', price: 350, description: 'A sash embroidered with star patterns, boosting cosmic awareness.' },
+    { name: 'Citrine Storm Pendant', rarity: 'uncommon', price: 750, description: 'A pendant charged with storm energy, electrifying the wearer’s touch.' },
+    { name: 'Brass Nebula Telescope', rarity: 'common', price: 500, description: 'A telescope revealing distant galaxies, aiding stargazers.' },
+    { name: 'Pearl Dragon Tiara', rarity: 'rare', price: 1500, description: 'A tiara with dragon-pearl gems, commanding respect from beasts.' },
+    { name: 'Obsidian Inferno Spear', rarity: 'epic', price: 2400, description: 'A spear wreathed in volcanic fire, piercing through defenses.' },
+    { name: 'Platinum Star Crown', rarity: 'legendary', price: 9500, description: 'A crown studded with star fragments, granting celestial authority.' },
+    { name: 'Willow Whisper Bow', rarity: 'common', price: 400, description: 'A bow crafted from enchanted willow, silent in forest ambushes.' },
+    { name: 'Aquamarine Tide Necklace', rarity: 'uncommon', price: 700, description: 'A necklace that flows with tidal magic, calming stormy seas.' },
+    { name: 'Steel Vortex Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets swirling with wind, striking with cyclone force.' },
+    { name: 'Amethyst Eclipse Ring', rarity: 'rare', price: 1400, description: 'A ring that harnesses eclipse energy, blinding enemies.' },
+    { name: 'Gold Phoenix Medallion', rarity: 'legendary', price: 8000, description: 'A medallion that resurrects the wearer once with phoenix fire.' },
+    { name: 'Leather Storm Boots', rarity: 'common', price: 350, description: 'Boots reinforced with storm leather, gripping wet terrain.' },
+    { name: 'Topaz Thunder Brooch', rarity: 'uncommon', price: 750, description: 'A brooch crackling with thunder, boosting electrical resistance.' },
+    { name: 'Iron Gale Spear', rarity: 'common', price: 450, description: 'A spear infused with wind, cutting through air with ease.' },
+    { name: 'Garnet Lava Pendant', rarity: 'epic', price: 2500, description: 'A pendant with molten garnet, increasing fire resistance.' },
+    { name: 'Onyx Night Bow', rarity: 'rare', price: 1500, description: 'A bow shrouded in night, striking unseen in darkness.' },
+    { name: 'Platinum Tide Bracelet', rarity: 'legendary', price: 8500, description: 'A bracelet that commands ocean waves, drowning foes.' },
+    { name: 'Flint Ember Knife', rarity: 'common', price: 300, description: 'A knife sparked with ember, igniting flammable targets.' },
+    { name: 'Coral Reef Necklace', rarity: 'uncommon', price: 700, description: 'A necklace built from reef coral, enhancing underwater breathing.' },
+    { name: 'Ivory Moon Horn', rarity: 'rare', price: 1400, description: 'A horn that calls lunar wolves to aid in battle.' },
+    { name: 'Quartz Star Crystal', rarity: 'epic', price: 2600, description: 'A crystal pulsing with starlight, amplifying all magic.' },
+    { name: 'Silk Nebula Belt', rarity: 'common', price: 350, description: 'A belt with nebula silk, granting minor levitation.' },
+    { name: 'Turquoise Gale Pendant', rarity: 'uncommon', price: 800, description: 'A pendant whistling with wind, boosting speed.' },
+    { name: 'Brass Solar Goblet', rarity: 'common', price: 500, description: 'A goblet that warms any liquid with captured sunlight.' },
+    { name: 'Crystal Phoenix Spear', rarity: 'legendary', price: 9000, description: 'A spear reborn in phoenix flames, striking with eternal fire.' },
+    { name: 'Velvet Twilight Hat', rarity: 'uncommon', price: 750, description: 'A hat woven at twilight, enhancing night vision.' },
+    { name: 'Jade Forest Mask', rarity: 'rare', price: 1600, description: 'A mask blessed by forest spirits, blending into greenery.' },
+    { name: 'Lead Meteor Mace', rarity: 'common', price: 450, description: 'A mace forged from a fallen meteor, crushing with cosmic force.' },
+    { name: 'Silver Tide Lyre', rarity: 'epic', price: 2700, description: 'A lyre that plays tidal melodies, controlling water currents.' },
+    { name: 'Marble Galaxy Plaque', rarity: 'legendary', price: 9500, description: 'A plaque inscribed with galaxy maps, revealing hidden realms.' },
+    { name: 'Copper Dawn Ring', rarity: 'common', price: 350, description: 'A ring glowing with dawn light, dispelling darkness.' },
+    { name: 'Opal Moon Pendant', rarity: 'rare', price: 1500, description: 'A pendant with lunar opal, enhancing night magic.' },
+    { name: 'Iron Storm Helmet', rarity: 'uncommon', price: 900, description: 'A helmet forged in storms, resisting lightning strikes.' },
+    { name: 'Lapis Nebula Ring', rarity: 'epic', price: 2800, description: 'A ring with nebula lapis, connecting to cosmic energies.' },
+    { name: 'Golden Eclipse Harp', rarity: 'legendary', price: 8500, description: 'A harp that plays eclipse songs, enchanting the battlefield.' },
+    { name: 'Ebony Void Spear', rarity: 'rare', price: 1600, description: 'A spear drawing from the void, piercing with dark energy.' },
+    { name: 'Satin Star Vest', rarity: 'common', price: 400, description: 'A vest embroidered with stars, boosting celestial awareness.' },
+    { name: 'Citrine Thunder Ring', rarity: 'uncommon', price: 800, description: 'A ring crackling with thunder, enhancing electrical attacks.' },
+    { name: 'Brass Twilight Telescope', rarity: 'common', price: 500, description: 'A telescope revealing twilight realms, aiding explorers.' },
+    { name: 'Pearl Ocean Tiara', rarity: 'rare', price: 1700, description: 'A tiara with ocean pearls, commanding sea creatures.' },
+    { name: 'Obsidian Lava Bow', rarity: 'epic', price: 2900, description: 'A bow wreathed in lava, firing molten arrows.' },
+    { name: 'Platinum Dawn Crown', rarity: 'legendary', price: 10000, description: 'A crown glowing with dawn, granting divine authority.' },
+    { name: 'Willow Mist Bow', rarity: 'common', price: 450, description: 'A bow crafted from misty willow, silent in fog.' },
+    { name: 'Aquamarine Storm Necklace', rarity: 'uncommon', price: 900, description: 'A necklace charged with storms, calming turbulent waters.' },
+    { name: 'Steel Gale Gauntlets', rarity: 'common', price: 500, description: 'Gauntlets infused with wind, striking with hurricane force.' },
+    { name: 'Amethyst Lunar Ring', rarity: 'rare', price: 1600, description: 'A ring glowing with lunar energy, enhancing night vision.' },
+    { name: 'Gold Nebula Medallion', rarity: 'legendary', price: 9000, description: 'A medallion with nebula gold, granting cosmic luck.' },
+    { name: 'Leather Twilight Boots', rarity: 'common', price: 350, description: 'Boots woven at twilight, silent on any surface.' },
+    { name: 'Topaz Storm Brooch', rarity: 'uncommon', price: 800, description: 'A brooch with storm topaz, boosting electrical resistance.' },
+    { name: 'Iron Mist Spear', rarity: 'common', price: 450, description: 'A spear shrouded in mist, striking with ethereal force.' },
+    { name: 'Garnet Eclipse Pendant', rarity: 'epic', price: 3000, description: 'A pendant with eclipse garnet, blinding foes with darkness.' },
+    { name: 'Onyx Void Bow', rarity: 'rare', price: 1700, description: 'A bow drawing from the void, firing unseen arrows.' },
+    { name: 'Platinum Lunar Bracelet', rarity: 'legendary', price: 9500, description: 'A bracelet with lunar platinum, commanding night forces.' },
+    { name: 'Flint Star Knife', rarity: 'common', price: 400, description: 'A knife sparked with starlight, cutting through armor.' },
+    { name: 'Coral Tide Necklace', rarity: 'uncommon', price: 900, description: 'A necklace with tidal coral, enhancing underwater agility.' },
+    { name: 'Ivory Dawn Horn', rarity: 'rare', price: 1600, description: 'A horn calling dawn spirits to aid in battle.' },
+    { name: 'Quartz Nebula Crystal', rarity: 'epic', price: 3100, description: 'A crystal pulsing with nebula light, amplifying all spells.' },
+    { name: 'Silk Twilight Belt', rarity: 'common', price: 450, description: 'A belt with twilight silk, granting minor flight.' },
+    { name: 'Turquoise Storm Pendant', rarity: 'uncommon', price: 1000, description: 'A pendant whistling with storms, boosting speed.' },
+    { name: 'Brass Lunar Goblet', rarity: 'common', price: 500, description: 'A goblet that cools any liquid with lunar essence.' },
+    { name: 'Crystal Eclipse Spear', rarity: 'legendary', price: 10000, description: 'A spear reborn in eclipse light, striking with divine force.' },
+    { name: 'Velvet Nebula Hat', rarity: 'uncommon', price: 900, description: 'A hat woven with nebula velvet, enhancing cosmic vision.' },
+    { name: 'Jade Mist Mask', rarity: 'rare', price: 1800, description: 'A mask blessed by mist spirits, blending into fog.' },
+    { name: 'Lead Void Mace', rarity: 'common', price: 500, description: 'A mace forged from void lead, crushing with dark energy.' },
+    { name: 'Silver Nebula Lyre', rarity: 'epic', price: 3200, description: 'A lyre that plays nebula melodies, enchanting the cosmos.' },
+    { name: 'Marble Twilight Plaque', rarity: 'legendary', price: 10500, description: 'A plaque inscribed with twilight maps, revealing hidden paths.' },
+    { name: 'Copper Star Ring', rarity: 'common', price: 450, description: 'A ring glowing with starlight, dispelling shadows.' },
+    { name: 'Opal Lunar Pendant', rarity: 'rare', price: 1700, description: 'A pendant with lunar opal, enhancing night magic.' },
+    { name: 'Iron Twilight Helmet', rarity: 'uncommon', price: 1000, description: 'A helmet forged at twilight, resisting dark forces.' },
+    { name: 'Lapis Void Ring', rarity: 'epic', price: 3300, description: 'A ring with void lapis, connecting to dark energies.' },
+    { name: 'Golden Nebula Harp', rarity: 'legendary', price: 11000, description: 'A harp that plays nebula songs, enchanting the universe.' },
+    { name: 'Ebony Star Spear', rarity: 'rare', price: 1800, description: 'A spear with star ebony, piercing with cosmic force.' },
+    { name: 'Satin Lunar Vest', rarity: 'common', price: 500, description: 'A vest embroidered with lunar patterns, boosting night awareness.' },
+    { name: 'Citrine Void Ring', rarity: 'uncommon', price: 1000, description: 'A ring crackling with void energy, enhancing dark attacks.' },
+    { name: 'Brass Eclipse Telescope', rarity: 'common', price: 550, description: 'A telescope revealing eclipse realms, aiding explorers.' },
+    { name: 'Pearl Mist Tiara', rarity: 'rare', price: 1900, description: 'A tiara with mist pearls, commanding fog spirits.' },
+    { name: 'Obsidian Nebula Bow', rarity: 'epic', price: 3400, description: 'A bow wreathed in nebula, firing cosmic arrows.' },
+    { name: 'Platinum Twilight Crown', rarity: 'legendary', price: 11500, description: 'A crown glowing with twilight, granting divine authority.' },
+    { name: 'Willow Star Bow', rarity: 'common', price: 500, description: 'A bow crafted from starry willow, silent in space.' },
+    { name: 'Aquamarine Void Necklace', rarity: 'uncommon', price: 1100, description: 'A necklace charged with void, calming chaotic energies.' },
+    { name: 'Steel Nebula Gauntlets', rarity: 'common', price: 550, description: 'Gauntlets infused with nebula, striking with cosmic force.' },
+    { name: 'Amethyst Star Ring', rarity: 'rare', price: 1900, description: 'A ring glowing with star energy, enhancing cosmic vision.' },
+    { name: 'Gold Eclipse Medallion', rarity: 'legendary', price: 12000, description: 'A medallion with eclipse gold, granting celestial luck.' },
+    { name: 'Leather Nebula Boots', rarity: 'common', price: 450, description: 'Boots woven with nebula leather, gripping cosmic terrain.' },
+    { name: 'Topaz Void Brooch', rarity: 'uncommon', price: 1100, description: 'A brooch with void topaz, boosting dark resistance.' },
+    { name: 'Iron Star Spear', rarity: 'common', price: 500, description: 'A spear infused with starlight, cutting through darkness.' },
+    { name: 'Garnet Nebula Pendant', rarity: 'epic', price: 3500, description: 'A pendant with nebula garnet, blinding foes with cosmic light.' },
+    { name: 'Onyx Eclipse Bow', rarity: 'rare', price: 2000, description: 'A bow drawing from eclipse, firing unseen arrows.' },
+    { name: 'Platinum Star Bracelet', rarity: 'legendary', price: 12500, description: 'A bracelet with star platinum, commanding cosmic forces.' },
+    { name: 'Flint Lunar Knife', rarity: 'common', price: 450, description: 'A knife sparked with lunar light, cutting through armor.' },
+    { name: 'Coral Void Necklace', rarity: 'uncommon', price: 1100, description: 'A necklace with void coral, enhancing underwater stealth.' },
+    { name: 'Ivory Star Horn', rarity: 'rare', price: 2000, description: 'A horn calling star beasts to aid in battle.' },
+    { name: 'Quartz Eclipse Crystal', rarity: 'epic', price: 3600, description: 'A crystal pulsing with eclipse light, amplifying all magic.' },
+    { name: 'Silk Star Belt', rarity: 'common', price: 500, description: 'A belt with star silk, granting minor levitation.' },
+    { name: 'Turquoise Nebula Pendant', rarity: 'uncommon', price: 1200, description: 'A pendant whistling with nebula, boosting speed.' },
+    { name: 'Brass Void Goblet', rarity: 'common', price: 550, description: 'A goblet that darkens any liquid with void essence.' },
+    { name: 'Crystal Star Spear', rarity: 'legendary', price: 13000, description: 'A spear reborn in starlight, striking with divine force.' },
+    { name: 'Velvet Eclipse Hat', rarity: 'uncommon', price: 1200, description: 'A hat woven with eclipse velvet, enhancing dark vision.' },
+    { name: 'Jade Nebula Mask', rarity: 'rare', price: 2100, description: 'A mask blessed by nebula spirits, blending into space.' },
+    { name: 'Lead Star Mace', rarity: 'common', price: 550, description: 'A mace forged from star lead, crushing with cosmic energy.' },
+    { name: 'Silver Void Lyre', rarity: 'epic', price: 3700, description: 'A lyre that plays void melodies, enchanting the darkness.' },
+    { name: 'Marble Eclipse Plaque', rarity: 'legendary', price: 13500, description: 'A plaque inscribed with eclipse maps, revealing hidden realms.' },
+    { name: 'Copper Lunar Ring', rarity: 'common', price: 500, description: 'A ring glowing with lunar light, dispelling shadows.' },
+    { name: 'Opal Star Pendant', rarity: 'rare', price: 2100, description: 'A pendant with star opal, enhancing cosmic magic.' },
+    { name: 'Iron Nebula Helmet', rarity: 'uncommon', price: 1300, description: 'A helmet forged with nebula, resisting cosmic forces.' },
+    { name: 'Lapis Eclipse Ring', rarity: 'epic', price: 3800, description: 'A ring with eclipse lapis, connecting to dark energies.' },
+    { name: 'Golden Void Harp', rarity: 'legendary', price: 14000, description: 'A harp that plays void songs, enchanting the universe.' },
+    { name: 'Ebony Lunar Spear', rarity: 'rare', price: 2200, description: 'A spear with lunar ebony, piercing with night force.' },
+    { name: 'Satin Star Vest', rarity: 'common', price: 550, description: 'A vest embroidered with star patterns, boosting cosmic awareness.' },
+    { name: 'Citrine Eclipse Ring', rarity: 'uncommon', price: 1300, description: 'A ring crackling with eclipse energy, enhancing dark attacks.' },
+    { name: 'Brass Nebula Telescope', rarity: 'common', price: 600, description: 'A telescope revealing nebula realms, aiding stargazers.' },
+    { name: 'Pearl Void Tiara', rarity: 'rare', price: 2300, description: 'A tiara with void pearls, commanding dark spirits.' },
+    { name: 'Obsidian Star Bow', rarity: 'epic', price: 3900, description: 'A bow wreathed in starlight, firing cosmic arrows.' },
+    { name: 'Platinum Eclipse Crown', rarity: 'legendary', price: 14500, description: 'A crown glowing with eclipse, granting divine authority.' },
+    { name: 'Willow Void Bow', rarity: 'common', price: 550, description: 'A bow crafted from void willow, silent in darkness.' },
+    { name: 'Aquamarine Nebula Necklace', rarity: 'uncommon', price: 1400, description: 'A necklace charged with nebula, calming chaotic energies.' },
+    { name: 'Steel Star Gauntlets', rarity: 'common', price: 600, description: 'Gauntlets infused with starlight, striking with cosmic force.' },
+    { name: 'Amethyst Void Ring', rarity: 'rare', price: 2400, description: 'A ring glowing with void energy, enhancing cosmic vision.' },
+    { name: 'Gold Lunar Medallion', rarity: 'legendary', price: 15000, description: 'A medallion with lunar gold, granting celestial luck.' },
+    { name: 'Leather Eclipse Boots', rarity: 'common', price: 500, description: 'Boots woven with eclipse leather, gripping dark terrain.' },
+    { name: 'Topaz Nebula Brooch', rarity: 'uncommon', price: 1400, description: 'A brooch with nebula topaz, boosting cosmic resistance.' },
+    { name: 'Iron Void Spear', rarity: 'common', price: 550, description: 'A spear infused with void, cutting through light.' },
+    { name: 'Garnet Star Pendant', rarity: 'epic', price: 4000, description: 'A pendant with star garnet, blinding foes with light.' },
+    { name: 'Onyx Lunar Bow', rarity: 'rare', price: 2500, description: 'A bow drawing from lunar, firing unseen arrows.' },
+    { name: 'Platinum Void Bracelet', rarity: 'legendary', price: 15500, description: 'A bracelet with void platinum, commanding dark forces.' }];
 
-        function showScreen(screenId) {
-            const screens = ['welcome-screen', 'mascot-screen', 'setup-screen', 'quiz-screen', 'results-screen', 'shop-screen', 'profile-screen'];
-            screens.forEach(id => safeGetElement(id)?.classList.add('hidden'));
-            safeGetElement(screenId)?.classList.remove('hidden');
+        function addUser() {
+            const usernameInput = document.getElementById('new-user');
+            const username = usernameInput.value.trim();
+            if (!username) {
+                alert('Please enter a valid username!');
+                return;
+            }
+            if (users[username]) {
+                alert('Username already exists! Please choose another.');
+                return;
+            }
+            users[username] = {
+                mascot: null,
+                theme: null,
+                scores: [],
+                gold: 0,
+                artifacts: [],
+                treasureChests: [],
+                propertyTier: 0,
+                xp: 0,
+                level: 1,
+                gamesPlayed: []
+            };
+            usernameInput.value = '';
+            renderUserList();
         }
 
         function renderUserList() {
-            const userList = safeGetElement('user-list');
-            if (!userList) return;
-            userList.innerHTML = Object.keys(users).map(name => `
-                <div class="flex justify-between items-center mb-2">
-                    <button onclick="selectUser('${name}')" class="btn bg-blue-500 text-white py-1 px-3 rounded-lg hover:bg-blue-600">${name}</button>
-                    <button onclick="deleteUser('${name}')" class="btn bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600">X</button>
-                </div>
-            `).join('');
-        }
-
-        function addUser() {
-            const input = safeGetElement('new-user');
-            const name = input.value.trim();
-            if (name && !users[name]) {
-                users[name] = {
-                    mascot: '🐰',
-                    theme: 'ocean',
-                    sound: true,
-                    gold: 0,
-                    artifacts: [],
-                    treasureChests: [],
-                    games: [],
-                    rank: 'Initiate',
-                    xp: 0,
-                    property: { tier: 0, name: 'None', description: '' }
-                };
-                input.value = '';
-                renderUserList();
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+            for (const username in users) {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'p-2 bg-blue-100 rounded-lg mb-2 cursor-pointer hover:bg-blue-200';
+                userDiv.innerText = username;
+                userDiv.onclick = () => selectUser(username);
+                userList.appendChild(userDiv);
             }
         }
 
-        function deleteUser(name) {
-            if (confirm(`Delete ${name}?`)) {
-                delete users[name];
-                if (currentUser === name) currentUser = null;
-                renderUserList();
-                showScreen('welcome-screen');
-            }
-        }
-
-        function selectUser(name) {
-            currentUser = name;
-            safeGetElement('mascot-user').textContent = name;
-            document.body.className = `${users[name].theme}-theme`;
-            showScreen('mascot-screen');
+        function selectUser(username) {
+            currentUser = username;
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('mascot-screen').classList.remove('hidden');
+            document.getElementById('mascot-user').innerText = username;
         }
 
         function setMascot(mascot) {
-            if (currentUser) {
-                users[currentUser].mascot = mascot;
-                safeGetElement('mascot').textContent = mascot;
-            }
+            users[currentUser].mascot = mascot;
+            updateMascot();
         }
 
         function setTheme(theme) {
-            if (currentUser) {
-                users[currentUser].theme = theme;
-                document.body.className = `${theme}-theme`;
-            }
+            users[currentUser].theme = theme;
+            document.body.className = `${theme}-theme`;
         }
 
         function proceedToSetup() {
-            if (currentUser) {
-                safeGetElement('greeting').textContent = `Ready to Race, ${currentUser}?`;
-                showScreen('setup-screen');
+            if (!users[currentUser].mascot || !users[currentUser].theme) {
+                alert('Please select a mascot and theme!');
+                return;
             }
+            document.getElementById('mascot-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            renderSetupScreen();
         }
 
-        function setDifficulty(level) { difficulty = level; }
-
-        function setOperation(op) {
-            operation = op;
-            safeGetElement('question').innerHTML = `Exploring the ${operationThemes[op]}<br>`;
-        }
-
-        function setSound(enabled) {
-            if (currentUser) {
-                users[currentUser].sound = enabled;
-                soundEnabled = enabled;
-                const onBtn = document.querySelector('.sound-on');
-                const offBtn = document.querySelector('.sound-off');
-                if (enabled) {
-                    onBtn.classList.add('bg-gray-700');
-                    offBtn.classList.remove('bg-gray-700');
+        function renderSetupScreen() {
+            document.getElementById('greeting').innerText = `Welcome, ${currentUser}!`;
+            const operationButtons = document.getElementById('operation-buttons');
+            const buttons = operationButtons.getElementsByTagName('button');
+            const userLevel = users[currentUser].level;
+            for (let btn of buttons) {
+                const op = btn.onclick.toString().match(/setOperation\('(.+)'\)/)[1];
+                if (userLevel < operationUnlockLevels[op]) {
+                    btn.disabled = true;
+                    btn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                    btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    btn.innerText = `${btn.innerText.split(' (')[0]} (Unlock at Level ${operationUnlockLevels[op]})`;
                 } else {
-                    offBtn.classList.add('bg-gray-700');
-                    onBtn.classList.remove('bg-gray-700');
+                    btn.disabled = false;
+                    btn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                    btn.classList.remove('bg-gray-400', 'cursor-not-allowed');
                 }
             }
         }
 
-        function generateQuestion() {
-            const range = difficultyRanges[difficulty];
-            let a = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-            let b = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-            let answer, question;
-            switch (operation) {
-                case '+': answer = a + b; question = `${a} + ${b} = ? (Field)`; break;
-                case '-': if (a < b) [a, b] = [b, a]; answer = a - b; question = `${a} - ${b} = ? (Lake)`; break;
-                case '*': answer = a * b; question = `${a} × ${b} = ? (Forest)`; break;
-                case '/': answer = a; a = a * b; question = `${a} ÷ ${b} = ? (Volcanic Mountain)`; break;
-            }
-            const choices = [answer];
-            while (choices.length < 4) {
-                const wrong = answer + Math.floor(Math.random() * 20 - 10);
-                if (wrong !== answer && !choices.includes(wrong) && wrong >= 0) choices.push(wrong);
-            }
-            shuffleArray(choices);
-            return { question, answer, choices };
+        function setDifficulty(level) {
+            difficulty = level;
         }
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+        function setOperation(op) {
+            const userLevel = users[currentUser].level;
+            if (userLevel < operationUnlockLevels[op]) {
+                alert(`You need to reach Level ${operationUnlockLevels[op]} to unlock this operation!`);
+                return;
             }
+            operation = op;
+        }
+
+        function setSound(enabled) {
+            soundEnabled = enabled;
+            document.querySelector('.sound-on').classList.toggle('bg-gray-700', enabled);
+            document.querySelector('.sound-off').classList.toggle('bg-gray-700', !enabled);
         }
 
         function startQuiz() {
-            if (!currentUser) return;
-            questions = Array(totalQuestions).fill().map(() => generateQuestion());
+            if (!operation) {
+                alert('Please select an operation!');
+                return;
+            }
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
             currentQuestion = 0;
             correctAnswers = 0;
             streak = 0;
             maxStreak = 0;
+            questions = generateQuestions();
             startTime = Date.now();
-            showScreen('quiz-screen');
-            displayQuestion();
-            startMascotAnimation();
+            renderQuestion();
+            updateMascot();
         }
 
-        function displayQuestion() {
+        function generateQuestions() {
+            const range = difficultyRanges[difficulty];
+            const questions = [];
+            for (let i = 0; i < totalQuestions; i++) {
+                let num1 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+                let num2 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+                let answer;
+                if (operation === '/') {
+                    answer = num1;
+                    num1 = num1 * num2;
+                } else {
+                    if (operation === '-' && num1 < num2) [num1, num2] = [num2, num1];
+                    answer = eval(`${num1} ${operation} ${num2}`);
+                }
+                const choices = [answer];
+                while (choices.length < 4) {
+                    const wrong = answer + Math.floor(Math.random() * 10 - 5);
+                    if (wrong !== answer && !choices.includes(wrong)) choices.push(wrong);
+                }
+                questions.push({ num1, num2, answer, choices: choices.sort(() => Math.random() - 0.5) });
+            }
+            return questions;
+        }
+
+        function renderQuestion() {
             const q = questions[currentQuestion];
-            safeGetElement('question-number').textContent = currentQuestion + 1;
-            safeGetElement('progress-bar').style.width = `${((currentQuestion + 1) / totalQuestions) * 100}%`;
-            safeGetElement('streak').textContent = `Streak: ${streak}`;
-            safeGetElement('question').textContent = q.question;
-            safeGetElement('answer-input').value = '';
-            safeGetElement('feedback').textContent = '';
+            document.getElementById('question-number').innerText = currentQuestion + 1;
+            document.getElementById('question').innerText = `${q.num1} ${operation} ${q.num2} = ?`;
+            document.getElementById('progress-bar').style.width = `${((currentQuestion + 1) / totalQuestions) * 100}%`;
+            document.getElementById('streak').innerText = `Streak: ${streak}`;
+            document.getElementById('answer-input').value = '';
+            document.getElementById('feedback').innerText = '';
             for (let i = 0; i < 4; i++) {
-                safeGetElement(`choice-${i}`).textContent = q.choices[i];
+                const btn = document.getElementById(`choice-${i}`).parentElement;
+                btn.classList.remove('correct-animation', 'incorrect-animation', 'selected');
+                document.getElementById(`choice-${i}`).innerText = q.choices[i];
             }
         }
 
         function checkAnswer(choiceIndex) {
             const q = questions[currentQuestion];
             const selected = q.choices[choiceIndex];
-            processAnswer(selected === q.answer);
+            const btn = document.getElementById(`choice-${choiceIndex}`).parentElement;
+            btn.classList.add('selected');
+            if (selected === q.answer) {
+                handleCorrectAnswer(btn);
+            } else {
+                handleIncorrectAnswer(btn);
+            }
         }
 
         function checkInputAnswer() {
-            const input = safeGetElement('answer-input').value;
             const q = questions[currentQuestion];
-            processAnswer(parseFloat(input) === q.answer);
-        }
-
-        function processAnswer(isCorrect) {
-            const feedback = safeGetElement('feedback');
-            questions[currentQuestion].wasCorrect = isCorrect;
-            if (isCorrect) {
-                correctAnswers++;
-                streak++;
-                maxStreak = Math.max(maxStreak, streak);
-                feedback.textContent = 'Correct!';
-                feedback.classList.add('text-green-500', 'correct-animation');
-            } else {
-                streak = 0;
-                feedback.textContent = `Wrong! The answer was ${questions[currentQuestion].answer}.`;
-                feedback.classList.add('text-red-500', 'incorrect-animation');
+            const input = parseInt(document.getElementById('answer-input').value);
+            if (isNaN(input)) {
+                document.getElementById('feedback').innerText = 'Please enter a number!';
+                return;
             }
-            setTimeout(() => {
-                feedback.classList.remove('text-green-500', 'text-red-500', 'correct-animation', 'incorrect-animation');
-                currentQuestion++;
-                if (currentQuestion < totalQuestions) {
-                    displayQuestion();
-                } else {
-                    endQuiz();
-                }
-            }, 1000);
+            if (input === q.answer) {
+                handleCorrectAnswer(document.getElementById('answer-input'));
+            } else {
+                handleIncorrectAnswer(document.getElementById('answer-input'));
+            }
         }
 
-        function startMascotAnimation() {
-            const mascotEl = safeGetElement('mascot');
-            if (!currentUser || !mascotEl) return;
+        function handleCorrectAnswer(element) {
+            element.classList.add('correct-animation');
+            document.getElementById('feedback').innerText = 'Correct!';
+            document.getElementById('feedback').className = 'text-lg mb-4 text-green-500';
+            correctAnswers++;
+            streak++;
+            maxStreak = Math.max(maxStreak, streak);
+            updateMascot();
+            setTimeout(nextQuestion, 1000);
+        }
+
+        function handleIncorrectAnswer(element) {
+            element.classList.add('incorrect-animation');
+            document.getElementById('feedback').innerText = `Incorrect! The answer was ${questions[currentQuestion].answer}.`;
+            document.getElementById('feedback').className = 'text-lg mb-4 text-red-500';
+            streak = 0;
+            updateMascot();
+            setTimeout(nextQuestion, 1000);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < totalQuestions) {
+                renderQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function updateMascot() {
+            if (mascotAnimation) clearInterval(mascotAnimation);
+            const mascotElement = document.getElementById('mascot');
+            const messageElement = document.getElementById('mascot-message');
             const mascot = users[currentUser].mascot;
-            const goal = goalObjects[users[currentUser].theme][0];
-            let position = 0;
+            const theme = users[currentUser].theme;
+            const goal = goalObjects[theme][Math.floor(currentQuestion / 5)];
             const trackLength = 10;
-            clearInterval(mascotAnimation);
-            mascotAnimation = setInterval(() => {
-                const progress = correctAnswers / totalQuestions;
-                position = Math.min(Math.floor(progress * trackLength), trackLength - 1);
-                const track = ' '.repeat(position) + mascot + ' '.repeat(trackLength - position - 1) + goal;
-                mascotEl.textContent = track;
-                mascotEl.classList.add('mascot-jumping');
-            }, 500);
+            const position = Math.min(Math.floor((currentQuestion + 1) / totalQuestions * trackLength), trackLength - 1);
+            let track = '';
+            for (let i = 0; i < trackLength; i++) {
+                if (i === position) track += `<span class="mascot-jumping">${mascot}</span>`;
+                else if (i === trackLength - 1) track += goal;
+                else track += '-';
+            }
+            mascotElement.innerHTML = track;
+
+            if (streak >= 3) {
+                messageElement.innerText = 'You’re on fire! Keep going!';
+            } else if (currentQuestion === totalQuestions - 1) {
+                messageElement.innerText = 'Almost there! Finish strong!';
+            } else {
+                messageElement.innerText = 'Keep racing to the finish!';
+            }
+
+            if (currentQuestion < totalQuestions) {
+                mascotAnimation = setInterval(() => {
+                    const jumping = document.querySelector('.mascot-jumping');
+                    if (jumping) jumping.classList.toggle('mascot-jumping');
+                }, 500);
+            }
         }
 
         function endQuiz() {
-            clearInterval(mascotAnimation);
-            const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
             const percentage = (correctAnswers / totalQuestions) * 100;
-            const gold = calculateGoldEarned();
-            users[currentUser].gold += gold;
-            users[currentUser].xp += Math.round(percentage * difficulty);
-            updateRank();
-            const medal = percentage >= 90 ? '🥇' : percentage >= 75 ? '🥈' : percentage >= 60 ? '🥉' : '';
-            safeGetElement('medal').textContent = medal || '🏅';
-            safeGetElement('score').textContent = `Score: ${correctAnswers} / ${totalQuestions}`;
-            safeGetElement('percentage').textContent = `Accuracy: ${percentage.toFixed(1)}%`;
-            safeGetElement('gold-earned').textContent = `Gold Earned: ${gold} 💰`;
-            safeGetElement('time').textContent = `Time: ${timeTaken} seconds`;
-            if (percentage >= 90 && difficulty >= 6) {
-                const chest = generateTreasureChest();
-                users[currentUser].treasureChests.push(chest);
-                safeGetElement('treasure-message').textContent = `You earned a Treasure Chest! (${chest.gold} Gold${chest.item ? ` + ${chest.item.name}` : ''})`;
+            const medal = percentage >= 90 ? '🥇 Gold' : percentage >= 70 ? '🥈 Silver' : percentage >= 50 ? '🥉 Bronze' : '🏅 Participation';
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            const goldEarned = Math.floor(correctAnswers * difficultyRanges[difficulty].goldBase * difficultyRanges[difficulty].goldMultiplier);
+            users[currentUser].gold += goldEarned;
+
+            // Treasure chest drop logic
+            const chestRoll = Math.random() * 100;
+            let chestCount = 0;
+            if (chestRoll < 75) {
+                chestCount = 1; // 75% chance for 1 chest
+            } else if (chestRoll < 95) {
+                chestCount = 2; // 20% chance for 2 chests
             } else {
-                safeGetElement('treasure-message').textContent = '';
+                chestCount = 3; // 5% chance for 3 chests
             }
-            updateHighScores(percentage, timeTaken);
-            showScreen('results-screen');
-            if (medal) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        }
-
-        function calculateGoldEarned() {
-            const baseGold = difficultyRanges[difficulty].goldBase;
-            const multiplier = difficultyRanges[difficulty].goldMultiplier;
-            let totalGold = correctAnswers * baseGold * multiplier;
-            if (maxStreak >= 5) totalGold *= 1.2;
-            return Math.round(totalGold);
-        }
-
-        function generateTreasureChest() {
-            const gold = Math.floor(Math.random() * 101) + 50;
-            const hasItem = difficulty >= 6 && Math.random() < 0.05;
-            let item = null;
-            if (hasItem) {
-                const mythicalItems = artifactsList.filter(a => a.rarity === 'mythical');
-                item = mythicalItems[Math.floor(Math.random() * mythicalItems.length)];
-                users[currentUser].artifacts.push({ ...item });
+            for (let i = 0; i < chestCount; i++) {
+                users[currentUser].treasureChests.push({ difficulty });
             }
-            return { gold, item };
+
+            const xpEarned = correctAnswers * difficulty * 10;
+            users[currentUser].xp += xpEarned;
+            updateLevel();
+
+            document.getElementById('medal').innerText = medal;
+            document.getElementById('score').innerText = `Score: ${correctAnswers} / ${totalQuestions}`;
+            document.getElementById('percentage').innerText = `Accuracy: ${percentage.toFixed(2)}%`;
+            document.getElementById('gold-earned').innerText = `Gold Earned: ${goldEarned} 💰`;
+            document.getElementById('time').innerText = `Time: ${Math.floor(timeTaken / 60)}m ${timeTaken % 60}s`;
+            document.getElementById('treasure-message').innerText = `You found ${chestCount} treasure chest${chestCount === 1 ? '' : 's'}!`;
+
+            const gameRecord = {
+                score: correctAnswers,
+                percentage: percentage.toFixed(2),
+                difficulty,
+                operation: operationThemes[operation],
+                time: timeTaken,
+                gold: goldEarned,
+                chests: chestCount,
+                date: new Date().toLocaleString()
+            };
+            users[currentUser].scores.push(correctAnswers);
+            users[currentUser].gamesPlayed.push(gameRecord);
+
+            const highScores = users[currentUser].scores.sort((a, b) => b - a).slice(0, 5);
+            document.getElementById('high-scores').innerHTML = highScores.map((score, i) => `Rank ${i + 1}: ${score} / ${totalQuestions}`).join('<br>');
+
+            if (soundEnabled && percentage >= 70) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
         }
 
-        function updateRank() {
-            const xp = users[currentUser].xp;
-            for (let i = ranks.length - 1; i >= 0; i--) {
-                if (xp >= ranks[i].xp) {
-                    users[currentUser].rank = ranks[i].name;
-                    users[currentUser].level = i + 1;
+        function updateLevel() {
+            let level = 1;
+            for (const rank of ranks) {
+                if (users[currentUser].xp >= rank.xp) {
+                    level = ranks.indexOf(rank) + 1;
+                } else {
                     break;
                 }
             }
-        }
-
-        function updateHighScores(percentage, time) {
-            const game = { percentage: percentage.toFixed(1), time, difficulty, operation, date: new Date().toLocaleString() };
-            users[currentUser].games.push(game);
-            users[currentUser].games.sort((a, b) => b.percentage - a.percentage || a.time - b.time);
-            if (users[currentUser].games.length > 5) users[currentUser].games.pop();
-            safeGetElement('high-scores').innerHTML = users[currentUser].games.map(g => 
-                `${g.percentage}% - ${g.time}s (Diff ${g.difficulty}, ${g.operation}) - ${g.date}`
-            ).join('<br>');
-        }
-
-        function quitGame() {
-            clearInterval(mascotAnimation);
-            showScreen('welcome-screen');
+            users[currentUser].level = level;
         }
 
         function goToShop() {
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('shop-screen').classList.remove('hidden');
             renderShop();
-            showScreen('shop-screen');
-        }
-
-        function viewProfile() {
-            renderProfile();
-            showScreen('profile-screen');
-        }
-
-        function restartGame() {
-            showScreen('setup-screen');
         }
 
         function renderShop() {
-            safeGetElement('shop-gold').textContent = users[currentUser].gold;
-            safeGetElement('refresh-cost').textContent = shopRefreshCost;
-            const shopItems = safeGetElement('shop-items');
-            const availableItems = artifactsList.filter(item => item.rarity !== 'mythical' && Math.random() < (item.rarity === 'legendary' ? 0.01 : 1));
-            const items = availableItems.sort(() => Math.random() - 0.5).slice(0, 5);
-            shopItems.innerHTML = items.map(item => `
-                <div class="artifact-item artifact-rarity-${item.rarity}" onclick="buyItem('${item.name}', ${item.price})">
+            document.getElementById('shop-gold').innerText = users[currentUser].gold;
+            document.getElementById('refresh-cost').innerText = shopRefreshCost;
+            const shopItems = document.getElementById('shop-items');
+            shopItems.innerHTML = '';
+            const itemsForSale = [];
+            while (itemsForSale.length < 5) {
+                const item = artifactsList[Math.floor(Math.random() * artifactsList.length)];
+                if (!itemsForSale.includes(item)) itemsForSale.push(item);
+            }
+            itemsForSale.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `artifact-item artifact-rarity-${item.rarity}`;
+                itemDiv.innerHTML = `
                     <p class="font-bold">${item.name}</p>
-                    <p>${item.price} 💰</p>
-                    <p class="text-xs">${item.description}</p>
-                </div>
-            `).join('');
+                    <p class="text-sm">${item.description}</p>
+                    <p class="text-yellow-600 font-semibold">${item.price} 💰</p>
+                    <div class="rarity-tag rarity-tag-${item.rarity}">${item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)}</div>
+                `;
+                itemDiv.onclick = () => buyItem(index);
+                shopItems.appendChild(itemDiv);
+            });
         }
 
-        function buyItem(name, price) {
-            if (users[currentUser].gold >= price) {
-                users[currentUser].gold -= price;
-                const item = artifactsList.find(a => a.name === name);
-                users[currentUser].artifacts.push({ ...item });
-                alert(`Purchased ${name}!`);
+        function buyItem(index) {
+            const item = document.getElementById('shop-items').children[index].querySelector('p').innerText;
+            const artifact = artifactsList.find(a => a.name === item);
+            if (users[currentUser].gold >= artifact.price) {
+                users[currentUser].gold -= artifact.price;
+                users[currentUser].artifacts.push(artifact);
+                alert(`Purchased ${artifact.name}!`);
                 renderShop();
             } else {
                 alert('Not enough gold!');
@@ -772,79 +878,120 @@
         function refreshShop() {
             if (users[currentUser].gold >= shopRefreshCost) {
                 users[currentUser].gold -= shopRefreshCost;
-                shopRefreshCost = Math.min(shopRefreshCost * 2, 10000);
+                shopRefreshCost = Math.min(shopRefreshCost + 50, 500);
                 renderShop();
             } else {
-                alert('Not enough gold to refresh!');
+                alert('Not enough gold to refresh the shop!');
             }
         }
 
         function exitShop() {
-            showScreen('results-screen');
+            document.getElementById('shop-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+        }
+
+        function viewProfile() {
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('shop-screen').classList.add('hidden');
+            document.getElementById('profile-screen').classList.remove('hidden');
+            renderProfile();
         }
 
         function renderProfile() {
             const user = users[currentUser];
-            safeGetElement('profile-user').textContent = currentUser;
-            safeGetElement('profile-rank').textContent = user.rank;
-            safeGetElement('profile-level').textContent = user.level;
-            safeGetElement('profile-gold').textContent = user.gold;
-            safeGetElement('profile-property').textContent = user.property.name;
-            safeGetElement('property-description').textContent = user.property.description;
-            const nextProperty = properties.find(p => p.tier === user.property.tier + 1);
-            const upgradeBtn = safeGetElement('upgrade-property');
+            document.getElementById('profile-user').innerText = currentUser;
+            const rank = ranks[Math.min(user.level - 1, ranks.length - 1)];
+            document.getElementById('profile-rank').innerText = rank.name;
+            document.getElementById('profile-level').innerText = user.level;
+            document.getElementById('profile-gold').innerText = user.gold;
+
+            const property = properties[user.propertyTier];
+            document.getElementById('profile-property').innerText = property.name;
+            document.getElementById('property-description').innerText = property.description;
+            const nextProperty = properties[user.propertyTier + 1];
+            const upgradeBtn = document.getElementById('upgrade-property');
             if (nextProperty) {
-                upgradeBtn.textContent = `Upgrade Base (${nextProperty.cost} 💰)`;
-                upgradeBtn.disabled = user.gold < nextProperty.cost;
                 upgradeBtn.classList.remove('hidden');
+                document.getElementById('property-cost').innerText = nextProperty.cost;
             } else {
-                upgradeBtn.textContent = 'Max Level Reached';
-                upgradeBtn.disabled = true;
+                upgradeBtn.classList.add('hidden');
             }
-            safeGetElement('treasure-chests').innerHTML = user.treasureChests.length ? user.treasureChests.map((chest, i) => `
-                <p>Chest ${i + 1}: ${chest.gold} Gold${chest.item ? ` + ${chest.item.name}` : ''}</p>
-            `).join('') : '<p>No treasure chests earned yet!</p>';
-            safeGetElement('artifacts').innerHTML = user.artifacts.length ? user.artifacts.map(item => `
-                <div class="artifact-item artifact-rarity-${item.rarity}" onclick="sellItem('${item.name}', ${item.price})">
-                    <p class="font-bold">${item.name}</p>
-                    <p>Sell for ${Math.floor(item.price / 2)} 💰</p>
-                    <p class="text-xs">${item.description}</p>
-                </div>
-            `).join('') : '<p>No artifacts collected yet!</p>';
-            safeGetElement('game-history').innerHTML = user.games.length ? user.games.map(g => 
-                `${g.percentage}% - ${g.time}s (Diff ${g.difficulty}, ${g.operation}) - ${g.date}`
-            ).join('<br>') : '<p>No games played yet!</p>';
+
+            const chestsDiv = document.getElementById('treasure-chests');
+            chestsDiv.innerHTML = user.treasureChests.length ? `${user.treasureChests.length} treasure chest${user.treasureChests.length === 1 ? '' : 's'} waiting to be opened!` : 'No treasure chests available.';
+
+            const artifactsDiv = document.getElementById('artifacts');
+            artifactsDiv.innerHTML = '';
+            user.artifacts.forEach(artifact => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `artifact-item artifact-rarity-${artifact.rarity}`;
+                itemDiv.innerHTML = `
+                    <p class="font-bold">${artifact.name}</p>
+                    <p class="text-sm">${artifact.description}</p>
+                    <div class="rarity-tag rarity-tag-${artifact.rarity}">${artifact.rarity.charAt(0).toUpperCase() + artifact.rarity.slice(1)}</div>
+                `;
+                artifactsDiv.appendChild(itemDiv);
+            });
+
+            const historyDiv = document.getElementById('game-history');
+            historyDiv.innerHTML = user.gamesPlayed.slice(-5).map(game => `
+                <p>${game.date}: ${game.score}/${totalQuestions} (${game.percentage}%) - ${game.operation} (Difficulty ${game.difficulty}) - ${game.gold} 💰, ${game.chests} chest${game.chests === 1 ? '' : 's'}</p>
+            `).join('');
         }
 
         function upgradeProperty() {
             const user = users[currentUser];
-            const nextProperty = properties.find(p => p.tier === user.property.tier + 1);
+            const nextProperty = properties[user.propertyTier + 1];
             if (nextProperty && user.gold >= nextProperty.cost) {
                 user.gold -= nextProperty.cost;
-                user.property = { ...nextProperty };
+                user.propertyTier++;
                 renderProfile();
+            } else {
+                alert('Not enough gold to upgrade your base!');
             }
         }
 
-        function sellItem(name, price) {
+        function openChest() {
             const user = users[currentUser];
-            const itemIndex = user.artifacts.findIndex(a => a.name === name);
-            if (itemIndex !== -1 && confirm(`Sell ${name} for ${Math.floor(price / 2)} gold?`)) {
-                user.gold += Math.floor(price / 2);
-                user.artifacts.splice(itemIndex, 1);
-                renderProfile();
+            if (user.treasureChests.length === 0) {
+                alert('No treasure chests to open!');
+                return;
             }
+            const chest = user.treasureChests.shift();
+            const difficulty = chest.difficulty;
+            const roll = Math.random() * 100;
+            let rarity;
+            if (roll < 50) rarity = 'common';
+            else if (roll < 75) rarity = 'uncommon';
+            else if (roll < 90) rarity = 'rare';
+            else if (roll < 97) rarity = 'epic';
+            else if (roll < 99.5) rarity = 'legendary';
+            else rarity = 'mythical';
+
+            const possibleItems = artifactsList.filter(item => item.rarity === rarity);
+            const item = possibleItems[Math.floor(Math.random() * possibleItems.length)];
+            user.artifacts.push(item);
+            alert(`You opened a chest and found a ${rarity} item: ${item.name}!`);
+            renderProfile();
         }
 
         function backToWelcome() {
-            showScreen('welcome-screen');
+            document.getElementById('profile-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            renderUserList();
         }
 
-        document.addEventListener('keydown', (e) => {
-            if (safeGetElement('quiz-screen').classList.contains('hidden')) return;
-            const keyMap = { 'a': 0, 's': 1, 'd': 2, 'f': 3 };
-            if (keyMap[e.key]) checkAnswer(keyMap[e.key]);
-        });
+        function quitGame() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            renderUserList();
+        }
+
+        function restartGame() {
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            renderSetupScreen();
+        }
 
         renderUserList();
     </script>
