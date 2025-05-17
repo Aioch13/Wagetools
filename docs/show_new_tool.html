@@ -16,16 +16,9 @@
             overflow-y: auto;
             transition: background 0.5s ease;
         }
-        .space-theme {
-            background: linear-gradient(135deg, #1a237e 0%, #4a148c 100%);
-            color: white;
-        }
-        .jungle-theme {
-            background: linear-gradient(135deg, #2e7d32 0%, #a5d6a7 100%);
-        }
-        .ocean-theme {
-            background: linear-gradient(135deg, #0288d1 0%, #4fc3f7 100%);
-        }
+        .space-theme { background: linear-gradient(135deg, #1a237e 0%, #4a148c 100%); color: white; }
+        .jungle-theme { background: linear-gradient(135deg, #2e7d32 0%, #a5d6a7 100%); }
+        .ocean-theme { background: linear-gradient(135deg, #0288d1 0%, #4fc3f7 100%); }
         .container {
             max-width: 900px;
             background: white;
@@ -54,15 +47,9 @@
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-        .progress-bar {
-            transition: width 0.5s ease-in-out;
-        }
-        .correct-animation {
-            animation: correct 0.5s ease;
-        }
-        .incorrect-animation {
-            animation: incorrect 0.5s ease;
-        }
+        .progress-bar { transition: width 0.5s ease-in-out; }
+        .correct-animation { animation: correct 0.5s ease; }
+        .incorrect-animation { animation: incorrect 0.5s ease; }
         @keyframes correct {
             0% { transform: scale(1); }
             50% { transform: scale(1.2); }
@@ -95,22 +82,10 @@
             font-weight: 700;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
-        .answer-btn {
-            min-width: 120px;
-            margin: 0.5rem;
-        }
-        .answer-btn.selected {
-            border: 2px solid #3b82f6;
-            background: #dbeafe;
-        }
-        .high-scores {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .streak-counter {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
+        .answer-btn { min-width: 120px; margin: 0.5rem; }
+        .answer-btn.selected { border: 2px solid #3b82f6; background: #dbeafe; }
+        .high-scores { max-height: 200px; overflow-y: auto; }
+        .streak-counter { font-size: 1.5rem; font-weight: 600; }
         .answer-input {
             border: 2px solid #d1d5db;
             border-radius: 0.5rem;
@@ -119,46 +94,68 @@
             text-align: center;
             outline: none;
         }
-        .answer-input:focus {
-            border-color: #3b82f6;
+        .answer-input:focus { border-color: #3b82f6; }
+        .artifact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
         }
+        .artifact-item {
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            color: #333;
+        }
+        .artifact-item:hover { transform: scale(1.05); }
+        .artifact-rarity-mythical {
+            border: 2px solid #ff00ff;
+            background: #fff0f5;
+            animation: glowMythical 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes glowMythical {
+            from { box-shadow: 0 0 5px #ff00ff; }
+            to { box-shadow: 0 0 20px #ff00ff; }
+        }
+        .artifact-rarity-legendary {
+            border: 2px solid #facc15;
+            background: #fefce8;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #facc15; }
+            to { box-shadow: 0 0 20px #facc15; }
+        }
+        .artifact-rarity-epic { border: 2px solid #a855f7; background: #faf5ff; }
+        .artifact-rarity-rare { border: 2px solid #3b82f6; background: #eff6ff; }
+        .artifact-rarity-uncommon { border: 2px solid #10b981; background: #ecfdf5; }
+        .artifact-rarity-common { border: 2px solid #6b7280; background: #f3f4f6; }
+        .operation-theme { font-size: 1.2rem; font-weight: 600; color: #555; }
     </style>
 </head>
 <body class="ocean-theme">
     <div class="flex">
-        <!-- Sidebar for User Selection -->
         <div class="sidebar">
             <h3 class="text-lg font-bold text-blue-600 mb-4">Players</h3>
             <div id="user-list"></div>
-            <input
-                id="new-user"
-                type="text"
-                placeholder="New Player Name"
-                class="border-2 border-blue-300 rounded-lg p-2 w-full mb-2 focus:outline-none focus:border-blue-500"
-            />
-            <button
-                onclick="addUser()"
-                class="btn bg-green-500 text-white w-full py-2 rounded-lg hover:bg-green-600"
-            >
-                Add Player
-            </button>
+            <input id="new-user" type="text" placeholder="New Player Name" class="border-2 border-blue-300 rounded-lg p-2 w-full mb-2 focus:outline-none focus:border-blue-500" />
+            <button onclick="addUser()" class="btn bg-green-500 text-white w-full py-2 rounded-lg hover:bg-green-600">Add Player</button>
             <div id="progress" class="mt-4 text-sm text-gray-600"></div>
         </div>
 
         <div class="container">
-            <!-- Mascot Track -->
             <div class="mascot-track bg-gray-100 p-4 rounded-lg mb-6 text-center">
                 <pre id="mascot" class="text-4xl"></pre>
                 <p id="mascot-message" class="text-sm text-gray-600 mt-2">Let's race to the finish!</p>
             </div>
 
-            <!-- Welcome Screen -->
             <div id="welcome-screen" class="text-center">
                 <h1 class="text-4xl font-bold text-blue-600 mb-6">Math Dash</h1>
                 <p class="text-lg text-gray-600 mb-4">Select a player or add a new one!</p>
             </div>
 
-            <!-- Mascot Selection Screen -->
             <div id="mascot-screen" class="hidden text-center">
                 <h2 class="text-3xl font-bold text-blue-600 mb-6">Choose Your Mascot, <span id="mascot-user"></span>!</h2>
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
@@ -174,15 +171,9 @@
                     <button onclick="setTheme('jungle')" class="btn bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">Jungle</button>
                     <button onclick="setTheme('space')" class="btn bg-indigo-500 text-white py-2 px-4 rounded-lg hover:bg-indigo-600">Space</button>
                 </div>
-                <button
-                    onclick="proceedToSetup()"
-                    class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700"
-                >
-                    Next
-                </button>
+                <button onclick="proceedToSetup()" class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Next</button>
             </div>
 
-            <!-- Setup Screen -->
             <div id="setup-screen" class="hidden text-center">
                 <h2 id="greeting" class="text-3xl font-bold text-blue-600 mb-6"></h2>
                 <p class="text-lg text-gray-600 mb-4">Choose your difficulty level:</p>
@@ -197,25 +188,19 @@
                 </div>
                 <p class="text-lg text-gray-600 mb-4">Choose an operation:</p>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                    <button onclick="setOperation('+')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Addition</button>
-                    <button onclick="setOperation('-')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Subtraction</button>
-                    <button onclick="setOperation('*')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Multiplication</button>
-                    <button onclick="setOperation('/')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Division</button>
+                    <button onclick="setOperation('+')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Addition (Field)</button>
+                    <button onclick="setOperation('-')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Subtraction (Lake)</button>
+                    <button onclick="setOperation('*')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Multiplication (Forest)</button>
+                    <button onclick="setOperation('/')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Division (Volcanic Mountain)</button>
                 </div>
                 <p class="text-lg text-gray-600 mb-4">Sound effects:</p>
                 <div class="flex justify-center gap-4 mb-6">
                     <button onclick="setSound(true)" class="btn bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 sound-on">On</button>
                     <button onclick="setSound(false)" class="btn bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 sound-off">Off</button>
                 </div>
-                <button
-                    onclick="startQuiz()"
-                    class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700"
-                >
-                    Start Quiz
-                </button>
+                <button onclick="startQuiz()" class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Start Quiz</button>
             </div>
 
-            <!-- Quiz Screen -->
             <div id="quiz-screen" class="hidden text-center">
                 <h2 class="text-2xl font-bold text-blue-600 mb-4">Question <span id="question-number">1</span> of 15</h2>
                 <div class="w-full bg-gray-200 rounded-full h-4 mb-4">
@@ -224,18 +209,8 @@
                 <p id="streak" class="streak-counter text-orange-500 mb-4">Streak: 0</p>
                 <p id="question" class="text-xl text-gray-800 mb-6"></p>
                 <div class="flex justify-center mb-4">
-                    <input
-                        id="answer-input"
-                        type="number"
-                        placeholder="Type your answer"
-                        class="answer-input"
-                    />
-                    <button
-                        onclick="checkInputAnswer()"
-                        class="btn bg-blue-500 text-white py-2 px-4 ml-2 rounded-lg hover:bg-blue-600"
-                    >
-                        Submit
-                    </button>
+                    <input id="answer-input" type="number" placeholder="Type your answer" class="answer-input" />
+                    <button onclick="checkInputAnswer()" class="btn bg-blue-500 text-white py-2 px-4 ml-2 rounded-lg hover:bg-blue-600">Submit</button>
                 </div>
                 <div id="answer-choices" class="flex flex-row justify-center gap-4 mb-4">
                     <button onclick="checkAnswer(0)" class="answer-btn btn bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"><span class="font-bold">A:</span> <span id="choice-0"></span></button>
@@ -244,29 +219,49 @@
                     <button onclick="checkAnswer(3)" class="answer-btn btn bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"><span class="font-bold">F:</span> <span id="choice-3"></span></button>
                 </div>
                 <p id="feedback" class="text-lg mb-4"></p>
-                <button
-                    onclick="quitGame()"
-                    class="btn bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600"
-                >
-                    Quit
-                </button>
+                <button onclick="quitGame()" class="btn bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600">Quit</button>
             </div>
 
-            <!-- Results Screen -->
             <div id="results-screen" class="hidden text-center">
                 <h2 class="text-3xl font-bold text-blue-600 mb-6">Race Complete!</h2>
                 <p id="medal" class="medal-display mb-4"></p>
                 <p id="score" class="text-2xl text-gray-800 mb-4"></p>
                 <p id="percentage" class="text-2xl text-gray-800 mb-4"></p>
+                <p id="gold-earned" class="text-2xl text-yellow-600 mb-4"></p>
                 <p id="time" class="text-xl text-gray-600 mb-6"></p>
+                <p id="treasure-message" class="text-xl text-purple-600 mb-6"></p>
                 <h3 class="text-xl font-bold text-blue-600 mb-4">High Scores</h3>
                 <div id="high-scores" class="high-scores text-left text-sm text-gray-600 mb-6 mx-auto max-w-md"></div>
-                <button
-                    onclick="restartGame()"
-                    class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700"
-                >
-                    Race Again!
-                </button>
+                <div class="flex justify-center gap-4">
+                    <button onclick="goToShop()" class="btn bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700">Visit Shop</button>
+                    <button onclick="viewProfile()" class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">View Profile</button>
+                    <button onclick="restartGame()" class="btn bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700">Race Again!</button>
+                </div>
+            </div>
+
+            <div id="shop-screen" class="hidden text-center">
+                <h2 class="text-3xl font-bold text-blue-600 mb-6">Treasure Shop</h2>
+                <p class="text-lg text-gray-600 mb-4">Your Gold: <span id="shop-gold">0</span> 💰</p>
+                <p class="text-lg text-gray-600 mb-6">Choose an item to buy or exit!</p>
+                <div id="shop-items" class="artifact-grid mb-6"></div>
+                <button onclick="refreshShop()" class="btn bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600">Refresh Shop (<span id="refresh-cost">100</span> 💰)</button>
+                <button onclick="exitShop()" class="btn bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600">Exit Shop</button>
+            </div>
+
+            <div id="profile-screen" class="hidden text-center">
+                <h2 class="text-3xl font-bold text-blue-600 mb-6">Profile: <span id="profile-user"></span></h2>
+                <p class="text-lg text-gray-600 mb-4">Rank: <span id="profile-rank">Initiate</span> (Level <span id="profile-level">1</span>)</p>
+                <p class="text-lg text-gray-600 mb-4">Gold: <span id="profile-gold">0</span> 💰</p>
+                <h3 class="text-xl font-bold text-blue-600 mb-2">Base: <span id="profile-property">None</span></h3>
+                <p id="property-description" class="text-sm text-gray-600 mb-4"></p>
+                <button id="upgrade-property" onclick="upgradeProperty()" class="btn bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 mb-4">Upgrade Base (<span id="property-cost">100</span> 💰)</button>
+                <h3 class="text-xl font-bold text-blue-600 mb-2">Treasure Chests</h3>
+                <div id="treasure-chests" class="mb-4"></div>
+                <h3 class="text-xl font-bold text-blue-600 mb-2">Artifacts</h3>
+                <div id="artifacts" class="artifact-grid mb-4"></div>
+                <h3 class="text-xl font-bold text-blue-600 mb-2">Game History</h3>
+                <div id="game-history" class="text-left text-sm text-gray-600 mb-6 mx-auto max-w-md"></div>
+                <button onclick="backToWelcome()" class="btn bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Back</button>
             </div>
         </div>
     </div>
@@ -275,36 +270,179 @@
         let currentUser = null;
         let difficulty = 1;
         let operation = '+';
+        let soundEnabled = true;
         const totalQuestions = 15;
         let currentQuestion = 0;
         let correctAnswers = 0;
         let streak = 0;
+        let maxStreak = 0;
         let questions = [];
         let startTime = 0;
-        let highScores = {};
         let mascotAnimation = null;
+        let shopRefreshCost = 100;
 
-        const users = {
-            Lucas: { mascot: '🐰', theme: 'ocean', sound: true, games: [] },
-            Alycia: { mascot: '🐱', theme: 'jungle', sound: true, games: [] }
-        };
-
+        const users = {};
         const difficultyRanges = {
-            1: { num1: { min: 1, max: 9 }, num2: { min: 1, max: 9 } },
-            2: { num1: { min: 10, max: 99 }, num2: { min: 1, max: 9 } },
-            3: { num1: { min: 10, max: 99 }, num2: { min: 10, max: 99 } },
-            4: { num1: { min: 100, max: 999 }, num2: { min: 1, max: 9 } },
-            5: { num1: { min: 100, max: 999 }, num2: { min: 10, max: 99 } },
-            6: { num1: { min: 100, max: 999 }, num2: { min: 100, max: 999 } },
-            7: { num1: { min: 1000, max: 9999 }, num2: { min: 10, max: 99 } }
+            1: { min: 1, max: 10, goldBase: 5, goldMultiplier: 1 },
+            2: { min: 10, max: 20, goldBase: 10, goldMultiplier: 1.2 },
+            3: { min: 20, max: 50, goldBase: 15, goldMultiplier: 1.5 },
+            4: { min: 50, max: 100, goldBase: 20, goldMultiplier: 1.8 },
+            5: { min: 100, max: 200, goldBase: 25, goldMultiplier: 2 },
+            6: { min: 200, max: 500, goldBase: 30, goldMultiplier: 2.5 },
+            7: { min: 500, max: 1000, goldBase: 40, goldMultiplier: 3 }
         };
-
-        const mascotMessages = [
-            "You're zooming along!",
-            "Super speedy answers!",
-            "Halfway there, champ!",
-            "You're a math wizard!",
-            "Sprint to the finish!"
+        const operationThemes = {
+            '+': 'Field',
+            '-': 'Lake',
+            '*': 'Forest',
+            '/': 'Volcanic Mountain'
+        };
+        const goalObjects = {
+            ocean: ['🏝️', '⚓', '🐚'],
+            jungle: ['🌴', '🏞️', '🐒'],
+            space: ['🪐', '⭐', '🚀']
+        };
+        const ranks = [
+            { name: 'Initiate', xp: 0 },
+            { name: 'Novice', xp: 100 },
+            { name: 'Apprentice', xp: 250 },
+            { name: 'Journeyman', xp: 500 },
+            { name: 'Expert', xp: 1000 },
+            { name: 'Adept', xp: 2000 },
+            { name: 'Master', xp: 3500 },
+            { name: 'Grandmaster', xp: 5000 },
+            { name: 'Legend', xp: 7500 },
+            { name: 'Immortal', xp: 10000 }
+        ];
+        const properties = [
+            { tier: 0, name: 'None', cost: 0, description: '' },
+            { tier: 1, name: 'Campfire', cost: 100, description: 'A small fire to keep you warm.' },
+            { tier: 2, name: 'Tent', cost: 200, description: 'A cozy tent for shelter.' },
+            { tier: 3, name: 'Cabin', cost: 500, description: 'A wooden cabin with a fireplace.' },
+            { tier: 4, name: 'House', cost: 1000, description: 'A comfortable house with a garden.' },
+            { tier: 5, name: 'Mansion', cost: 5000, description: 'A luxurious mansion with many rooms.' },
+            { tier: 6, name: 'Castle', cost: 10000, description: 'A grand castle fit for a king.' }
+        ];
+        const artifactsList = [
+            { name: 'Golden Scepter', rarity: 'legendary', price: 5000, description: 'A scepter of pure gold, radiating royal authority.' },
+            { name: 'Moonlit Dagger', rarity: 'rare', price: 800, description: 'A dagger that glows faintly under moonlight, perfect for stealth.' },
+            { name: 'Emerald Compass', rarity: 'epic', price: 1500, description: 'A magical compass with an emerald inlay, guiding to hidden treasures.' },
+            { name: 'Wooden Flute', rarity: 'common', price: 150, description: 'A simple flute carved from oak, playing soothing tunes.' },
+            { name: 'Sapphire Cloak', rarity: 'legendary', price: 4500, description: 'A cloak woven with sapphire threads, granting invisibility at night.' },
+            { name: 'Iron Lantern', rarity: 'common', price: 200, description: 'A sturdy lantern that lights up dark jungle paths.' },
+            { name: 'Ruby Talisman', rarity: 'rare', price: 900, description: 'A talisman with a ruby core, boosting courage in battle.' },
+            { name: 'Bronze Gauntlets', rarity: 'uncommon', price: 350, description: 'Heavy gauntlets offering protection in melee combat.' },
+            { name: 'Diamond Orb', rarity: 'legendary', price: 6000, description: 'An orb encrusted with diamonds, holding ancient wisdom.' },
+            { name: 'Steel Bow', rarity: 'common', price: 250, description: 'A reliable steel bow for long-range attacks.' },
+            { name: 'Amethyst Pendant', rarity: 'epic', price: 1200, description: 'A pendant with an amethyst gem, protecting against curses.' },
+            { name: 'Obsidian Blade', rarity: 'rare', price: 1000, description: 'A razor-sharp blade carved from obsidian, deadly in skilled hands.' },
+            { name: 'Platinum Chalice', rarity: 'legendary', price: 5500, description: 'A chalice of platinum, said to purify any liquid poured into it.' },
+            { name: 'Leather Satchel', rarity: 'common', price: 180, description: 'A rugged satchel for carrying jungle supplies.' },
+            { name: 'Topaz Ring', rarity: 'uncommon', price: 400, description: 'A ring with a glowing topaz, enhancing focus.' },
+            { name: 'Cedar Staff', rarity: 'common', price: 220, description: 'A staff made of cedar wood, used for channeling nature magic.' },
+            { name: 'Garnet Brooch', rarity: 'rare', price: 850, description: 'A brooch with a fiery garnet, increasing stamina.' },
+            { name: 'Onyx Amulet', rarity: 'epic', price: 1300, description: 'An amulet with a dark onyx stone, granting stealth in shadows.' },
+            { name: 'Copper Telescope', rarity: 'uncommon', price: 300, description: 'A telescope for spotting distant dangers in the jungle.' },
+            { name: 'Coral Bracelet', rarity: 'common', price: 200, description: 'A bracelet made of ocean coral, bringing calmness.' },
+            { name: 'Ivory Horn', rarity: 'legendary', price: 5200, description: 'A horn carved from ivory, summoning allies with its call.' },
+            { name: 'Quartz Wand', rarity: 'rare', price: 950, description: 'A wand topped with a quartz crystal, amplifying spells.' },
+            { name: 'Silk Scarf', rarity: 'uncommon', price: 320, description: 'A silk scarf with jungle patterns, enhancing agility.' },
+            { name: 'Jade Mask', rarity: 'epic', price: 1400, description: 'A mask carved from jade, offering spiritual protection.' },
+            { name: 'Tin Cup', rarity: 'common', price: 150, description: 'A simple tin cup for drinking water on long journeys.' },
+            { name: 'Turquoise Necklace', rarity: 'rare', price: 800, description: 'A necklace with turquoise stones, boosting endurance.' },
+            { name: 'Brass Bell', rarity: 'uncommon', price: 280, description: 'A brass bell that wards off evil spirits with its chime.' },
+            { name: 'Crystal Globe', rarity: 'legendary', price: 5800, description: 'A globe of crystal that reveals hidden paths.' },
+            { name: 'Velvet Boots', rarity: 'common', price: 230, description: 'Soft velvet boots with a sturdy sole for jungle treks.' },
+            { name: 'Opal Earrings', rarity: 'epic', price: 1100, description: 'Earrings with shimmering opals, enhancing intuition.' },
+            { name: 'Lead Hammer', rarity: 'common', price: 260, description: 'A heavy hammer for breaking through obstacles.' },
+            { name: 'Aquamarine Ring', rarity: 'uncommon', price: 400, description: 'A ring with an aquamarine gem, promoting serenity.' },
+            { name: 'Silver Lyre', rarity: 'rare', price: 900, description: 'A silver lyre that plays melodies to calm wild beasts.' },
+            { name: 'Marble Statue', rarity: 'legendary', price: 6000, description: 'A statue of a jungle deity, radiating divine energy.' },
+            { name: 'Copper Anklet', rarity: 'common', price: 180, description: 'A simple anklet with etched symbols of strength.' },
+            { name: 'Lapis Lazuli Amulet', rarity: 'epic', price: 1250, description: 'An amulet with a deep blue lapis lazuli, enhancing wisdom.' },
+            { name: 'Iron Chainmail', rarity: 'uncommon', price: 450, description: 'Durable chainmail for moderate protection in battle.' },
+            { name: 'Moonstone Ring', rarity: 'rare', price: 850, description: 'A ring with a glowing moonstone, improving night vision.' },
+            { name: 'Golden Flute', rarity: 'legendary', price: 5100, description: 'A golden flute with enchanting tones, soothing the jungle.' },
+            { name: 'Ebony Wand', rarity: 'epic', price: 1300, description: 'A wand of ebony wood, channeling dark magic.' },
+            { name: 'Satin Sash', rarity: 'common', price: 200, description: 'A satin sash with jungle embroidery, adding elegance.' },
+            { name: 'Citrine Pendant', rarity: 'uncommon', price: 380, description: 'A pendant with a bright citrine stone, boosting energy.' },
+            { name: 'Brass Compass', rarity: 'common', price: 250, description: 'A brass compass for navigating through dense jungles.' },
+            { name: 'Pearl Tiara', rarity: 'rare', price: 950, description: 'A tiara with lustrous pearls, fit for a jungle queen.' },
+            { name: 'Obsidian Spear', rarity: 'epic', price: 1400, description: 'A spear with an obsidian tip, perfect for hunting.' },
+            { name: 'Platinum Crown', rarity: 'legendary', price: 6200, description: 'A platinum crown with embedded gems, symbolizing power.' },
+            { name: 'Wooden Bow', rarity: 'common', price: 220, description: 'A sturdy wooden bow for accurate long-range shots.' },
+            { name: 'Aquamarine Necklace', rarity: 'uncommon', price: 400, description: 'A necklace with an aquamarine stone, promoting peace.' },
+            { name: 'Steel Gauntlets', rarity: 'common', price: 300, description: 'Heavy gauntlets offering superior hand protection.' },
+            { name: 'Amethyst Ring', rarity: 'rare', price: 800, description: 'A ring with a deep amethyst, protecting against dark magic.' },
+            { name: 'Gold Medallion', rarity: 'legendary', price: 5000, description: 'A medallion with ancient symbols, granting luck.' },
+            { name: 'Leather Boots', rarity: 'common', price: 200, description: 'Tough leather boots with jungle tread for exploration.' },
+            { name: 'Topaz Brooch', rarity: 'uncommon', price: 350, description: 'A brooch with a radiant topaz, enhancing charisma.' },
+            { name: 'Iron Spear', rarity: 'common', price: 280, description: 'A sturdy iron spear for close combat.' },
+            { name: 'Garnet Ring', rarity: 'epic', price: 1200, description: 'A ring with fiery garnet stones, increasing vitality.' },
+            { name: 'Onyx Pendant', rarity: 'rare', price: 900, description: 'A pendant with a dark onyx stone, granting stealth.' },
+            { name: 'Flint Knife', rarity: 'common', price: 180, description: 'A rugged flint knife for survival tasks.' },
+            { name: 'Coral Ring', rarity: 'uncommon', price: 320, description: 'A ring made of vibrant coral, evoking the ocean’s spirit.' },
+            { name: 'Ivory Necklace', rarity: 'rare', price: 850, description: 'A necklace carved from ivory, boosting agility.' },
+            { name: 'Quartz Crystal', rarity: 'epic', price: 1300, description: 'A raw quartz crystal that amplifies magical abilities.' },
+            { name: 'Silk Belt', rarity: 'common', price: 200, description: 'A silk belt with jungle patterns, adding style.' },
+            { name: 'Turquoise Pendant', rarity: 'uncommon', price: 400, description: 'A pendant with turquoise stones, enhancing endurance.' },
+            { name: 'Brass Goblet', rarity: 'common', price: 250, description: 'A brass goblet with etched designs, used for ceremonies.' },
+            { name: 'Crystal Spear', rarity: 'legendary', price: 5500, description: 'A spear with a crystal tip, channeling pure energy.' },
+            { name: 'Velvet Hat', rarity: 'uncommon', price: 300, description: 'A velvet hat with a jungle feather, enhancing mobility.' },
+            { name: 'Jade Ring', rarity: 'rare', price: 900, description: 'A ring with a carved jade stone, offering spiritual protection.' },
+            { name: 'Lead Mace', rarity: 'common', price: 280, description: 'A heavy lead mace for crushing opponents.' },
+            { name: 'Silver Harp', rarity: 'epic', price: 1400, description: 'A silver harp that plays soothing melodies to influence foes.' },
+            { name: 'Marble Plaque', rarity: 'legendary', price: 5800, description: 'A marble plaque with jungle carvings, used for blessings.' },
+            { name: 'Copper Ring', rarity: 'common', price: 180, description: 'A simple copper ring with etched strength symbols.' },
+            { name: 'Opal Pendant', rarity: 'rare', price: 850, description: 'A pendant with a shimmering opal, enhancing foresight.' },
+            { name: 'Iron Helmet', rarity: 'uncommon', price: 400, description: 'A sturdy iron helmet with a jungle crest.' },
+            { name: 'Lapis Lazuli Ring', rarity: 'epic', price: 1200, description: 'A ring with a deep blue lapis lazuli, promoting wisdom.' },
+            { name: 'Golden Lyre', rarity: 'legendary', price: 5100, description: 'A golden lyre with enchanting tones, calming the jungle.' },
+            { name: 'Ebony Staff', rarity: 'rare', price: 950, description: 'An ebony staff with carved runes, channeling dark magic.' },
+            { name: 'Satin Vest', rarity: 'common', price: 220, description: 'A satin vest with jungle embroidery, adding elegance.' },
+            { name: 'Citrine Ring', rarity: 'uncommon', price: 350, description: 'A ring with a bright citrine stone, boosting energy.' },
+            { name: 'Brass Telescope', rarity: 'common', price: 260, description: 'A brass telescope for spotting distant treasures.' },
+            { name: 'Pearl Ring', rarity: 'rare', price: 900, description: 'A ring with a lustrous pearl, fit for a jungle queen.' },
+            { name: 'Obsidian Bow', rarity: 'epic', price: 1300, description: 'A sleek obsidian bow with deadly accuracy.' },
+            { name: 'Gold Anklet', rarity: 'legendary', price: 5000, description: 'An anklet with golden charms, granting luck in travel.' },
+            { name: 'Leather Gloves', rarity: 'common', price: 200, description: 'Tough leather gloves for climbing jungle vines.' },
+            { name: 'Topaz Necklace', rarity: 'uncommon', price: 400, description: 'A necklace with a radiant topaz, enhancing charisma.' },
+            { name: 'Iron Bow', rarity: 'common', price: 280, description: 'A sturdy iron bow with a powerful draw.' },
+            { name: 'Amethyst Necklace', rarity: 'rare', price: 850, description: 'A necklace with a deep amethyst, protecting against curses.' },
+            { name: 'Platinum Bracelet', rarity: 'legendary', price: 5200, description: 'A bracelet with a platinum chain, symbolizing wealth.' },
+            { name: 'Flint Spear', rarity: 'common', price: 200, description: 'A rugged flint spear for survival in the wild.' },
+            { name: 'Coral Necklace', rarity: 'uncommon', price: 350, description: 'A necklace made of vibrant coral, evoking the sea.' },
+            { name: 'Ivory Ring', rarity: 'rare', price: 900, description: 'A ring carved from ivory, enhancing agility.' },
+            { name: 'Quartz Pendant', rarity: 'epic', price: 1200, description: 'A pendant with a raw quartz crystal, amplifying magic.' },
+            { name: 'Silk Sash', rarity: 'common', price: 220, description: 'A silk sash with jungle patterns, adding style.' },
+            { name: 'Onyx Ring', rarity: 'rare', price: 850, description: 'A ring with a dark onyx stone, granting stealth.' },
+            { name: 'Tin Whistle', rarity: 'uncommon', price: 300, description: 'A tin whistle that mimics jungle bird calls.' },
+            { name: 'Garnet Pendant', rarity: 'epic', price: 1300, description: 'A pendant with fiery garnet stones, boosting stamina.' },
+            { name: 'Bronze Mirror', rarity: 'common', price: 200, description: 'A bronze mirror with etched designs, revealing truths.' },
+            { name: 'Crystal Wand', rarity: 'legendary', price: 5500, description: 'A wand topped with a clear crystal, channeling pure magic.' },
+            { name: 'Velvet Cloak', rarity: 'uncommon', price: 400, description: 'A velvet cloak with a jungle vine border, enhancing mobility.' },
+            { name: 'Jade Amulet', rarity: 'rare', price: 900, description: 'An amulet with a carved jade stone, offering protection.' },
+            { name: 'Lead Club', rarity: 'common', price: 260, description: 'A heavy lead club for overwhelming opponents.' },
+            { name: 'Turquoise Ring', rarity: 'uncommon', price: 350, description: 'A ring with turquoise stones, enhancing endurance.' },
+            { name: 'Silver Flute', rarity: 'epic', price: 1400, description: 'A silver flute that plays enchanting melodies.' },
+            { name: 'Marble Bowl', rarity: 'legendary', price: 5800, description: 'A marble bowl with jungle motifs, used for rituals.' },
+            { name: 'Copper Bracelet', rarity: 'common', price: 200, description: 'A simple copper bracelet with etched symbols.' },
+            { name: 'Opal Ring', rarity: 'rare', price: 850, description: 'A ring with a shimmering opal, enhancing foresight.' },
+            { name: 'Iron Armor', rarity: 'uncommon', price: 450, description: 'Heavy iron armor offering superior protection.' },
+            { name: 'Lapis Lazuli Pendant', rarity: 'epic', price: 1200, description: 'A pendant with a deep blue lapis lazuli, promoting wisdom.' },
+            { name: 'Golden Harp', rarity: 'legendary', price: 5100, description: 'A golden harp with soothing tones, calming chaos.' },
+            { name: 'Ebony Spear', rarity: 'rare', price: 900, description: 'A spear of ebony wood, channeling dark energy.' },
+            { name: 'Satin Cloak', rarity: 'common', price: 220, description: 'A satin cloak with jungle embroidery, adding elegance.' },
+            { name: 'Citrine Necklace', rarity: 'uncommon', price: 400, description: 'A necklace with a bright citrine stone, boosting energy.' },
+            { name: 'Brass Lantern', rarity: 'common', price: 250, description: 'A brass lantern for illuminating dark paths.' },
+            { name: 'Pearl Necklace', rarity: 'rare', price: 950, description: 'A necklace with lustrous pearls, fit for royalty.' },
+            { name: 'Obsidian Ring', rarity: 'epic', price: 1300, description: 'A ring with an obsidian gem, granting stealth.' },
+            { name: 'Cursed Blade', rarity: 'epic', price: 1800, description: 'A blade imbued with dark magic, whispering secrets.' },
+            { name: 'Vampire Fang', rarity: 'rare', price: 600, description: 'A fang from an ancient vampire, glowing faintly.' },
+            { name: 'Shadow Puppy', rarity: 'uncommon', price: 250, description: 'A playful pet that blends into the shadows.' },
+            { name: 'Fire Kitten', rarity: 'rare', price: 700, description: 'A companion with a fiery tail, warming your journey.' },
+            { name: 'Mythical Dragon Egg', rarity: 'mythical', price: 10000, description: 'A rare egg that might hatch into a dragon.' },
+            { name: 'Eternal Phoenix', rarity: 'mythical', price: 12000, description: 'A mythical companion reborn from ashes, fiery brilliance.' }
         ];
 
         function safeGetElement(id) {
@@ -313,590 +451,401 @@
             return element;
         }
 
-        // Sound effects
-        function playSound(type) {
-            try {
-                if (!currentUser || !users[currentUser].sound) return;
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = ctx.createOscillator();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(type === 'correct' ? 800 : 200, ctx.currentTime);
-                oscillator.connect(ctx.destination);
-                oscillator.start();
-                oscillator.stop(ctx.currentTime + 0.3);
-            } catch (error) {
-                console.error('Error in playSound:', error);
-            }
+        function showScreen(screenId) {
+            const screens = ['welcome-screen', 'mascot-screen', 'setup-screen', 'quiz-screen', 'results-screen', 'shop-screen', 'profile-screen'];
+            screens.forEach(id => safeGetElement(id)?.classList.add('hidden'));
+            safeGetElement(screenId)?.classList.remove('hidden');
         }
 
         function renderUserList() {
-            try {
-                const userList = safeGetElement('user-list');
-                if (!userList) return;
-                userList.innerHTML = '';
-                Object.keys(users).forEach(user => {
-                    const button = document.createElement('button');
-                    button.className = 'btn bg-blue-500 text-white w-full py-2 rounded-lg mb-2 hover:bg-blue-600';
-                    button.textContent = user;
-                    button.onclick = () => selectUser(user);
-                    userList.appendChild(button);
-                });
-                updateProgress();
-            } catch (error) {
-                console.error('Error in renderUserList:', error);
-            }
+            const userList = safeGetElement('user-list');
+            if (!userList) return;
+            userList.innerHTML = Object.keys(users).map(name => `
+                <div class="flex justify-between items-center mb-2">
+                    <button onclick="selectUser('${name}')" class="btn bg-blue-500 text-white py-1 px-3 rounded-lg hover:bg-blue-600">${name}</button>
+                    <button onclick="deleteUser('${name}')" class="btn bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600">X</button>
+                </div>
+            `).join('');
         }
 
         function addUser() {
-            try {
-                const newUserInput = safeGetElement('new-user');
-                if (!newUserInput) return;
-                const newUser = newUserInput.value.trim();
-                if (!newUser) {
-                    alert('Please enter a player name!');
-                    return;
-                }
-                if (users[newUser]) {
-                    alert('Player already exists!');
-                    return;
-                }
-                users[newUser] = { mascot: '🐰', theme: 'ocean', sound: true, games: [] };
-                newUserInput.value = '';
+            const input = safeGetElement('new-user');
+            const name = input.value.trim();
+            if (name && !users[name]) {
+                users[name] = {
+                    mascot: '🐰',
+                    theme: 'ocean',
+                    sound: true,
+                    gold: 0,
+                    artifacts: [],
+                    treasureChests: [],
+                    games: [],
+                    rank: 'Initiate',
+                    xp: 0,
+                    property: { tier: 0, name: 'None', description: '' }
+                };
+                input.value = '';
                 renderUserList();
-            } catch (error) {
-                console.error('Error in addUser:', error);
             }
         }
 
-        function selectUser(user) {
-            try {
-                currentUser = user;
-                const welcomeScreen = safeGetElement('welcome-screen');
-                const mascotScreen = safeGetElement('mascot-screen');
-                const mascotUser = safeGetElement('mascot-user');
-                const mascot = safeGetElement('mascot');
-                if (!welcomeScreen || !mascotScreen || !mascotUser || !mascot) return;
-                welcomeScreen.classList.add('hidden');
-                mascotScreen.classList.remove('hidden');
-                mascotUser.textContent = user;
-                mascot.textContent = `${users[currentUser].mascot}  ---🏁`;
-                setTheme(users[currentUser].theme);
-                updateSoundToggle();
-            } catch (error) {
-                console.error('Error in selectUser:', error);
+        function deleteUser(name) {
+            if (confirm(`Delete ${name}?`)) {
+                delete users[name];
+                if (currentUser === name) currentUser = null;
+                renderUserList();
+                showScreen('welcome-screen');
             }
+        }
+
+        function selectUser(name) {
+            currentUser = name;
+            safeGetElement('mascot-user').textContent = name;
+            document.body.className = `${users[name].theme}-theme`;
+            showScreen('mascot-screen');
         }
 
         function setMascot(mascot) {
-            try {
-                if (!currentUser || !mascot) return;
+            if (currentUser) {
                 users[currentUser].mascot = mascot;
-                const mascotElement = safeGetElement('mascot');
-                if (mascotElement) mascotElement.textContent = `${mascot}  ---🏁`;
-                document.querySelectorAll('.btn.bg-purple-500').forEach(btn => {
-                    btn.classList.remove('ring-4', 'ring-blue-300');
-                });
-                if (event && event.target) {
-                    event.target.classList.add('ring-4', 'ring-blue-300');
-                }
-            } catch (error) {
-                console.error('Error in setMascot:', error);
+                safeGetElement('mascot').textContent = mascot;
             }
         }
 
         function setTheme(theme) {
-            try {
-                if (!currentUser || !theme) return;
+            if (currentUser) {
                 users[currentUser].theme = theme;
-                document.body.classList.remove('ocean-theme', 'jungle-theme', 'space-theme');
-                document.body.classList.add(`${theme}-theme`);
-                document.querySelectorAll('.btn.bg-blue-500, .btn.bg-green-500, .btn.bg-indigo-500').forEach(btn => {
-                    btn.classList.remove('ring-4', 'ring-blue-300');
-                });
-                const themeBtn = document.querySelector(`button[onclick="setTheme('${theme}')"]`);
-                if (themeBtn) themeBtn.classList.add('ring-4', 'ring-blue-300');
-            } catch (error) {
-                console.error('Error in setTheme:', error);
-            }
-        }
-
-        function setSound(enabled) {
-            try {
-                if (!currentUser) return;
-                users[currentUser].sound = enabled;
-                updateSoundToggle();
-                if (event && event.target) {
-                    document.querySelectorAll('.btn.bg-gray-500').forEach(btn => {
-                        btn.classList.remove('ring-4', 'ring-blue-300');
-                    });
-                    event.target.classList.add('ring-4', 'ring-blue-300');
-                }
-            } catch (error) {
-                console.error('Error in setSound:', error);
-            }
-        }
-
-        function updateSoundToggle() {
-            try {
-                const soundOn = document.querySelector('.sound-on');
-                const soundOff = document.querySelector('.sound-off');
-                if (!soundOn || !soundOff) return;
-                if (users[currentUser].sound) {
-                    soundOn.classList.add('ring-4', 'ring-blue-300');
-                    soundOff.classList.remove('ring-4', 'ring-blue-300');
-                } else {
-                    soundOff.classList.add('ring-4', 'ring-blue-300');
-                    soundOn.classList.remove('ring-4', 'ring-blue-300');
-                }
-            } catch (error) {
-                console.error('Error in updateSoundToggle:', error);
+                document.body.className = `${theme}-theme`;
             }
         }
 
         function proceedToSetup() {
-            try {
-                const mascotScreen = safeGetElement('mascot-screen');
-                const setupScreen = safeGetElement('setup-screen');
-                const greeting = safeGetElement('greeting');
-                if (!mascotScreen || !setupScreen || !greeting) return;
-                mascotScreen.classList.add('hidden');
-                setupScreen.classList.remove('hidden');
-                greeting.textContent = `Ready, ${currentUser}?`;
-            } catch (error) {
-                console.error('Error in proceedToSetup:', error);
+            if (currentUser) {
+                safeGetElement('greeting').textContent = `Ready to Race, ${currentUser}?`;
+                showScreen('setup-screen');
             }
         }
 
-        function setDifficulty(level) {
-            try {
-                difficulty = level;
-                document.querySelectorAll('.btn.bg-green-500, .btn.bg-yellow-500, .btn.bg-orange-500, .btn.bg-red-500').forEach(btn => {
-                    btn.classList.remove('ring-4', 'ring-blue-300');
-                });
-                if (event && event.target) {
-                    event.target.classList.add('ring-4', 'ring-blue-300');
-                }
-            } catch (error) {
-                console.error('Error in setDifficulty:', error);
-            }
-        }
+        function setDifficulty(level) { difficulty = level; }
 
         function setOperation(op) {
-            try {
-                operation = op;
-                document.querySelectorAll('.btn.bg-blue-500').forEach(btn => {
-                    btn.classList.remove('ring-4', 'ring-blue-300');
-                });
-                if (event && event.target) {
-                    event.target.classList.add('ring-4', 'ring-blue-300');
+            operation = op;
+            safeGetElement('question').innerHTML = `Exploring the ${operationThemes[op]}<br>`;
+        }
+
+        function setSound(enabled) {
+            if (currentUser) {
+                users[currentUser].sound = enabled;
+                soundEnabled = enabled;
+                const onBtn = document.querySelector('.sound-on');
+                const offBtn = document.querySelector('.sound-off');
+                if (enabled) {
+                    onBtn.classList.add('bg-gray-700');
+                    offBtn.classList.remove('bg-gray-700');
+                } else {
+                    offBtn.classList.add('bg-gray-700');
+                    onBtn.classList.remove('bg-gray-700');
                 }
-            } catch (error) {
-                console.error('Error in setOperation:', error);
             }
         }
 
         function generateQuestion() {
-            try {
-                const range = difficultyRanges[difficulty];
-                let num1 = Math.floor(Math.random() * (range.num1.max - range.num1.min + 1)) + range.num1.min;
-                let num2 = Math.floor(Math.random() * (range.num2.max - range.num2.min + 1)) + range.num2.min;
-                let answer;
-
-                if (operation === '+') {
-                    answer = num1 + num2;
-                } else if (operation === '-') {
-                    if (num1 < num2) [num1, num2] = [num2, num1];
-                    answer = num1 - num2;
-                } else if (operation === '*') {
-                    answer = num1 * num2;
-                } else {
-                    answer = num1;
-                    num1 = num1 * num2;
-                }
-
-                const choices = [answer];
-                while (choices.length < 4) {
-                    const deviation = Math.floor(answer * (Math.random() * 0.6 - 0.3));
-                    const choice = answer + deviation;
-                    if (!choices.includes(choice) && choice !== 0) {
-                        choices.push(choice);
-                    }
-                }
-                choices.sort(() => Math.random() - 0.5);
-
-                return {
-                    question: operation === '/' ? `${num1} ÷ ${num2} = ?` : `${num1} ${operation} ${num2} = ?`,
-                    answer,
-                    choices,
-                    correctIndex: choices.indexOf(answer)
-                };
-            } catch (error) {
-                console.error('Error in generateQuestion:', error);
-                return null;
+            const range = difficultyRanges[difficulty];
+            let a = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+            let b = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+            let answer, question;
+            switch (operation) {
+                case '+': answer = a + b; question = `${a} + ${b} = ? (Field)`; break;
+                case '-': if (a < b) [a, b] = [b, a]; answer = a - b; question = `${a} - ${b} = ? (Lake)`; break;
+                case '*': answer = a * b; question = `${a} × ${b} = ? (Forest)`; break;
+                case '/': answer = a; a = a * b; question = `${a} ÷ ${b} = ? (Volcanic Mountain)`; break;
             }
+            const choices = [answer];
+            while (choices.length < 4) {
+                const wrong = answer + Math.floor(Math.random() * 20 - 10);
+                if (wrong !== answer && !choices.includes(wrong) && wrong >= 0) choices.push(wrong);
+            }
+            shuffleArray(choices);
+            return { question, answer, choices };
         }
 
-        function updateMascot() {
-            try {
-                if (mascotAnimation) clearInterval(mascotAnimation);
-                mascotAnimation = null;
-                const progress = currentQuestion / totalQuestions;
-                const trackLength = 15;
-                const position = Math.floor(progress * trackLength);
-                const mascot = safeGetElement('mascot');
-                if (!mascot) return;
-
-                mascot.innerHTML = `<span class="mascot-jumping">${' '.repeat(position) + users[currentUser].mascot + ' '.repeat(trackLength - position) + '🏁'}</span>`;
-
-                const messageIndex = Math.min(Math.floor(progress * mascotMessages.length), mascotMessages.length - 1);
-                const mascotMessage = safeGetElement('mascot-message');
-                if (mascotMessage) mascotMessage.textContent = mascotMessages[messageIndex];
-            } catch (error) {
-                console.error('Error in updateMascot:', error);
-            }
-        }
-
-        function stopMascotAnimation() {
-            try {
-                if (mascotAnimation) {
-                    clearInterval(mascotAnimation);
-                    mascotAnimation = null;
-                }
-                const mascot = safeGetElement('mascot');
-                if (!mascot) return;
-                mascot.innerHTML = `<span class="mascot-jumping">${mascot.textContent}</span>`;
-            } catch (error) {
-                console.error('Error in stopMascotAnimation:', error);
-            }
-        }
-
-        function updateProgress() {
-            try {
-                const progressDiv = safeGetElement('progress');
-                if (!progressDiv) return;
-                progressDiv.innerHTML = '';
-                Object.keys(users).forEach(user => {
-                    const games = users[user].games;
-                    const div = document.createElement('div');
-                    div.className = 'mt-2';
-                    div.textContent = games.length
-                        ? `${user}: ${games[games.length - 1].medal} (${games[games.length - 1].percentage.toFixed(2)}%)`
-                        : `${user}: No games yet`;
-                    progressDiv.appendChild(div);
-                });
-            } catch (error) {
-                console.error('Error in updateProgress:', error);
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
         }
 
         function startQuiz() {
-            try {
-                questions = Array.from({ length: totalQuestions }, () => generateQuestion()).filter(q => q !== null);
-                if (questions.length !== totalQuestions) {
-                    alert('Failed to generate questions. Please try again.');
-                    return;
-                }
-                currentQuestion = 0;
-                correctAnswers = 0;
-                streak = 0;
-                startTime = Date.now();
-                if (mascotAnimation) clearInterval(mascotAnimation);
-                mascotAnimation = null;
-                const setupScreen = safeGetElement('setup-screen');
-                const quizScreen = safeGetElement('quiz-screen');
-                if (!setupScreen || !quizScreen) return;
-                setupScreen.classList.add('hidden');
-                quizScreen.classList.remove('hidden');
-                const questionElement = safeGetElement('question');
-                const answerInput = safeGetElement('answer-input');
-                if (questionElement) questionElement.textContent = '';
-                if (answerInput) answerInput.value = '';
-                for (let i = 0; i < 4; i++) {
-                    const choice = safeGetElement(`choice-${i}`);
-                    if (choice) choice.textContent = '';
-                }
-                showQuestion();
-            } catch (error) {
-                console.error('Error in startQuiz:', error);
-            }
+            if (!currentUser) return;
+            questions = Array(totalQuestions).fill().map(() => generateQuestion());
+            currentQuestion = 0;
+            correctAnswers = 0;
+            streak = 0;
+            maxStreak = 0;
+            startTime = Date.now();
+            showScreen('quiz-screen');
+            displayQuestion();
+            startMascotAnimation();
         }
 
-        function showQuestion() {
-            try {
-                if (currentQuestion >= totalQuestions || !questions[currentQuestion]) return;
-                const questionNumber = safeGetElement('question-number');
-                const questionElement = safeGetElement('question');
-                const feedback = safeGetElement('feedback');
-                const streakElement = safeGetElement('streak');
-                const progressBar = safeGetElement('progress-bar');
-                const answerInput = safeGetElement('answer-input');
-                if (!questionNumber || !questionElement || !feedback || !streakElement || !progressBar || !answerInput) return;
-                questionNumber.textContent = currentQuestion + 1;
-                questionElement.textContent = questions[currentQuestion].question;
-                feedback.textContent = '';
-                streakElement.textContent = `Streak: ${streak}`;
-                answerInput.value = '';
-                for (let i = 0; i < 4; i++) {
-                    const choice = safeGetElement(`choice-${i}`);
-                    if (choice) choice.textContent = questions[currentQuestion].choices[i];
-                }
-                progressBar.style.width = `${((currentQuestion + 1) / totalQuestions) * 100}%`;
-                document.querySelectorAll('.answer-btn').forEach(btn => btn.classList.remove('selected'));
-                updateMascot();
-            } catch (error) {
-                console.error('Error in showQuestion:', error);
+        function displayQuestion() {
+            const q = questions[currentQuestion];
+            safeGetElement('question-number').textContent = currentQuestion + 1;
+            safeGetElement('progress-bar').style.width = `${((currentQuestion + 1) / totalQuestions) * 100}%`;
+            safeGetElement('streak').textContent = `Streak: ${streak}`;
+            safeGetElement('question').textContent = q.question;
+            safeGetElement('answer-input').value = '';
+            safeGetElement('feedback').textContent = '';
+            for (let i = 0; i < 4; i++) {
+                safeGetElement(`choice-${i}`).textContent = q.choices[i];
             }
         }
 
         function checkAnswer(choiceIndex) {
-            try {
-                const feedback = safeGetElement('feedback');
-                if (!feedback || !questions[currentQuestion]) return;
-                const correctIndex = questions[currentQuestion].correctIndex;
-                const correctAnswer = questions[currentQuestion].answer;
-
-                document.querySelectorAll('.answer-btn').forEach(btn => btn.classList.remove('selected'));
-                const selectedBtn = document.querySelectorAll('.answer-btn')[choiceIndex];
-                if (selectedBtn) selectedBtn.classList.add('selected');
-
-                if (choiceIndex === correctIndex) {
-                    feedback.textContent = 'Correct!';
-                    feedback.classList.add('text-green-500', 'correct-animation');
-                    correctAnswers++;
-                    streak++;
-                    playSound('correct');
-                } else {
-                    feedback.textContent = `Incorrect. The correct answer was ${correctAnswer}.`;
-                    feedback.classList.add('text-red-500', 'incorrect-animation');
-                    streak = 0;
-                    playSound('incorrect');
-                }
-
-                const streakElement = safeGetElement('streak');
-                if (streakElement) streakElement.textContent = `Streak: ${streak}`;
-                stopMascotAnimation();
-                setTimeout(nextQuestion, 500);
-            } catch (error) {
-                console.error('Error in checkAnswer:', error);
-            }
+            const q = questions[currentQuestion];
+            const selected = q.choices[choiceIndex];
+            processAnswer(selected === q.answer);
         }
 
         function checkInputAnswer() {
-            try {
-                const feedback = safeGetElement('feedback');
-                const answerInput = safeGetElement('answer-input');
-                if (!feedback || !answerInput || !questions[currentQuestion]) return;
-                const correctAnswer = questions[currentQuestion].answer;
-                const userAnswer = parseFloat(answerInput.value);
+            const input = safeGetElement('answer-input').value;
+            const q = questions[currentQuestion];
+            processAnswer(parseFloat(input) === q.answer);
+        }
 
-                document.querySelectorAll('.answer-btn').forEach(btn => btn.classList.remove('selected'));
-
-                if (isNaN(userAnswer)) {
-                    feedback.textContent = 'Please enter a number.';
-                    feedback.classList.add('text-red-500');
-                    return;
-                }
-
-                if (userAnswer === correctAnswer) {
-                    feedback.textContent = 'Correct!';
-                    feedback.classList.add('text-green-500', 'correct-animation');
-                    correctAnswers++;
-                    streak++;
-                    playSound('correct');
+        function processAnswer(isCorrect) {
+            const feedback = safeGetElement('feedback');
+            questions[currentQuestion].wasCorrect = isCorrect;
+            if (isCorrect) {
+                correctAnswers++;
+                streak++;
+                maxStreak = Math.max(maxStreak, streak);
+                feedback.textContent = 'Correct!';
+                feedback.classList.add('text-green-500', 'correct-animation');
+            } else {
+                streak = 0;
+                feedback.textContent = `Wrong! The answer was ${questions[currentQuestion].answer}.`;
+                feedback.classList.add('text-red-500', 'incorrect-animation');
+            }
+            setTimeout(() => {
+                feedback.classList.remove('text-green-500', 'text-red-500', 'correct-animation', 'incorrect-animation');
+                currentQuestion++;
+                if (currentQuestion < totalQuestions) {
+                    displayQuestion();
                 } else {
-                    feedback.textContent = `Incorrect. The correct answer was ${correctAnswer}.`;
-                    feedback.classList.add('text-red-500', 'incorrect-animation');
-                    streak = 0;
-                    playSound('incorrect');
+                    endQuiz();
                 }
+            }, 1000);
+        }
 
-                const streakElement = safeGetElement('streak');
-                if (streakElement) streakElement.textContent = `Streak: ${streak}`;
-                stopMascotAnimation();
-                setTimeout(nextQuestion, 500);
-            } catch (error) {
-                console.error('Error in checkInputAnswer:', error);
+        function startMascotAnimation() {
+            const mascotEl = safeGetElement('mascot');
+            if (!currentUser || !mascotEl) return;
+            const mascot = users[currentUser].mascot;
+            const goal = goalObjects[users[currentUser].theme][0];
+            let position = 0;
+            const trackLength = 10;
+            clearInterval(mascotAnimation);
+            mascotAnimation = setInterval(() => {
+                const progress = correctAnswers / totalQuestions;
+                position = Math.min(Math.floor(progress * trackLength), trackLength - 1);
+                const track = ' '.repeat(position) + mascot + ' '.repeat(trackLength - position - 1) + goal;
+                mascotEl.textContent = track;
+                mascotEl.classList.add('mascot-jumping');
+            }, 500);
+        }
+
+        function endQuiz() {
+            clearInterval(mascotAnimation);
+            const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
+            const percentage = (correctAnswers / totalQuestions) * 100;
+            const gold = calculateGoldEarned();
+            users[currentUser].gold += gold;
+            users[currentUser].xp += Math.round(percentage * difficulty);
+            updateRank();
+            const medal = percentage >= 90 ? '🥇' : percentage >= 75 ? '🥈' : percentage >= 60 ? '🥉' : '';
+            safeGetElement('medal').textContent = medal || '🏅';
+            safeGetElement('score').textContent = `Score: ${correctAnswers} / ${totalQuestions}`;
+            safeGetElement('percentage').textContent = `Accuracy: ${percentage.toFixed(1)}%`;
+            safeGetElement('gold-earned').textContent = `Gold Earned: ${gold} 💰`;
+            safeGetElement('time').textContent = `Time: ${timeTaken} seconds`;
+            if (percentage >= 90 && difficulty >= 6) {
+                const chest = generateTreasureChest();
+                users[currentUser].treasureChests.push(chest);
+                safeGetElement('treasure-message').textContent = `You earned a Treasure Chest! (${chest.gold} Gold${chest.item ? ` + ${chest.item.name}` : ''})`;
+            } else {
+                safeGetElement('treasure-message').textContent = '';
+            }
+            updateHighScores(percentage, timeTaken);
+            showScreen('results-screen');
+            if (medal) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        }
+
+        function calculateGoldEarned() {
+            const baseGold = difficultyRanges[difficulty].goldBase;
+            const multiplier = difficultyRanges[difficulty].goldMultiplier;
+            let totalGold = correctAnswers * baseGold * multiplier;
+            if (maxStreak >= 5) totalGold *= 1.2;
+            return Math.round(totalGold);
+        }
+
+        function generateTreasureChest() {
+            const gold = Math.floor(Math.random() * 101) + 50;
+            const hasItem = difficulty >= 6 && Math.random() < 0.05;
+            let item = null;
+            if (hasItem) {
+                const mythicalItems = artifactsList.filter(a => a.rarity === 'mythical');
+                item = mythicalItems[Math.floor(Math.random() * mythicalItems.length)];
+                users[currentUser].artifacts.push({ ...item });
+            }
+            return { gold, item };
+        }
+
+        function updateRank() {
+            const xp = users[currentUser].xp;
+            for (let i = ranks.length - 1; i >= 0; i--) {
+                if (xp >= ranks[i].xp) {
+                    users[currentUser].rank = ranks[i].name;
+                    users[currentUser].level = i + 1;
+                    break;
+                }
             }
         }
 
-        function nextQuestion() {
-            try {
-                currentQuestion++;
-                if (currentQuestion < totalQuestions) {
-                    showQuestion();
-                } else {
-                    showResults();
-                }
-            } catch (error) {
-                console.error('Error in nextQuestion:', error);
-            }
+        function updateHighScores(percentage, time) {
+            const game = { percentage: percentage.toFixed(1), time, difficulty, operation, date: new Date().toLocaleString() };
+            users[currentUser].games.push(game);
+            users[currentUser].games.sort((a, b) => b.percentage - a.percentage || a.time - b.time);
+            if (users[currentUser].games.length > 5) users[currentUser].games.pop();
+            safeGetElement('high-scores').innerHTML = users[currentUser].games.map(g => 
+                `${g.percentage}% - ${g.time}s (Diff ${g.difficulty}, ${g.operation}) - ${g.date}`
+            ).join('<br>');
         }
 
         function quitGame() {
-            try {
-                if (mascotAnimation) {
-                    clearInterval(mascotAnimation);
-                    mascotAnimation = null;
-                }
-                const quizScreen = safeGetElement('quiz-screen');
-                const welcomeScreen = safeGetElement('welcome-screen');
-                if (!quizScreen || !welcomeScreen) return;
-                quizScreen.classList.add('hidden');
-                welcomeScreen.classList.remove('hidden');
-                currentUser = null;
-                questions = [];
-                currentQuestion = 0;
-                correctAnswers = 0;
-                streak = 0;
-                startTime = 0;
-            } catch (error) {
-                console.error('Error in quitGame:', error);
-            }
+            clearInterval(mascotAnimation);
+            showScreen('welcome-screen');
         }
 
-        function getMedal(percentage) {
-            try {
-                if (percentage >= 90) return { medal: '🥇 Gold', color: 'text-yellow-500' };
-                if (percentage >= 80) return { medal: '🥈 Silver', color: 'text-gray-400' };
-                if (percentage >= 70) return { medal: '🥉 Bronze', color: 'text-orange-600' };
-                return { medal: '🎖️ Try Again', color: 'text-blue-600' };
-            } catch (error) {
-                console.error('Error in getMedal:', error);
-                return { medal: '🎖️ Try Again', color: 'text-blue-600' };
-            }
+        function goToShop() {
+            renderShop();
+            showScreen('shop-screen');
         }
 
-        function updateHighScores(timeTaken) {
-            try {
-                const mode = `${difficulty}-${operation}`;
-                if (!highScores[mode]) highScores[mode] = [];
-                highScores[mode].push({ user: currentUser, time: timeTaken, percentage: (correctAnswers / totalQuestions) * 100 });
-                highScores[mode].sort((a, b) => a.time - b.time);
-                highScores[mode] = highScores[mode].slice(0, 5);
-            } catch (error) {
-                console.error('Error in updateHighScores:', error);
-            }
-        }
-
-        function displayHighScores() {
-            try {
-                const mode = `${difficulty}-${operation}`;
-                const scores = highScores[mode] || [];
-                const highScoresDiv = safeGetElement('high-scores');
-                if (!highScoresDiv) return;
-                highScoresDiv.innerHTML = scores.length
-                    ? scores.map((score, i) => `${i + 1}. ${score.user}: ${score.time.toFixed(1)}s (${score.percentage.toFixed(2)}%)`).join('<br>')
-                    : 'No high scores yet!';
-            } catch (error) {
-                console.error('Error in displayHighScores:', error);
-            }
-        }
-
-        function triggerConfetti() {
-            try {
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
-            } catch (error) {
-                console.error('Error in triggerConfetti:', error);
-            }
-        }
-
-        function showResults() {
-            try {
-                if (mascotAnimation) {
-                    clearInterval(mascotAnimation);
-                    mascotAnimation = null;
-                }
-                const quizScreen = safeGetElement('quiz-screen');
-                const resultsScreen = safeGetElement('results-screen');
-                if (!quizScreen || !resultsScreen) return;
-                quizScreen.classList.add('hidden');
-                resultsScreen.classList.remove('hidden');
-                const percentage = (correctAnswers / totalQuestions) * 100;
-                const { medal, color } = getMedal(percentage);
-                const timeTaken = (Date.now() - startTime) / 1000;
-                users[currentUser].games.push({ medal, percentage, correct: correctAnswers, total: totalQuestions });
-                updateHighScores(timeTaken);
-                const medalElement = safeGetElement('medal');
-                const scoreElement = safeGetElement('score');
-                const percentageElement = safeGetElement('percentage');
-                const timeElement = safeGetElement('time');
-                const mascot = safeGetElement('mascot');
-                const mascotMessage = safeGetElement('mascot-message');
-                if (medalElement) {
-                    medalElement.textContent = medal;
-                    medalElement.classList.add(color);
-                }
-                if (scoreElement) scoreElement.textContent = `Score: ${correctAnswers} out of ${totalQuestions}`;
-                if (percentageElement) percentageElement.textContent = `Percentage: ${percentage.toFixed(2)}%`;
-                if (timeElement) timeElement.textContent = `Time: ${timeTaken.toFixed(1)} seconds`;
-                if (mascot) mascot.textContent = `${users[currentUser].mascot}🏁 Yay!`;
-                if (mascotMessage) mascotMessage.textContent = 'You made it! Awesome job!';
-                updateProgress();
-                displayHighScores();
-                if (percentage >= 80) triggerConfetti();
-            } catch (error) {
-                console.error('Error in showResults:', error);
-            }
+        function viewProfile() {
+            renderProfile();
+            showScreen('profile-screen');
         }
 
         function restartGame() {
-            try {
-                if (mascotAnimation) {
-                    clearInterval(mascotAnimation);
-                    mascotAnimation = null;
-                }
-                const resultsScreen = safeGetElement('results-screen');
-                const welcomeScreen = safeGetElement('welcome-screen');
-                if (!resultsScreen || !welcomeScreen) return;
-                resultsScreen.classList.add('hidden');
-                welcomeScreen.classList.remove('hidden');
-                currentUser = null;
-                questions = [];
-                currentQuestion = 0;
-                correctAnswers = 0;
-                streak = 0;
-                startTime = 0;
-            } catch (error) {
-                console.error('Error in restartGame:', error);
+            showScreen('setup-screen');
+        }
+
+        function renderShop() {
+            safeGetElement('shop-gold').textContent = users[currentUser].gold;
+            safeGetElement('refresh-cost').textContent = shopRefreshCost;
+            const shopItems = safeGetElement('shop-items');
+            const availableItems = artifactsList.filter(item => item.rarity !== 'mythical' && Math.random() < (item.rarity === 'legendary' ? 0.01 : 1));
+            const items = availableItems.sort(() => Math.random() - 0.5).slice(0, 5);
+            shopItems.innerHTML = items.map(item => `
+                <div class="artifact-item artifact-rarity-${item.rarity}" onclick="buyItem('${item.name}', ${item.price})">
+                    <p class="font-bold">${item.name}</p>
+                    <p>${item.price} 💰</p>
+                    <p class="text-xs">${item.description}</p>
+                </div>
+            `).join('');
+        }
+
+        function buyItem(name, price) {
+            if (users[currentUser].gold >= price) {
+                users[currentUser].gold -= price;
+                const item = artifactsList.find(a => a.name === name);
+                users[currentUser].artifacts.push({ ...item });
+                alert(`Purchased ${name}!`);
+                renderShop();
+            } else {
+                alert('Not enough gold!');
             }
         }
 
-        // Handle keyboard shortcuts for answer selection and input submission
-        document.addEventListener('keydown', (e) => {
-            try {
-                const quizScreen = safeGetElement('quiz-screen');
-                if (!quizScreen || quizScreen.classList.contains('hidden')) return;
-                const key = e.key.toLowerCase();
-                if (key === 'a') checkAnswer(0);
-                else if (key === 's') checkAnswer(1);
-                else if (key === 'd') checkAnswer(2);
-                else if (key === 'f') checkAnswer(3);
-                else if (e.key === 'Enter') {
-                    const answerInput = safeGetElement('answer-input');
-                    if (answerInput && answerInput.value.trim()) checkInputAnswer();
-                }
-            } catch (error) {
-                console.error('Error in keydown handler:', error);
+        function refreshShop() {
+            if (users[currentUser].gold >= shopRefreshCost) {
+                users[currentUser].gold -= shopRefreshCost;
+                shopRefreshCost = Math.min(shopRefreshCost * 2, 10000);
+                renderShop();
+            } else {
+                alert('Not enough gold to refresh!');
             }
+        }
+
+        function exitShop() {
+            showScreen('results-screen');
+        }
+
+        function renderProfile() {
+            const user = users[currentUser];
+            safeGetElement('profile-user').textContent = currentUser;
+            safeGetElement('profile-rank').textContent = user.rank;
+            safeGetElement('profile-level').textContent = user.level;
+            safeGetElement('profile-gold').textContent = user.gold;
+            safeGetElement('profile-property').textContent = user.property.name;
+            safeGetElement('property-description').textContent = user.property.description;
+            const nextProperty = properties.find(p => p.tier === user.property.tier + 1);
+            const upgradeBtn = safeGetElement('upgrade-property');
+            if (nextProperty) {
+                upgradeBtn.textContent = `Upgrade Base (${nextProperty.cost} 💰)`;
+                upgradeBtn.disabled = user.gold < nextProperty.cost;
+                upgradeBtn.classList.remove('hidden');
+            } else {
+                upgradeBtn.textContent = 'Max Level Reached';
+                upgradeBtn.disabled = true;
+            }
+            safeGetElement('treasure-chests').innerHTML = user.treasureChests.length ? user.treasureChests.map((chest, i) => `
+                <p>Chest ${i + 1}: ${chest.gold} Gold${chest.item ? ` + ${chest.item.name}` : ''}</p>
+            `).join('') : '<p>No treasure chests earned yet!</p>';
+            safeGetElement('artifacts').innerHTML = user.artifacts.length ? user.artifacts.map(item => `
+                <div class="artifact-item artifact-rarity-${item.rarity}" onclick="sellItem('${item.name}', ${item.price})">
+                    <p class="font-bold">${item.name}</p>
+                    <p>Sell for ${Math.floor(item.price / 2)} 💰</p>
+                    <p class="text-xs">${item.description}</p>
+                </div>
+            `).join('') : '<p>No artifacts collected yet!</p>';
+            safeGetElement('game-history').innerHTML = user.games.length ? user.games.map(g => 
+                `${g.percentage}% - ${g.time}s (Diff ${g.difficulty}, ${g.operation}) - ${g.date}`
+            ).join('<br>') : '<p>No games played yet!</p>';
+        }
+
+        function upgradeProperty() {
+            const user = users[currentUser];
+            const nextProperty = properties.find(p => p.tier === user.property.tier + 1);
+            if (nextProperty && user.gold >= nextProperty.cost) {
+                user.gold -= nextProperty.cost;
+                user.property = { ...nextProperty };
+                renderProfile();
+            }
+        }
+
+        function sellItem(name, price) {
+            const user = users[currentUser];
+            const itemIndex = user.artifacts.findIndex(a => a.name === name);
+            if (itemIndex !== -1 && confirm(`Sell ${name} for ${Math.floor(price / 2)} gold?`)) {
+                user.gold += Math.floor(price / 2);
+                user.artifacts.splice(itemIndex, 1);
+                renderProfile();
+            }
+        }
+
+        function backToWelcome() {
+            showScreen('welcome-screen');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (safeGetElement('quiz-screen').classList.contains('hidden')) return;
+            const keyMap = { 'a': 0, 's': 1, 'd': 2, 'f': 3 };
+            if (keyMap[e.key]) checkAnswer(keyMap[e.key]);
         });
 
-        // Handle Enter key for adding user
-        const newUserInput = safeGetElement('new-user');
-        if (newUserInput) {
-            newUserInput.addEventListener('keypress', (e) => {
-                try {
-                    if (e.key === 'Enter') addUser();
-                } catch (error) {
-                    console.error('Error in new-user keypress handler:', error);
-                }
-            });
-        }
-
-        // Initialize user list
         renderUserList();
     </script>
 </body>
