@@ -3,250 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Practice Game</title>
+    <title>Math Master - Fun Learning Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            overflow-y: auto;
+        }
+        .container {
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            margin: 2rem;
+            animation: fadeIn 1s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn {
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .correct-animation {
+            animation: correct 0.5s ease;
+        }
+        .incorrect-animation {
+            animation: incorrect 0.5s ease;
+        }
+        @keyframes correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes incorrect {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="container mx-auto px-4 max-w-2xl">
-        <!-- Name Input Screen -->
-        <div id="nameScreen" class="bg-white p-8 rounded-lg shadow-md">
-            <h1 class="text-2xl font-bold mb-4 text-center">Math Practice Game</h1>
-            <div class="mb-4">
-                <input type="text" id="userName" placeholder="Enter your name" 
-                       class="w-full p-2 border rounded mb-4">
-                <button onclick="startGame()" 
-                        class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                    Start Practice
-                </button>
-            </div>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="text-center">
+            <h1 class="text-4xl font-bold text-indigo-600 mb-6">Math Master</h1>
+            <p class="text-lg text-gray-600 mb-4">Enter your name to start the adventure!</p>
+            <input
+                id="user-name"
+                type="text"
+                placeholder="Your Name"
+                class="border-2 border-indigo-300 rounded-lg p-3 w-full max-w-xs mb-4 focus:outline-none focus:border-indigo-500"
+            />
+            <button
+                onclick="startGame()"
+                class="btn bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700"
+            >
+                Let's Go!
+            </button>
         </div>
 
-        <!-- Main Game Screen -->
-        <div id="gameScreen" class="hidden bg-white p-8 rounded-lg shadow-md">
-            <div id="greeting" class="text-center mb-6"></div>
-            
-            <!-- Difficulty Selection -->
-            <div class="mb-6">
-                <h2 class="text-lg font-semibold mb-2">Select Difficulty:</h2>
-                <div class="grid grid-cols-3 gap-2" id="difficultyButtons"></div>
+        <!-- Setup Screen -->
+        <div id="setup-screen" class="hidden text-center">
+            <h2 id="greeting" class="text-3xl font-bold text-indigo-600 mb-6"></h2>
+            <p class="text-lg text-gray-600 mb-4">Choose your difficulty level:</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <button onclick="setDifficulty(1)" class="btn bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Level 1</button>
+                <button onclick="setDifficulty(2)" class="btn bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Level 2</button>
+                <button onclick="setDifficulty(3)" class="btn bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">Level 3</button>
+                <button onclick="setDifficulty(4)" class="btn bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">Level 4</button>
+                <button onclick="setDifficulty(5)" class="btn bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">Level 5</button>
+                <button onclick="setDifficulty(6)" class="btn bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">Level 6</button>
+                <button onclick="setDifficulty(7)" class="btn bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">Level 7</button>
             </div>
+            <p class="text-lg text-gray-600 mb-4">Choose an operation:</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <button onclick="setOperation('+')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Addition</button>
+                <button onclick="setOperation('-')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Subtraction</button>
+                <button onclick="setOperation('*')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Multiplication</button>
+                <button onclick="setOperation('/')" class="btn bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Division</button>
+            </div>
+            <button
+                onclick="startQuiz()"
+                class="btn bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700"
+            >
+                Start Quiz
+            </button>
+        </div>
 
-            <!-- Operation Selection -->
-            <div class="mb-6">
-                <h2 class="text-lg font-semibold mb-2">Select Operation:</h2>
-                <div class="grid grid-cols-2 gap-2" id="operationButtons"></div>
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden text-center">
+            <h2 class="text-2xl font-bold text-indigo-600 mb-4">Question <span id="question-number">1</span> of 20</h2>
+            <div class="w-full bg-gray-200 rounded-full h-4 mb-6">
+                <div id="progress-bar" class="progress-bar bg-indigo-600 h-4 rounded-full" style="width: 5%"></div>
             </div>
+            <p id="question" class="text-xl text-gray-800 mb-6"></p>
+            <input
+                id="answer-input"
+                type="text"
+                placeholder="Your Answer"
+                class="border-2 border-indigo-300 rounded-lg p-3 w-full max-w-xs mb-4 focus:outline-none focus:border-indigo-500"
+            />
+            <p id="feedback" class="text-lg mb-4"></p>
+            <button
+                onclick="checkAnswer()"
+                class="btn bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700"
+            >
+                Submit Answer
+            </button>
+            <button
+                id="next-button"
+                onclick="nextQuestion()"
+                class="hidden btn bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600"
+            >
+                Next Question
+            </button>
+        </div>
 
-            <!-- Question Section -->
-            <div id="questionSection" class="hidden">
-                <div class="text-xl font-bold mb-4 text-center" id="question"></div>
-                <input type="number" id="answerInput" placeholder="Your answer" 
-                       class="w-full p-2 border rounded mb-4">
-                <button onclick="checkAnswer()" 
-                        class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
-                    Submit Answer
-                </button>
-                <div id="feedback" class="mt-4 text-center"></div>
-                <button onclick="nextQuestion()" id="nextButton" 
-                        class="hidden w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mt-4">
-                    Next Question
-                </button>
-            </div>
-
-            <!-- Results Screen -->
-            <div id="resultsScreen" class="hidden text-center">
-                <h2 class="text-xl font-bold mb-4">Test Results</h2>
-                <p class="mb-2">Score: <span id="score"></span>/20</p>
-                <p class="mb-4">Percentage: <span id="percentage"></span>%</p>
-                <button onclick="restartTest()" 
-                        class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                    Restart Test
-                </button>
-            </div>
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold text-indigo-600 mb-6">Results</h2>
+            <p id="score" class="text-2xl text-gray-800 mb-4"></p>
+            <p id="percentage" class="text-2xl text-gray-800 mb-6"></p>
+            <button
+                onclick="restartGame()"
+                class="btn bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700"
+            >
+                Play Again
+            </button>
         </div>
     </div>
 
     <script>
-        const levels = {
+        let userName = '';
+        let difficulty = 1;
+        let operation = '+';
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        let totalQuestions = 20;
+        let questions = [];
+
+        const difficultyRanges = {
             1: { min: 1, max: 10 },
             2: { min: 1, max: 50 },
             3: { min: 1, max: 100 },
-            4: { min: 1, max: 500 },
-            5: { min: 1, max: 1000 },
-            6: { min: 1, max: 5000 },
-            7: { min: 1, max: 10000 }
+            4: { min: 10, max: 200 },
+            5: { min: 50, max: 500 },
+            6: { min: 100, max: 1000 },
+            7: { min: 500, max: 10000 }
         };
 
-        let currentState = {
-            userName: '',
-            difficulty: null,
-            operation: null,
-            currentQuestion: null,
-            score: 0,
-            questionCount: 0
-        };
-
-        // Initialize buttons
-        function initializeGame() {
-            // Create difficulty buttons
-            const difficultyContainer = document.getElementById('difficultyButtons');
-            for (let i = 1; i <= 7; i++) {
-                const button = document.createElement('button');
-                button.textContent = `Level ${i}`;
-                button.className = 'p-2 bg-gray-200 rounded hover:bg-gray-300';
-                button.onclick = () => selectDifficulty(i, button);
-                difficultyContainer.appendChild(button);
-            }
-
-            // Create operation buttons
-            const operations = [
-                { symbol: '+', name: 'Addition' },
-                { symbol: '-', name: 'Subtraction' },
-                { symbol: '×', name: 'Multiplication' },
-                { symbol: '÷', name: 'Division' }
-            ];
-            const operationContainer = document.getElementById('operationButtons');
-            operations.forEach(op => {
-                const button = document.createElement('button');
-                button.textContent = op.name;
-                button.className = 'p-2 bg-gray-200 rounded hover:bg-gray-300';
-                button.onclick = () => selectOperation(op.symbol, button);
-                operationContainer.appendChild(button);
-            });
-        }
+        const correctSound = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
+        const incorrectSound = new Audio('https://www.soundjay.com/buttons/beep-02.mp3');
 
         function startGame() {
-            const name = document.getElementById('userName').value.trim();
-            if (!name) return;
-            
-            currentState.userName = name;
-            document.getElementById('nameScreen').classList.add('hidden');
-            document.getElementById('gameScreen').classList.remove('hidden');
-            document.getElementById('greeting').textContent = `Hello, ${name}! Let's practice math!`;
-        }
-
-        function selectDifficulty(level, button) {
-            document.querySelectorAll('#difficultyButtons button').forEach(b => 
-                b.classList.remove('bg-blue-500', 'text-white'));
-            button.classList.add('bg-blue-500', 'text-white');
-            currentState.difficulty = level;
-            startQuestionsIfReady();
-        }
-
-        function selectOperation(operation, button) {
-            document.querySelectorAll('#operationButtons button').forEach(b => 
-                b.classList.remove('bg-blue-500', 'text-white'));
-            button.classList.add('bg-blue-500', 'text-white');
-            currentState.operation = operation;
-            startQuestionsIfReady();
-        }
-
-        function startQuestionsIfReady() {
-            if (currentState.difficulty && currentState.operation) {
-                document.getElementById('questionSection').classList.remove('hidden');
-                generateQuestion();
+            userName = document.getElementById('user-name').value.trim();
+            if (!userName) {
+                alert('Please enter your name!');
+                return;
             }
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('greeting').textContent = `Hello, ${userName}!`;
+        }
+
+        function setDifficulty(level) {
+            difficulty = level;
+            document.querySelectorAll('.btn.bg-green-500, .btn.bg-yellow-500, .btn.bg-orange-500, .btn.bg-red-500').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-indigo-300');
+            });
+            event.target.classList.add('ring-4', 'ring-indigo-300');
+        }
+
+        function setOperation(op) {
+            operation = op;
+            document.querySelectorAll('.btn.bg-blue-500').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-indigo-300');
+            });
+            event.target.classList.add('ring-4', 'ring-indigo-300');
         }
 
         function generateQuestion() {
-            const level = levels[currentState.difficulty];
-            let num1, num2;
-            
-            switch(currentState.operation) {
-                case '+':
-                    num1 = randomInRange(level);
-                    num2 = randomInRange(level);
-                    currentState.currentQuestion = { num1, num2, answer: num1 + num2 };
-                    break;
-                case '-':
-                    num1 = randomInRange(level);
-                    num2 = randomInRange({ min: level.min, max: num1 });
-                    currentState.currentQuestion = { num1, num2, answer: num1 - num2 };
-                    break;
-                case '×':
-                    num1 = randomInRange(level);
-                    num2 = randomInRange(level);
-                    currentState.currentQuestion = { num1, num2, answer: num1 * num2 };
-                    break;
-                case '÷':
-                    num2 = randomInRange(level, 1); // Ensure divisor is at least 1
-                    const answer = randomInRange(level);
-                    num1 = num2 * answer;
-                    currentState.currentQuestion = { num1, num2, answer };
-                    break;
-            }
+            const range = difficultyRanges[difficulty];
+            let num1 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+            let num2 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+            let answer;
 
-            document.getElementById('question').textContent = 
-                `${currentState.currentQuestion.num1} ${currentState.operation} ${currentState.currentQuestion.num2} = ?`;
+            if (operation === '+') {
+                answer = num1 + num2;
+                return { question: `${num1} + ${num2} = ?`, answer };
+            } else if (operation === '-') {
+                if (num1 < num2) [num1, num2] = [num2, num1];
+                answer = num1 - num2;
+                return { question: `${num1} - ${num2} = ?`, answer };
+            } else if (operation === '*') {
+                answer = num1 * num2;
+                return { question: `${num1} × ${num2} = ?`, answer };
+            } else {
+                answer = num1;
+                num1 = num1 * num2;
+                return { question: `${num1} ÷ ${num2} = ?`, answer };
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            questions = Array.from({ length: totalQuestions }, () => generateQuestion());
+            currentQuestion = 0;
+            correctAnswers = 0;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            document.getElementById('question-number').textContent = currentQuestion + 1;
+            document.getElementById('question').textContent = questions[currentQuestion].question;
+            document.getElementById('answer-input').value = '';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('next-button').classList.add('hidden');
+            document.getElementById('progress-bar').style.width = `${((currentQuestion + 1) / totalQuestions) * 100}%`;
         }
 
         function checkAnswer() {
-            const userAnswer = document.getElementById('answerInput').value.trim();
-            if (!userAnswer || isNaN(userAnswer)) {
-                showFeedback('Please enter a valid number', 'red');
+            const userAnswer = document.getElementById('answer-input').value.trim();
+            const feedback = document.getElementById('feedback');
+            const correctAnswer = questions[currentQuestion].answer;
+
+            if (!/^-?\d+$/.test(userAnswer)) {
+                feedback.textContent = 'Please enter a valid number!';
+                feedback.classList.add('text-red-500', 'incorrect-animation');
+                incorrectSound.play();
                 return;
             }
 
-            currentState.questionCount++;
-            const correct = parseInt(userAnswer) === currentState.currentQuestion.answer;
-            if (correct) currentState.score++;
+            if (parseInt(userAnswer) === correctAnswer) {
+                feedback.textContent = 'Correct!';
+                feedback.classList.add('text-green-500', 'correct-animation');
+                correctAnswers++;
+                correctSound.play();
+            } else {
+                feedback.textContent = `Incorrect. The correct answer was ${correctAnswer}.`;
+                feedback.classList.add('text-red-500', 'incorrect-animation');
+                incorrectSound.play();
+            }
 
-            showFeedback(
-                correct ? 'Correct! 🎉' : 
-                `Incorrect. The correct answer was ${currentState.currentQuestion.answer}`,
-                correct ? 'green' : 'red'
-            );
-            
-            document.getElementById('nextButton').classList.remove('hidden');
+            document.getElementById('next-button').classList.remove('hidden');
         }
 
         function nextQuestion() {
-            if (currentState.questionCount >= 20) {
+            currentQuestion++;
+            if (currentQuestion < totalQuestions) {
+                showQuestion();
+            } else {
                 showResults();
-                return;
             }
-
-            resetQuestion();
-            generateQuestion();
         }
 
         function showResults() {
-            document.getElementById('questionSection').classList.add('hidden');
-            document.getElementById('resultsScreen').classList.remove('hidden');
-            document.getElementById('score').textContent = currentState.score;
-            document.getElementById('percentage').textContent = 
-                ((currentState.score / 20) * 100).toFixed(1);
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+            const percentage = (correctAnswers / totalQuestions) * 100;
+            document.getElementById('score').textContent = `Score: ${correctAnswers} out of ${totalQuestions}`;
+            document.getElementById('percentage').textContent = `Percentage: ${percentage.toFixed(2)}%`;
         }
 
-        function restartTest() {
-            currentState.score = 0;
-            currentState.questionCount = 0;
-            document.getElementById('resultsScreen').classList.add('hidden');
-            document.getElementById('questionSection').classList.remove('hidden');
-            resetQuestion();
-            generateQuestion();
+        function restartGame() {
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            document.getElementById('user-name').value = '';
         }
 
-        // Helper functions
-        function randomInRange(range, min = null) {
-            const actualMin = min !== null ? min : range.min;
-            return Math.floor(Math.random() * (range.max - actualMin + 1)) + actualMin;
-        }
-
-        function showFeedback(message, color) {
-            const feedback = document.getElementById('feedback');
-            feedback.textContent = message;
-            feedback.style.color = color;
-        }
-
-        function resetQuestion() {
-            document.getElementById('answerInput').value = '';
-            document.getElementById('feedback').textContent = '';
-            document.getElementById('nextButton').classList.add('hidden');
-        }
-
-        // Initialize the game when page loads
-        initializeGame();
+        // Handle Enter key for answer submission
+        document.getElementById('answer-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !document.getElementById('next-button').classList.contains('hidden')) {
+                nextQuestion();
+            } else if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
     </script>
 </body>
 </html>
