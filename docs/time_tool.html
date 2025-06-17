@@ -530,20 +530,11 @@
         
         // Initialize the application
         function init() {
-            // Generate time slots
             generateTimeSlots();
-            
-            // Load timezones
             const savedTimezones = localStorage.getItem('guild_timezones');
             timezones = savedTimezones ? JSON.parse(savedTimezones) : [...defaultTimezones];
-            
-            // Load event from Firebase
             loadEventFromFirebase();
-            
-            // Initialize clocks
             initClocks();
-            
-            // Set event button
             setEventButton.addEventListener('click', saveEventToCloud);
         }
         
@@ -555,22 +546,16 @@
             
             while (hour < 22 || (hour === 22 && minute === 0)) {
                 const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                
-                // Calculate end time
                 minute += 20;
                 if (minute >= 60) {
                     hour += 1;
                     minute = minute % 60;
                 }
                 const endTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                
                 slots.push({ start: startTime, end: endTime });
-                
-                // Break if we've reached 22:00
                 if (hour === 22 && minute === 0) break;
             }
             
-            // Render time slots
             timeSlotsGrid.innerHTML = '';
             slots.forEach(slot => {
                 const slotEl = document.createElement('div');
@@ -581,16 +566,9 @@
                 `;
                 
                 slotEl.addEventListener('click', () => {
-                    // Remove selected class from all slots
-                    document.querySelectorAll('.time-slot').forEach(el => {
-                        el.classList.remove('selected');
-                    });
-                    
-                    // Add selected class to clicked slot
+                    document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
                     slotEl.classList.add('selected');
                     selectedSlot = slot;
-                    
-                    // Update event preview
                     eventDisplayTime.textContent = `${slot.start} - ${slot.end}`;
                 });
                 
@@ -602,8 +580,6 @@
         function initClocks() {
             updateServerTime();
             renderClocks();
-            
-            // Update every second
             setInterval(() => {
                 updateServerTime();
                 updateAllClocks();
@@ -620,12 +596,9 @@
         // Render all clocks
         function renderClocks() {
             if (!worldClocksEl) return;
-            
             worldClocksEl.innerHTML = '';
-            
             timezones.forEach(tz => {
                 const now = moment().tz(tz.id);
-                
                 const clockCard = document.createElement('div');
                 clockCard.className = 'clock-card';
                 clockCard.innerHTML = `
@@ -642,7 +615,6 @@
                         <div class="countdown-time" id="countdown-${tz.id}">--:--:--</div>
                     </div>
                 `;
-                
                 worldClocksEl.appendChild(clockCard);
             });
         }
@@ -652,15 +624,11 @@
             timezones.forEach((tz, index) => {
                 const now = moment().tz(tz.id);
                 const clockCard = worldClocksEl.children[index];
-                
                 if (clockCard) {
                     const timeEl = clockCard.querySelector('.clock-time');
                     const dateEl = clockCard.querySelector('.clock-date');
-                    
                     if (timeEl) timeEl.textContent = now.format('HH:mm:ss');
                     if (dateEl) dateEl.textContent = now.format('dddd, MMMM D');
-                    
-                    // Update countdown for this timezone
                     updateCountdownForTimezone(tz.id);
                 }
             });
@@ -669,33 +637,28 @@
         // Update countdown for a specific timezone
         function updateCountdownForTimezone(timezoneId) {
             if (!owgEvent) return;
-            
-            // Create a moment object for the event start time today
-            const now = moment().tz(timezoneId);
+            const nowServer = moment().tz(SERVER_TIMEZONE);
             const [startHour, startMinute] = owgEvent.start.split(':').map(Number);
-            const eventMoment = moment().tz(timezoneId).set({
+            let eventMoment = moment.tz(SERVER_TIMEZONE).set({
                 hour: startHour,
                 minute: startMinute,
-                second: 0
+                second: 0,
+                millisecond: 0
             });
-            
-            // If the event time has already passed today, set it for tomorrow
-            if (eventMoment.isBefore(now)) {
+            if (eventMoment.isBefore(nowServer)) {
                 eventMoment.add(1, 'day');
             }
-            
-            const diff = eventMoment.diff(now);
-            
+            const eventLocal = eventMoment.clone().tz(timezoneId);
+            const nowLocal = moment().tz(timezoneId);
+            const diff = eventLocal.diff(nowLocal);
             if (diff <= 0) {
                 document.getElementById(`countdown-${timezoneId}`).textContent = "Event started!";
                 return;
             }
-            
             const duration = moment.duration(diff);
             const hours = Math.floor(duration.asHours());
             const minutes = duration.minutes();
             const seconds = duration.seconds();
-            
             document.getElementById(`countdown-${timezoneId}`).textContent = 
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
@@ -705,34 +668,27 @@
             if (owgEvent) {
                 eventDisplayTime.textContent = `${owgEvent.start} - ${owgEvent.end}`;
                 eventDisplayTz.textContent = `Server Time (${SERVER_TIMEZONE})`;
-                
-                // Calculate countdown in server time
-                const now = moment().tz(SERVER_TIMEZONE);
+                const nowServer = moment().tz(SERVER_TIMEZONE);
                 const [startHour, startMinute] = owgEvent.start.split(':').map(Number);
-                const eventMoment = moment().tz(SERVER_TIMEZONE).set({
+                let eventMoment = moment.tz(SERVER_TIMEZONE).set({
                     hour: startHour,
                     minute: startMinute,
-                    second: 0
+                    second: 0,
+                    millisecond: 0
                 });
-                
-                // If the event time has already passed today, set it for tomorrow
-                if (eventMoment.isBefore(now)) {
+                if (eventMoment.isBefore(nowServer)) {
                     eventMoment.add(1, 'day');
                 }
-                
-                const diff = eventMoment.diff(now);
-                
+                const diff = eventMoment.diff(nowServer);
                 if (diff <= 0) {
                     eventCountdown.textContent = "EVENT STARTED!";
                     eventCountdown.style.color = "#ff453a";
                 } else {
                     eventCountdown.style.color = "#8a2be2";
-                    
                     const duration = moment.duration(diff);
                     const hours = Math.floor(duration.asHours());
                     const minutes = duration.minutes();
                     const seconds = duration.seconds();
-                    
                     eventCountdown.textContent = 
                         `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 }
@@ -749,24 +705,20 @@
                 alert('Please select a time slot for the OWG event');
                 return;
             }
-            
             owgEvent = {
                 start: selectedSlot.start,
                 end: selectedSlot.end,
                 updatedAt: moment().format()
             };
-            
-            // Save to Firebase
             database.ref('owg_event').set(owgEvent)
                 .then(() => {
+                    console.log('Event saved successfully:', owgEvent);
                     syncStatus.innerHTML = '<i class="fas fa-check-circle"></i> Event saved to cloud';
                     syncStatus.style.color = "#30d158";
                     setTimeout(() => {
                         syncStatus.innerHTML = '<i class="fas fa-cloud"></i> Cloud Sync: Active';
                         syncStatus.style.color = "";
                     }, 3000);
-                    
-                    // Update UI
                     updateEventDisplay();
                 })
                 .catch(error => {
@@ -779,15 +731,13 @@
         // Load event from Firebase
         function loadEventFromFirebase() {
             syncStatus.innerHTML = '<i class="fas fa-sync-alt loading"></i> Connecting to cloud...';
-            
             database.ref('owg_event').on('value', (snapshot) => {
                 const eventData = snapshot.val();
+                console.log('Event data loaded:', eventData);
                 if (eventData) {
                     owgEvent = eventData;
                     syncStatus.innerHTML = '<i class="fas fa-cloud"></i> Cloud Sync: Active';
                     updateEventDisplay();
-                    
-                    // Highlight the selected time slot
                     document.querySelectorAll('.time-slot').forEach(slot => {
                         const range = slot.querySelector('.range').textContent;
                         if (range === `${owgEvent.start} - ${owgEvent.end}`) {
