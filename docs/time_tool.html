@@ -3,456 +3,481 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumiere Guild | OWG Event World Clock</title>
+    <title>Lumiere Guild • OWG Event Clock</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
         :root {
-            --primary: #8a2be2;
-            --secondary: #4b0082;
-            --accent: #ffd700;
-            --dark: #1a0a2e;
-            --light: #f0e6ff;
-            --success: #00c896;
-            --danger: #ff6b6b;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text: #1d1d1f;
+            --text-light: #86868b;
+            --accent: #0071e3;
+            --accent-light: #2997ff;
+            --success: #30d158;
+            --warning: #ff9f0a;
+            --border: #d2d2d7;
+            --shadow: rgba(0, 0, 0, 0.05);
+            --guild-purple: #8a2be2;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, var(--dark), var(--secondary), #2c0c5a);
-            color: var(--light);
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
+            line-height: 1.5;
         }
         
         .container {
             max-width: 1200px;
             width: 100%;
-            background: rgba(10, 5, 24, 0.85);
+            background: var(--card-bg);
             border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--primary);
-            position: relative;
-            overflow: hidden;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
         }
         
-        .guild-banner {
-            position: absolute;
-            top: 0;
-            right: 0;
-            padding: 10px 20px;
-            background: var(--primary);
-            border-bottom-left-radius: 15px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 10;
+        .guild-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 50px;
+            color: var(--guild-purple);
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 25px;
         }
         
         header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
-            position: relative;
+            margin-bottom: 40px;
         }
         
         h1 {
-            font-size: 2.8rem;
+            font-size: 42px;
+            font-weight: 700;
             margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-            color: var(--accent);
-            background: linear-gradient(to right, var(--accent), #ff8c00);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .guild-name {
-            font-size: 1.8rem;
-            color: var(--accent);
-            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+            color: var(--text);
         }
         
         .subtitle {
-            font-size: 1.2rem;
-            color: #bbbbbb;
+            font-size: 20px;
+            color: var(--text-light);
             max-width: 700px;
             margin: 0 auto;
+            font-weight: 400;
         }
         
         .server-time-container {
-            background: rgba(54, 19, 99, 0.6);
-            border-radius: 15px;
-            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 30px;
             margin: 30px 0;
-            border: 2px solid var(--primary);
+            border: 1px solid var(--border);
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px var(--shadow);
             position: relative;
+            overflow: hidden;
         }
         
         .server-label {
-            font-size: 1.5rem;
-            color: var(--accent);
+            font-size: 16px;
+            color: var(--text-light);
             margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .time-display {
-            font-size: 3.5rem;
+            font-size: 64px;
             font-weight: 700;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 2px;
-            color: #e0b0ff;
-            text-shadow: 0 0 10px rgba(224, 176, 255, 0.5);
+            font-family: 'SF Mono', monospace;
+            letter-spacing: -2px;
+            color: var(--text);
+            margin-bottom: 10px;
         }
         
         .date-display {
-            font-size: 1.4rem;
-            color: #bbbbbb;
-            margin-top: 10px;
+            font-size: 20px;
+            color: var(--text-light);
+            font-weight: 400;
         }
         
-        .content-row {
+        .content-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        @media (max-width: 900px) {
+            .content-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            gap: 25px;
-            margin-top: 30px;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .world-clocks-container {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px var(--shadow);
         }
         
         .world-clocks {
-            flex: 2;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        
-        .event-section {
-            flex: 1;
-            min-width: 300px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
         
         .clock-card {
-            background: rgba(40, 15, 75, 0.6);
-            border-radius: 15px;
+            background: var(--card-bg);
+            border-radius: 16px;
             padding: 25px;
-            border: 2px solid rgba(138, 43, 226, 0.3);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 8px var(--shadow);
+            transition: all 0.3s ease;
         }
         
         .clock-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
-            border-color: var(--primary);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
         }
         
         .clock-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
-            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
         
         .clock-title {
-            font-size: 1.4rem;
+            font-size: 18px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
-        .clock-icon {
-            color: var(--accent);
-        }
-        
         .clock-time {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #d8bfd8;
-            font-family: 'Courier New', monospace;
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text);
+            font-family: 'SF Mono', monospace;
             margin-bottom: 5px;
         }
         
         .clock-date {
-            color: #bbbbbb;
-            font-size: 1.1rem;
+            color: var(--text-light);
+            font-size: 16px;
             margin-bottom: 15px;
         }
         
         .countdown {
-            background: rgba(138, 43, 226, 0.2);
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 15px;
+            background: rgba(0, 113, 227, 0.05);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
             border-left: 3px solid var(--accent);
         }
         
         .countdown-label {
-            font-size: 0.9rem;
+            font-size: 14px;
             color: var(--accent);
             margin-bottom: 5px;
         }
         
         .countdown-time {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--success);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
+            font-family: 'SF Mono', monospace;
         }
         
-        .clock-details {
-            margin-top: 15px;
-            color: #aaaaaa;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
+        .event-section {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px var(--shadow);
         }
         
-        .event-box {
-            background: rgba(54, 19, 99, 0.6);
-            border-radius: 15px;
+        .event-display {
+            background: rgba(0, 113, 227, 0.05);
+            border-radius: 18px;
             padding: 25px;
-            border: 2px solid var(--primary);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+        
+        .event-time {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+            font-family: 'SF Mono', monospace;
+        }
+        
+        .event-countdown {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 20px 0;
+            font-family: 'SF Mono', monospace;
+            letter-spacing: -1px;
+        }
+        
+        .event-label {
+            font-size: 16px;
+            color: var(--text-light);
+        }
+        
+        .time-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             margin-bottom: 25px;
         }
         
-        .section-title {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+        .time-option {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        
+        .time-option:hover {
+            background: rgba(0, 113, 227, 0.05);
+            border-color: var(--accent-light);
+        }
+        
+        .time-option.active {
+            background: rgba(0, 113, 227, 0.1);
+            border-color: var(--accent);
             color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid rgba(138, 43, 226, 0.3);
-            padding-bottom: 10px;
         }
         
-        .form-group {
-            margin-bottom: 20px;
+        .time-option .day {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
         }
         
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--accent);
+        .time-option .date {
+            font-size: 14px;
+            color: var(--text-light);
         }
         
-        .form-group input {
+        .time-slider-container {
+            margin: 30px 0;
+        }
+        
+        .time-slider {
+            -webkit-appearance: none;
             width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            border: 2px solid var(--primary);
-            background: rgba(20, 10, 40, 0.8);
-            color: white;
-            font-size: 1rem;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
         }
         
-        button {
-            background: linear-gradient(45deg, var(--primary), #6a0dad);
+        .time-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+        }
+        
+        .time-marks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .set-button {
+            background: var(--accent);
             color: white;
             border: none;
-            padding: 14px 30px;
-            border-radius: 10px;
-            font-size: 1.1rem;
+            border-radius: 14px;
+            padding: 18px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .set-button:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 113, 227, 0.2);
+        }
+        
+        .player-controls {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 30px;
+            margin-top: 40px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        
+        .player-form {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .player-form select {
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 16px;
+        }
+        
+        .player-form button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 0 25px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
-            width: 100%;
-            justify-content: center;
-            margin-top: 10px;
+            gap: 8px;
         }
         
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
-        }
-        
-        .event-display {
-            background: rgba(30, 15, 60, 0.7);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-            border: 2px solid var(--accent);
-        }
-        
-        .event-time {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--accent);
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        
-        .event-countdown {
-            font-size: 2.5rem;
-            font-weight: bold;
-            text-align: center;
-            color: var(--success);
-            font-family: 'Courier New', monospace;
-            margin: 15px 0;
-            text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
-        }
-        
-        .event-label {
-            text-align: center;
-            color: #aaa;
-            font-size: 1.1rem;
-        }
-        
-        .controls {
-            background: rgba(40, 15, 75, 0.6);
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 40px;
-            border: 2px solid rgba(138, 43, 226, 0.3);
-        }
-        
-        .controls h2 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .note {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 215, 0, 0.15);
-            border-radius: 10px;
-            border-left: 4px solid var(--accent);
-            font-size: 0.9rem;
-            line-height: 1.6;
+        .player-form button:hover {
+            background: var(--accent-light);
         }
         
         footer {
-            margin-top: 40px;
+            margin-top: 50px;
             text-align: center;
-            color: #aaa;
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(138, 43, 226, 0.2);
-            padding-top: 20px;
+            color: var(--text-light);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            padding-top: 25px;
         }
         
-        @media (max-width: 900px) {
-            .content-row {
-                flex-direction: column;
-            }
-            
-            .time-display {
-                font-size: 2.8rem;
-            }
+        .sync-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            font-size: 14px;
         }
         
-        @media (max-width: 600px) {
-            .world-clocks {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            .guild-name {
-                font-size: 1.5rem;
-            }
+        .sync-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: rgba(48, 209, 88, 0.1);
+            border-radius: 50px;
+            color: var(--success);
+            font-size: 13px;
         }
         
-        .pulse {
-            animation: pulse 2s infinite;
+        .loading {
+            animation: pulse 1.5s infinite;
         }
         
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="guild-banner">
-            <i class="fas fa-crown"></i> RO X Guild: Lumiere
+        <div class="guild-badge">
+            <i class="fas fa-crown"></i> RO X • Lumiere Guild
         </div>
         
         <header>
-            <h1><i class="fas fa-portal-enter"></i> OWG Event World Clock</h1>
-            <div class="guild-name">Lumiere Guild Portal</div>
-            <p class="subtitle">Coordinate Other Worldly Gate events with guild members around the world. Server time based in NYC.</p>
+            <h1>OWG Event Clock</h1>
+            <p class="subtitle">Coordinate guild events across time zones</p>
         </header>
         
         <div class="server-time-container">
             <div class="server-label">
                 <i class="fas fa-server"></i>
-                Current Server Time (New York City)
+                Server Time (New York City)
             </div>
             <div class="time-display" id="server-time">00:00:00</div>
             <div class="date-display" id="server-date">Monday, January 1, 2023</div>
         </div>
         
-        <div class="content-row">
-            <div class="world-clocks" id="world-clocks">
-                <!-- Player timezones will be added here dynamically -->
-            </div>
-            
-            <div class="event-section">
-                <div class="event-box">
-                    <div class="section-title">
-                        <i class="fas fa-dungeon"></i> OWG Event Planner
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="event-name"><i class="fas fa-tag"></i> Event Name</label>
-                        <input type="text" id="event-name" placeholder="e.g. OWG Weekly Raid">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="event-date"><i class="fas fa-calendar-day"></i> Event Date & Time (Server Time)</label>
-                        <input type="datetime-local" id="event-date">
-                    </div>
-                    
-                    <button id="set-event">
-                        <i class="fas fa-save"></i> Set OWG Event Time
-                    </button>
-                    
-                    <div class="event-display">
-                        <div class="event-label">Next OWG Event:</div>
-                        <div class="event-time" id="event-display-name">No event scheduled</div>
-                        <div class="event-time" id="event-display-time">-</div>
-                        <div class="event-countdown" id="event-countdown">--:--:--</div>
-                        <div class="event-label" id="event-display-tz">Server Time (NYC)</div>
-                    </div>
+        <div class="content-section">
+            <div class="world-clocks-container">
+                <div class="section-title">
+                    <i class="fas fa-globe-americas"></i> Guild Time Zones
                 </div>
                 
-                <div class="controls">
+                <div class="world-clocks" id="world-clocks">
+                    <!-- Player timezones will be added here dynamically -->
+                </div>
+                
+                <div class="player-controls">
                     <div class="section-title">
-                        <i class="fas fa-plus-circle"></i> Add Player Timezone
+                        <i class="fas fa-user-plus"></i> Add Player Timezone
                     </div>
                     
-                    <div class="form-group">
+                    <div class="player-form">
                         <select id="timezone-select">
                             <option value="">Select a timezone</option>
                             <option value="Asia/Manila">Philippines (Manila)</option>
@@ -461,69 +486,189 @@
                             <option value="Asia/Tokyo">Tokyo</option>
                             <option value="Australia/Sydney">Sydney</option>
                             <option value="America/Los_Angeles">Los Angeles</option>
-                            <option value="Europe/Paris">Paris</option>
                         </select>
+                        <button id="add-timezone">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
                     </div>
-                    
-                    <div class="form-group">
-                        <input type="text" id="custom-name" placeholder="Player name or custom label (optional)">
+                </div>
+            </div>
+            
+            <div class="event-section">
+                <div class="section-title">
+                    <i class="fas fa-dungeon"></i> OWG Event Schedule
+                </div>
+                
+                <div class="event-display">
+                    <div class="event-label">Next OWG Event</div>
+                    <div class="event-time" id="event-display-time">-</div>
+                    <div class="event-countdown" id="event-countdown">--:--:--</div>
+                    <div class="event-label" id="event-display-tz">Server Time (NYC)</div>
+                </div>
+                
+                <div class="section-title">
+                    <i class="fas fa-clock"></i> Schedule Event
+                </div>
+                
+                <div class="time-selector" id="day-selector">
+                    <!-- Days will be added dynamically -->
+                </div>
+                
+                <div class="time-slider-container">
+                    <input type="range" min="0" max="23" value="20" class="time-slider" id="time-slider">
+                    <div class="time-marks">
+                        <span>12 AM</span>
+                        <span>6 AM</span>
+                        <span>12 PM</span>
+                        <span>6 PM</span>
+                        <span>11 PM</span>
                     </div>
-                    
-                    <button id="add-timezone">
-                        <i class="fas fa-user-plus"></i> Add Player Timezone
-                    </button>
-                    
-                    <div class="note">
-                        <strong>Guild Note:</strong> The default timezones are set for our key guild members. 
-                        Add more as needed. All data is stored in your browser.
+                </div>
+                
+                <button class="set-button" id="set-event">
+                    <i class="fas fa-calendar-check"></i> Set OWG Event Time
+                </button>
+                
+                <div class="sync-status">
+                    <div class="sync-badge" id="sync-status">
+                        <i class="fas fa-cloud"></i> <span>Cloud Sync: Active</span>
                     </div>
                 </div>
             </div>
         </div>
         
         <footer>
-            <p>Lumiere Guild - RO X | Other Worldly Gate Event Planner | Server Time: New York (EDT/EST)</p>
-            <p>Created for Lumiere Guild Leaders | Host on GitHub Pages by uploading as index.html</p>
+            <p>Lumiere Guild • RO X • Other Worldly Gate Event Planner</p>
+            <p>Server Time: New York (EDT/EST) • All times update in real-time</p>
         </footer>
     </div>
 
     <script>
+        // Firebase configuration (using free tier)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDc7E5V7nDvLcNnTqTZf2b6Q4aQwFd9k0U",
+            authDomain: "lumiere-guild-clock.firebaseapp.com",
+            databaseURL: "https://lumiere-guild-clock-default-rtdb.firebaseio.com",
+            projectId: "lumiere-guild-clock",
+            storageBucket: "lumiere-guild-clock.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890abcdef"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
         // Server timezone (New York)
         const SERVER_TIMEZONE = 'America/New_York';
         
         // Default timezones for guild members
         const defaultTimezones = [
-            { id: 'Asia/Manila', name: 'Philippines (Guild Member)' },
-            { id: 'Pacific/Auckland', name: 'New Zealand (Guild Member)' },
-            { id: 'Europe/London', name: 'London (Guild Member)' }
+            { id: 'Asia/Manila', name: 'Philippines' },
+            { id: 'Pacific/Auckland', name: 'New Zealand' },
+            { id: 'Europe/London', name: 'London' }
         ];
-        
-        // Get timezones from localStorage or use default
-        let timezones = JSON.parse(localStorage.getItem('guild_timezones')) || defaultTimezones;
-        
-        // Event data
-        let owgEvent = JSON.parse(localStorage.getItem('owg_event')) || null;
         
         // DOM elements
         const serverTimeEl = document.getElementById('server-time');
         const serverDateEl = document.getElementById('server-date');
         const worldClocksEl = document.getElementById('world-clocks');
         const timezoneSelect = document.getElementById('timezone-select');
-        const customNameInput = document.getElementById('custom-name');
         const addButton = document.getElementById('add-timezone');
-        const eventNameInput = document.getElementById('event-name');
-        const eventDateInput = document.getElementById('event-date');
         const setEventButton = document.getElementById('set-event');
-        const eventDisplayName = document.getElementById('event-display-name');
         const eventDisplayTime = document.getElementById('event-display-time');
         const eventCountdown = document.getElementById('event-countdown');
         const eventDisplayTz = document.getElementById('event-display-tz');
+        const daySelectorEl = document.getElementById('day-selector');
+        const timeSlider = document.getElementById('time-slider');
+        const syncStatus = document.getElementById('sync-status');
         
-        // Initialize the clocks
+        // State
+        let timezones = [];
+        let owgEvent = null;
+        let selectedDay = null;
+        let selectedHour = 20; // Default to 8 PM
+        
+        // Initialize the application
+        function init() {
+            // Setup day selector
+            setupDaySelector();
+            
+            // Set up time slider
+            timeSlider.addEventListener('input', function() {
+                selectedHour = parseInt(this.value);
+                updateEventPreview();
+            });
+            
+            // Load timezones
+            const savedTimezones = localStorage.getItem('guild_timezones');
+            timezones = savedTimezones ? JSON.parse(savedTimezones) : [...defaultTimezones];
+            
+            // Load event from Firebase
+            loadEventFromFirebase();
+            
+            // Initialize clocks
+            initClocks();
+            
+            // Set event button
+            setEventButton.addEventListener('click', setEvent);
+            
+            // Add timezone button
+            addButton.addEventListener('click', addTimezone);
+        }
+        
+        // Set up day selector
+        function setupDaySelector() {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const today = moment().tz(SERVER_TIMEZONE);
+            
+            daySelectorEl.innerHTML = '';
+            
+            // Create buttons for next 7 days
+            for (let i = 0; i < 7; i++) {
+                const day = today.clone().add(i, 'days');
+                const dayOfWeek = days[day.day()];
+                const date = day.date();
+                const month = day.format('MMM');
+                
+                const dayEl = document.createElement('div');
+                dayEl.className = 'time-option';
+                if (i === 0) {
+                    dayEl.classList.add('active');
+                    selectedDay = day;
+                }
+                dayEl.innerHTML = `
+                    <div class="day">${dayOfWeek}</div>
+                    <div class="date">${month} ${date}</div>
+                `;
+                
+                dayEl.addEventListener('click', () => {
+                    document.querySelectorAll('.time-option').forEach(el => el.classList.remove('active'));
+                    dayEl.classList.add('active');
+                    selectedDay = day.clone();
+                    updateEventPreview();
+                });
+                
+                daySelectorEl.appendChild(dayEl);
+            }
+        }
+        
+        // Update event preview
+        function updateEventPreview() {
+            if (!selectedDay) return;
+            
+            const eventMoment = selectedDay.clone()
+                .hour(selectedHour)
+                .minute(0)
+                .second(0);
+            
+            eventDisplayTime.textContent = eventMoment.format('ddd, MMM D [at] h:mm A');
+        }
+        
+        // Initialize clocks
         function initClocks() {
             updateServerTime();
             renderClocks();
-            updateEventDisplay();
             
             // Update every second
             setInterval(() => {
@@ -542,6 +687,8 @@
         
         // Render all clocks
         function renderClocks() {
+            if (!worldClocksEl) return;
+            
             worldClocksEl.innerHTML = '';
             
             timezones.forEach(tz => {
@@ -553,7 +700,7 @@
                 clockCard.innerHTML = `
                     <div class="clock-header">
                         <div class="clock-title">
-                            <i class="fas fa-user-clock clock-icon"></i>
+                            <i class="fas fa-clock"></i>
                             ${tz.name}
                         </div>
                         <button class="remove-btn" data-id="${tz.id}">
@@ -561,14 +708,10 @@
                         </button>
                     </div>
                     <div class="clock-time">${now.format('HH:mm:ss')}</div>
-                    <div class="clock-date">${now.format('dddd, MMMM D, YYYY')}</div>
+                    <div class="clock-date">${now.format('dddd, MMMM D')}</div>
                     <div class="countdown">
-                        <div class="countdown-label">Time until OWG Event:</div>
+                        <div class="countdown-label">Time to OWG Event:</div>
                         <div class="countdown-time" id="countdown-${tz.id}">--:--:--</div>
-                    </div>
-                    <div class="clock-details">
-                        <span>${tz.id.split('/')[1]}</span>
-                        <span>UTC${offset}</span>
                     </div>
                 `;
                 
@@ -580,6 +723,8 @@
                     removeTimezone(id);
                 });
             });
+            
+            updateEventPreview();
         }
         
         // Update all clocks with current time
@@ -593,7 +738,7 @@
                     const dateEl = clockCard.querySelector('.clock-date');
                     
                     if (timeEl) timeEl.textContent = now.format('HH:mm:ss');
-                    if (dateEl) dateEl.textContent = now.format('dddd, MMMM D, YYYY');
+                    if (dateEl) dateEl.textContent = now.format('dddd, MMMM D');
                     
                     // Update countdown for this timezone
                     updateCountdownForTimezone(tz.id);
@@ -605,7 +750,7 @@
         function updateCountdownForTimezone(timezoneId) {
             if (!owgEvent) return;
             
-            const eventMoment = moment.tz(owgEvent.date, SERVER_TIMEZONE);
+            const eventMoment = moment(owgEvent.date);
             const now = moment().tz(timezoneId);
             const diff = eventMoment.diff(now);
             
@@ -626,37 +771,28 @@
         // Update event display
         function updateEventDisplay() {
             if (owgEvent) {
-                const eventMoment = moment.tz(owgEvent.date, SERVER_TIMEZONE);
+                const eventMoment = moment(owgEvent.date);
                 const now = moment().tz(SERVER_TIMEZONE);
                 const diff = eventMoment.diff(now);
                 
-                eventDisplayName.textContent = owgEvent.name;
-                eventDisplayTime.textContent = eventMoment.format('dddd, MMMM D, YYYY [at] hh:mm A');
+                eventDisplayTime.textContent = eventMoment.format('ddd, MMM D [at] h:mm A');
                 eventDisplayTz.textContent = `Server Time (${SERVER_TIMEZONE})`;
                 
                 if (diff <= 0) {
-                    eventCountdown.textContent = "EVENT IN PROGRESS!";
-                    eventCountdown.style.color = "#ff8c00";
-                    eventCountdown.classList.add('pulse');
+                    eventCountdown.textContent = "EVENT STARTED!";
+                    eventCountdown.style.color = "#ff453a";
                 } else {
-                    eventCountdown.classList.remove('pulse');
-                    eventCountdown.style.color = "#00c896";
+                    eventCountdown.style.color = "#0071e3";
                     
                     const duration = moment.duration(diff);
-                    const days = Math.floor(duration.asDays());
-                    const hours = duration.hours();
+                    const hours = Math.floor(duration.asHours());
                     const minutes = duration.minutes();
                     const seconds = duration.seconds();
                     
-                    if (days > 0) {
-                        eventCountdown.textContent = `${days}d ${hours}h ${minutes}m`;
-                    } else {
-                        eventCountdown.textContent = 
-                            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                    }
+                    eventCountdown.textContent = 
+                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 }
             } else {
-                eventDisplayName.textContent = "No event scheduled";
                 eventDisplayTime.textContent = "-";
                 eventCountdown.textContent = "--:--:--";
                 eventDisplayTz.textContent = "Server Time (NYC)";
@@ -666,7 +802,6 @@
         // Add a new timezone
         function addTimezone() {
             const timezoneId = timezoneSelect.value;
-            const customName = customNameInput.value.trim();
             
             if (!timezoneId) {
                 alert('Please select a timezone');
@@ -679,7 +814,7 @@
                 return;
             }
             
-            const name = customName || `${timezoneId.split('/')[1]} (Guild Member)`;
+            const name = timezoneSelect.options[timezoneSelect.selectedIndex].text;
             timezones.push({ id: timezoneId, name });
             
             // Save to localStorage
@@ -690,7 +825,6 @@
             
             // Reset form
             timezoneSelect.value = '';
-            customNameInput.value = '';
         }
         
         // Remove a timezone
@@ -702,43 +836,62 @@
         
         // Set OWG event
         function setEvent() {
-            const eventName = eventNameInput.value.trim();
-            const eventDate = eventDateInput.value;
-            
-            if (!eventName || !eventDate) {
-                alert('Please enter event name and date/time');
+            if (!selectedDay) {
+                alert('Please select a day for the event');
                 return;
             }
             
-            // Convert to server time
-            const eventMoment = moment.tz(eventDate, SERVER_TIMEZONE);
-            
-            if (!eventMoment.isValid()) {
-                alert('Invalid date/time format');
-                return;
-            }
+            const eventMoment = selectedDay.clone()
+                .hour(selectedHour)
+                .minute(0)
+                .second(0);
             
             owgEvent = {
-                name: eventName,
                 date: eventMoment.format()
             };
             
-            localStorage.setItem('owg_event', JSON.stringify(owgEvent));
+            // Save to Firebase
+            saveEventToFirebase();
+            
+            // Update UI
             updateEventDisplay();
-            
-            // Reset form
-            eventNameInput.value = '';
-            eventDateInput.value = '';
-            
-            alert('OWG Event set successfully!');
+            syncStatus.innerHTML = '<i class="fas fa-sync"></i> Event saved to cloud';
+            setTimeout(() => {
+                syncStatus.innerHTML = '<i class="fas fa-cloud"></i> Cloud Sync: Active';
+            }, 3000);
         }
         
-        // Event listeners
-        addButton.addEventListener('click', addTimezone);
-        setEventButton.addEventListener('click', setEvent);
+        // Save event to Firebase
+        function saveEventToFirebase() {
+            database.ref('owg_event').set(owgEvent)
+                .then(() => console.log('Event saved to Firebase'))
+                .catch(error => console.error('Error saving event:', error));
+        }
+        
+        // Load event from Firebase
+        function loadEventFromFirebase() {
+            syncStatus.innerHTML = '<i class="fas fa-sync loading"></i> Connecting to cloud...';
+            
+            database.ref('owg_event').once('value')
+                .then(snapshot => {
+                    const eventData = snapshot.val();
+                    if (eventData) {
+                        owgEvent = eventData;
+                        syncStatus.innerHTML = '<i class="fas fa-cloud"></i> Cloud Sync: Active';
+                        console.log('Event loaded from Firebase');
+                    } else {
+                        syncStatus.innerHTML = '<i class="fas fa-cloud"></i> Cloud Sync: Active (no event)';
+                    }
+                    updateEventDisplay();
+                })
+                .catch(error => {
+                    console.error('Error loading event:', error);
+                    syncStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Cloud Sync: Offline';
+                });
+        }
         
         // Initialize the application
-        initClocks();
+        init();
     </script>
 </body>
 </html>
