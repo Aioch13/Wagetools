@@ -1,1569 +1,574 @@
-"<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Time Tracker (NZ) - Final v9</title>
+    <title>Lynette Pay Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* --- Base Styles & Variables --- */
         :root {
-            --system-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            --background-color: #f2f2f7;
-            --card-background: #ffffff;
-            --text-primary: #1c1c1e;
-            --text-secondary: #636366;
-            --accent-color: #007aff;
-            --accent-color-hover: #005fc5;
-            --border-color: #dcdcdc;
-            --input-background: #f8f9fa;
-            --danger-color: #ff3b30;
-            --success-color: #34c759;
-            --subtle-grey: #e5e5ea;
-            --log-bg: #f8f9fa;
-            --border-light: #eaeaec;
-            --ph-active-color: var(--success-color);
-            --highlight-bg: #e6f2ff; /* Standard highlight */
-            --delete-bg: #ffebee; /* Delete animation bg */
-            --warning-color-border: #ff9500; /* Orange */
-            --warning-color-glow: rgba(255, 149, 0, 0.2);
-            --warning-color-bg-pulse: #fff3e0;
-            --ph-auto-highlight-bg: #e8f5e9; /* Light green for auto-PH check */
-
-            /* Animation Timing */
-            --transition-fast: 0.15s ease;
-            --transition-medium: 0.25s ease-out;
-            --transition-slow: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --bg: #0f0f0f;
+            --surface: #1a1a1a;
+            --surface2: #222222;
+            --border: #2e2e2e;
+            --border-light: #3a3a3a;
+            --text: #f0ede8;
+            --text-muted: #888;
+            --text-dim: #555;
+            --accent: #c9a96e;
+            --accent-dim: rgba(201, 169, 110, 0.12);
+            --accent-glow: rgba(201, 169, 110, 0.25);
+            --green: #6ab87a;
+            --green-dim: rgba(106, 184, 122, 0.1);
+            --red: #e07070;
+            --red-dim: rgba(224, 112, 112, 0.1);
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { font-size: 16px; width: 100%; }
+
         body {
-            font-family: var(--system-font);
-            display: flex;
-            justify-content: center;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            background-color: var(--background-color);
-            padding: 20px 15px;
-            color: var(--text-primary);
-            line-height: 1.5;
-            width: 100%;
-        }
-
-        /* --- Main App Layout --- */
-        .app-container {
             display: flex;
-            gap: 25px;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .wrapper {
             width: 100%;
-            max-width: 1250px;
-            background-color: var(--card-background);
-            border-radius: 18px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
-            padding: 30px;
-            height: calc(100vh - 40px);
-            overflow: hidden;
+            max-width: 580px;
         }
 
-        /* --- Staff List (Left Panel) --- */
-        .staff-list {
-            flex: 0 0 190px;
-            border-right: 1px solid var(--border-light);
-            padding-right: 25px;
-            overflow-y: auto;
+        /* Header */
+        .header {
+            margin-bottom: 36px;
         }
-        .staff-list h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 18px; }
-        .staff-list ul { list-style: none; }
-        .staff-list li button {
-            display: block; width: 100%; padding: 11px 14px; margin-bottom: 8px;
-            border: none; background-color: transparent; border-radius: 10px;
-            text-align: left; font-size: 1rem; font-weight: 500; cursor: pointer;
-            color: var(--accent-color);
-            transition: background-color var(--transition-medium), color var(--transition-medium), transform 0.1s ease;
+        .header-eyebrow {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
         }
-        .staff-list li button:hover { background-color: var(--input-background); }
-        .staff-list li button:active { transform: scale(0.98); }
-        .staff-list li button.active { background-color: var(--accent-color); color: white; font-weight: 600; }
-
-        /* --- Input Area (Center Panel) --- */
-        .input-area {
-            flex: 1 1 480px;
-            min-width: 300px;
-            padding: 0 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
+        .header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.4rem;
+            font-weight: 400;
+            color: var(--text);
+            line-height: 1.1;
         }
-        .input-area-header {
-            text-align: center; margin-bottom: 25px;
-            position: relative; overflow: hidden;
-        }
-        .input-area h2 {
-            font-size: 1.3rem; font-weight: 600; margin-bottom: 5px;
-            display: inline-block;
-            transition: transform var(--transition-medium), opacity var(--transition-medium);
-        }
-        .input-area h2.entering {
-            transform: translateY(15px);
-            opacity: 0;
-        }
-        .input-area h2 span { font-weight: 700; color: var(--accent-color); }
-
-        fieldset { border: none; padding: 0; margin: 0 0 20px 0; }
-        fieldset#lynette-manager-inputs {
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: max-height var(--transition-slow), opacity var(--transition-medium), margin-bottom var(--transition-slow);
-            margin-bottom: 0;
-            visibility: hidden;
-        }
-        fieldset#lynette-manager-inputs.visible {
-            max-height: 300px;
-            opacity: 1;
-            margin-bottom: 20px;
-            visibility: visible;
+        .header h1 em {
+            font-style: italic;
+            color: var(--accent);
         }
 
-        legend { font-weight: 600; margin-bottom: 12px; font-size: 1.1rem; padding: 0; }
-        label { font-weight: 500; color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 6px; }
-        input[type="text"][name*="time"], input[type="number"], input[type="date"] {
-            width: 100%; padding: 11px 14px; border: 1px solid var(--border-color);
-            border-radius: 10px; font-size: 1rem; background-color: var(--card-background);
-            color: var(--text-primary);
-            appearance: none; -moz-appearance: none; -webkit-appearance: none;
-            transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
-            margin-bottom: 4px;
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 16px;
         }
-        input[type="text"][name*="time"]::placeholder { color: var(--subtle-grey); font-size: 0.9rem;}
-        input:focus {
-            border-color: var(--accent-color); outline: 0;
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); background-color: var(--card-background);
-        }
-        .form-row { display: flex; gap: 18px; align-items: flex-start; }
-        .form-row > .input-group { flex: 1; }
-        .input-group { margin-bottom: 15px; }
-        .stepper-input-group { display: flex; align-items: center; gap: 8px; }
-        .stepper-input-group input { text-align: center; flex-grow: 1; margin-bottom: 0 !important; -moz-appearance: textfield; }
-        .stepper-button {
-            flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
-            border: 1px solid var(--border-color); background-color: var(--card-background);
-            color: var(--accent-color); font-size: 18px; font-weight: 400; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; line-height: 1;
-            transition: background-color var(--transition-fast), transform var(--transition-fast);
-        }
-        .stepper-button:hover { background-color: var(--input-background); }
-        .stepper-button:active { background-color: var(--subtle-grey); transform: scale(0.92); }
-        .ph-toggle-group { display: flex; align-items: center; margin-top: 10px; gap: 10px; padding: 8px; border-radius: 10px; transition: background-color var(--transition-medium); cursor: pointer;}
-        .ph-toggle-group:hover { background-color: var(--input-background); }
-        .ph-toggle {
-            appearance: none; -webkit-appearance: none;
-            width: 22px; height: 22px; border: 1.5px solid var(--border-color);
-            border-radius: 6px; cursor: pointer; position: relative; flex-shrink: 0;
-            background-color: var(--card-background);
-            transition: background-color var(--transition-medium), border-color var(--transition-medium);
-        }
-        .ph-toggle:checked { background-color: var(--success-color); border-color: var(--success-color); }
-        .ph-toggle:checked::after {
-            content: '✔'; color: white; font-size: 15px; position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
-            line-height: 1;
-            opacity: 0;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.1s ease;
-        }
-        .ph-toggle:checked::after {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-        }
-        .ph-toggle:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px;}
-        .ph-toggle-group label { margin-bottom: 0; font-size: 0.95rem; color: var(--text-primary); cursor: pointer;}
-        /* Style for highlighting the PH group when auto-checked */
-        .ph-auto-checked-highlight {
-            animation: phHighlightFade 1.5s ease-out forwards;
-        }
-        @keyframes phHighlightFade {
-             0% { background-color: var(--ph-auto-highlight-bg); }
-             100% { background-color: transparent; } /* Fade back to default transparent bg */
-        }
-
-        .log-button {
-            width: 100%; padding: 14px; font-size: 1rem; font-weight: 600; border: none; border-radius: 12px; cursor: pointer;
-            transition: background-color var(--transition-medium), transform var(--transition-fast), box-shadow 0.2s ease;
-            background-color: var(--accent-color); color: white; margin-top: 25px;
-            box-shadow: 0 2px 5px rgba(0, 122, 255, 0.2);
-        }
-        .log-button:hover {
-            background-color: var(--accent-color-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);
-        }
-        .log-button:active {
-            transform: scale(0.98) translateY(0);
-            box-shadow: 0 1px 3px rgba(0, 122, 255, 0.2);
-        }
-        .error-message { font-size: 0.8rem; color: var(--danger-color); min-height: 1.3em; display: block; margin-top: 4px; transition: opacity var(--transition-medium); }
-        .input-error { border-color: var(--danger-color) !important; }
-
-        /* --- Shake Animation --- */
-        @keyframes shake {
-            10%, 90% { transform: translateX(-1px); }
-            20%, 80% { transform: translateX(2px); }
-            30%, 50%, 70% { transform: translateX(-3px); }
-            40%, 60% { transform: translateX(3px); }
-        }
-        .input-shake {
-            animation: shake 0.5s ease-in-out;
-        }
-
-        /* Subtle warning highlight for inputs */
-        .input-warning {
-            border-color: var(--warning-color-border) !important;
-            box-shadow: 0 0 0 3px var(--warning-color-glow) !important;
-        }
-
-        /* Subtle warning highlight for log entries */
-        .log-entry-warning {
-            animation: warnPulse 1.5s ease-out 1; /* Apply pulse once */
-        }
-
-        @keyframes warnPulse {
-            0% { background-color: var(--card-background); }
-            30% { background-color: var(--warning-color-bg-pulse); } /* Light orange flash */
-            100% { background-color: var(--card-background); }
-        }
-
-
-        /* --- Log & Summary Area (Right Panel) --- */
-        .log-summary-area {
-            flex: 1 1 420px;
-            min-width: 300px;
-            padding-left: 25px;
-            border-left: 1px solid var(--border-light);
-            display: flex; flex-direction: column; overflow: hidden;
-        }
-        .summary-section { /* Base class for both individual and weekly total summaries */
-            padding: 18px; margin-bottom: 18px; border-radius: 12px; background-color: var(--input-background); border: 1px solid var(--border-light); flex-shrink: 0;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: max-height var(--transition-slow), opacity var(--transition-medium), padding var(--transition-slow), margin-bottom var(--transition-slow);
-            padding-top: 0; padding-bottom: 0;
-            margin-bottom: 0;
-            visibility: hidden;
-        }
-        .summary-section.visible {
-            max-height: 500px; /* Increased max-height to accommodate content */
-            opacity: 1;
-            padding-top: 18px; padding-bottom: 18px;
+        .card-title {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
             margin-bottom: 18px;
-            visibility: visible;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .summary-section h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 12px; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;}
-        .summary-section .summary-scope-note { font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin-top: -10px; margin-bottom: 10px;}
-        .summary-section p { font-size: 0.95rem; margin-bottom: 6px; display: flex; justify-content: space-between; }
-        .summary-section p span:first-child { color: var(--text-secondary); }
-        .summary-section p span:last-child { font-weight: 600; color: var(--text-primary); }
-        .summary-section .ph-total { color: var(--success-color); } /* Class for PH totals */
+        .card-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
 
-        /* Individual Staff Summary Specifics */
-        #summary-section .lynette-summary-details {
-            margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-light); font-size: 0.9rem;
-            max-height: 0;
-            opacity: 0;
+        /* Stepper rows */
+        .field-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .field-row:last-child { border-bottom: none; }
+        .field-label {
+            font-size: 0.92rem;
+            color: var(--text);
+        }
+        .field-sublabel {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .stepper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stepper-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            background: var(--surface2);
+            color: var(--accent);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+        .stepper-btn:hover { background: var(--accent-dim); border-color: var(--accent); }
+        .stepper-btn:active { transform: scale(0.93); }
+        .stepper-val {
+            font-family: 'DM Mono', monospace;
+            font-size: 1rem;
+            color: var(--text);
+            min-width: 32px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Editable stepper input (for hours) */
+        .stepper-input {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: var(--surface2);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 5px 8px;
+            width: 64px;
+            text-align: center;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .stepper-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        /* Remove browser number input arrows */
+        .stepper-input::-webkit-outer-spin-button,
+        .stepper-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .stepper-input[type=number] { -moz-appearance: textfield; }
+
+        /* Number inputs (for rates) */
+        .rate-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .rate-prefix {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .rate-input {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: var(--surface2);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 6px 10px;
+            width: 80px;
+            text-align: right;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .rate-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* Calculate button */
+        .calc-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: #0f0f0f;
+            border: none;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.03em;
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+        }
+        .calc-btn:hover { background: #d4b57e; transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+        .calc-btn:active { transform: scale(0.99) translateY(0); }
+
+        /* Results */
+        .results-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
             overflow: hidden;
-            transition: max-height var(--transition-slow), opacity var(--transition-medium), margin-top var(--transition-slow), padding-top var(--transition-slow);
-            margin-top: 0; padding-top: 0;
-            visibility: hidden;
+            display: none;
         }
-         #summary-section .lynette-summary-details.visible {
-            max-height: 300px;
-            opacity: 1;
-            margin-top: 10px; padding-top: 10px;
-            visibility: visible;
-        }
-        #summary-section .lynette-summary-details p span:last-child { font-weight: 500; }
-        #summary-section .lynette-summary-details .final-wage span { font-weight: 600; font-size: 1rem; }
-        #summary-section .adjustment-positive { color: var(--success-color); }
-        #summary-section .adjustment-negative { color: var(--danger-color); }
-        #summary-section .current-rates { font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px; padding-top: 6px; border-top: 1px dotted var(--border-light); }
-
-        /* Weekly Total Summary Specifics */
-        #weekly-total-summary {
-             border-top: 2px solid var(--border-color); /* Add a stronger separator */
-             margin-top: 0; /* Remove top margin if individual summary is hidden */
-             padding-top: 18px; /* Ensure padding is there when visible */
-             background-color: #f8f9fa; /* Slightly different background for distinction */
+        .results-card.visible { display: block; animation: fadeUp 0.3s ease-out; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-
-        .log-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .log-area h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
-        #log-entries {
-            list-style: none;
-            overflow-y: auto;
-            flex-grow: 1;
-            padding-right: 8px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--subtle-grey) transparent;
+        .results-header {
+            background: var(--accent-dim);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        #log-entries::-webkit-scrollbar { width: 6px; }
-        #log-entries::-webkit-scrollbar-track { background: transparent; }
-        #log-entries::-webkit-scrollbar-thumb { background-color: var(--subtle-grey); border-radius: 10px; border: 1px solid var(--card-background); }
-
-        /* Log Entry Animations */
-        .log-entry {
-            background-color: var(--card-background); border: 1px solid var(--border-light); border-radius: 10px;
-            padding: 10px 15px; margin-bottom: 10px; font-size: 0.9rem; position: relative;
-            transition: box-shadow var(--transition-medium), background-color var(--transition-medium), opacity var(--transition-medium), transform var(--transition-medium), max-height var(--transition-medium), padding var(--transition-medium), margin var(--transition-medium);
-            opacity: 1;
-            transform: scale(1);
-            max-height: 150px;
-            overflow: hidden;
-        }
-        .log-entry:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06);}
-        .log-entry p { margin-bottom: 4px; color: var(--text-secondary); }
-        .log-entry p span { color: var(--text-primary); font-weight: 500; }
-        .log-entry .log-ph { color: var(--success-color); font-weight: 600; margin-left: 5px; font-size: 0.8rem; vertical-align: middle;}
-        .log-entry .delete-log-btn {
-            position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border: none;
-            background: var(--subtle-grey); color: var(--text-secondary); border-radius: 50%; cursor: pointer;
-            font-size: 14px; line-height: 20px; text-align: center;
-            opacity: 0; visibility: hidden;
-            transition: opacity var(--transition-medium), visibility var(--transition-medium), background-color var(--transition-medium), color var(--transition-medium), transform var(--transition-medium);
-            transform: scale(0.8);
-        }
-        .log-entry:hover .delete-log-btn { opacity: 0.7; visibility: visible; transform: scale(1); }
-        .delete-log-btn:hover { opacity: 1; background-color: var(--danger-color); color: white; transform: scale(1.1); }
-        .delete-log-btn:active { transform: scale(0.95); }
-
-        /* Animation for adding new entry */
-        .log-entry.new-entry-enter {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.98);
-            max-height: 0;
-            padding-top: 0; padding-bottom: 0;
-            margin-bottom: 0;
-        }
-        /* Animation for highlighting new entry (standard blue) */
-        .log-entry.new-entry-highlight {
-            animation: highlightFade 1.5s ease-out forwards;
-        }
-        @keyframes highlightFade {
-            0% { background-color: var(--highlight-bg); }
-            100% { background-color: var(--card-background); }
+        .results-header-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--accent);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
         }
 
-        /* Animation for removing entry */
-        .log-entry.removing {
-            opacity: 0;
-            transform: translateX(-20px) scale(0.95);
-            max-height: 0 !important;
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-            margin-bottom: 0 !important;
-            border-width: 0;
-            background-color: var(--delete-bg);
+        .results-body { padding: 24px; }
+
+        .result-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .result-line:last-child { border-bottom: none; }
+        .result-line-label {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+        .result-line-value {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 500;
         }
 
-
-        .log-controls { margin-top: 15px; flex-shrink: 0; display: flex; gap: 10px; }
-        .export-log-button, .clear-log-button {
-            flex: 1; padding: 9px; font-size: 0.9rem; font-weight: 500; border: 1px solid;
-            border-radius: 10px; cursor: pointer; background-color: var(--card-background);
-            transition: background-color var(--transition-medium), color var(--transition-medium), border-color var(--transition-medium), transform var(--transition-fast);
+        .result-divider {
+            height: 1px;
+            background: var(--border-light);
+            margin: 4px 0;
         }
-        .export-log-button { color: var(--accent-color); border-color: var(--accent-color);}
-        .export-log-button:hover { background-color: var(--accent-color); color: white; transform: translateY(-1px); }
-        .export-log-button:active { transform: scale(0.98); }
-        .clear-log-button { color: var(--danger-color); border-color: var(--danger-color); }
-        .clear-log-button:hover { background-color: var(--danger-color); color: white; transform: translateY(-1px); }
-        .clear-log-button:active { transform: scale(0.98); }
 
-        /* --- Responsive Adjustments --- */
-        @media (max-width: 1100px) {
-            .app-container { flex-direction: column; height: auto; max-height: none; transition: height 0.3s ease; }
-            .staff-list, .log-summary-area { border: none; padding: 0; flex-basis: auto; max-height: 45vh; /* Increased slightly */ overflow-y: auto; }
-            .staff-list { border-bottom: 1px solid var(--border-light); padding-bottom: 15px; margin-bottom: 15px; }
-            .log-summary-area { border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 15px; }
-            .input-area { padding: 0; overflow-y: visible; flex-basis: auto; }
+        .result-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 14px 0 4px;
         }
-        @media (max-width: 600px) {
-            body { padding: 10px 5px; }
-            .app-container { padding: 15px; gap: 15px; }
-            .form-row { flex-direction: column; gap: 0; }
-            h1, .input-area h2, .log-summary-area h2, .staff-list h2 { font-size: 1.1rem; }
-            .button, .log-button { font-size: 0.95rem; padding: 12px; }
-            input[type="text"][name*="time"], input[type="number"], input[type="date"] { font-size: 0.9rem; padding: 10px; }
-            .log-entry { font-size: 0.8rem; }
-            .summary-section p { font-size: 0.85rem; }
-            .staff-list { flex-basis: auto; }
-            .log-summary-area { flex-basis: auto; }
+        .result-total-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
         }
-        .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+        .result-total-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
 
+        /* IRD split section */
+        .ird-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-light);
+        }
+        .ird-title {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .ird-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .ird-line:last-child { border-bottom: none; }
+        .ird-line-label { font-size: 0.85rem; color: var(--text-muted); }
+        .ird-line-value {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.88rem;
+            color: var(--text);
+        }
+        .ird-note {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        /* Reset rates link */
+        .reset-link {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            padding: 0;
+            transition: color 0.15s;
+        }
+        .reset-link:hover { color: var(--accent); }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            body { padding: 24px 16px; }
+            .header h1 { font-size: 2rem; }
+            .card { padding: 18px; }
+        }
     </style>
 </head>
 <body>
-    <div class="app-container">
+<div class="wrapper">
 
-        <aside class="staff-list">
-            <h2>Staff</h2>
-            <ul id="staff-list-ui"></ul>
-        </aside>
-
-        <main class="input-area">
-            <div class="input-area-header">
-                <h2 id="current-staff-header">Select Staff</h2>
-            </div>
-
-            <form id="calculator-form" onsubmit="return false;">
-
-                <fieldset id="lynette-manager-inputs">
-                    <legend>Manager Work (Period)</legend>
-                    <div class="form-row">
-                        <div class="input-group">
-                            <label for="full_days">Full Days</label>
-                            <div class="stepper-input-group">
-                                <button type="button" class="stepper-button" aria-label="Decrease Full Days" data-target="full_days" data-step="-1">−</button>
-                                <input type="number" id="full_days" name="full_days" min="0" max="7" step="1" value="2" aria-describedby="full_days-error">
-                                <button type="button" class="stepper-button" aria-label="Increase Full Days" data-target="full_days" data-step="1">+</button>
-                            </div>
-                            <span class="error-message" id="full_days-error"></span>
-                        </div>
-                        <div class="input-group">
-                            <label for="half_days">Half Days</label>
-                             <div class="stepper-input-group">
-                                <button type="button" class="stepper-button" aria-label="Decrease Half Days" data-target="half_days" data-step="-1">−</button>
-                                <input type="number" id="half_days" name="half_days" min="0" max="7" step="1" value="3" aria-describedby="half_days-error">
-                                <button type="button" class="stepper-button" aria-label="Increase Half Days" data-target="half_days" data-step="1">+</button>
-                            </div>
-                            <span class="error-message" id="half_days-error"></span>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend id="time-entry-legend">Log Work Time</legend>
-                     <div class="input-group">
-                         <label for="entry_date">Date</label>
-                         <input type="date" id="entry_date" name="entry_date" aria-label="Entry Date" aria-describedby="entry_date-error">
-                         <span class="error-message" id="entry_date-error"></span>
-                     </div>
-                    <div class="form-row">
-                        <div class="input-group">
-                            <label for="start_time">Start Time</label>
-                            <input type="text" id="start_time" name="start_time" placeholder="e.g., 9, 9a, 14:30" inputmode="decimal" aria-label="Start Time" aria-describedby="start_time-error">
-                            <span class="error-message" id="start_time-error"></span>
-                        </div>
-                        <div class="input-group">
-                            <label for="end_time">End Time</label>
-                            <input type="text" id="end_time" name="end_time" placeholder="e.g., 11, 3p, 1700" inputmode="decimal" aria-label="End Time" aria-describedby="end_time-error">
-                            <span class="error-message" id="end_time-error"></span>
-                        </div>
-                    </div>
-                     <div class="ph-toggle-group input-group" id="ph-group">
-                        <input type="checkbox" class="ph-toggle" id="is_ph" name="is_ph" aria-describedby="is_ph-error">
-                        <label for="is_ph">Work on Public Holiday?</label>
-                        <span class="error-message" id="is_ph-error"></span>
-                     </div>
-                </fieldset>
-
-                <button type="button" id="log-entry-button" class="log-button">Log Time Entry</button>
-                <p style="text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;">Tip: Use Enter to move between fields, Ctrl+Enter to log & select next staff.</p>
-            </form>
-        </main>
-
-        <aside class="log-summary-area">
-             <section id="summary-section" class="summary-section" role="region" aria-live="polite" aria-atomic="true">
-                 <h3>Summary for <span id="summary-staff-name">Staff</span></h3>
-                 <p class="summary-scope-note">(Based on currently logged entries)</p>
-                 <p><span>Total Standard Hours:</span> <span id="summary-std-hours">0.00</span></p>
-                 <p><span>Total Public Holiday Hours:</span> <span id="summary-ph-hours" class="ph-total">0.00</span></p>
-                 <div id="lynette-summary-details" class="lynette-summary-details">
-                      <p>Mgr Days (F/H): <span id="summary-mgr-days">0 / 0</span></p>
-                      <p>Base Mgr Wage: <span id="summary-base-mgr-wage">$0.00</span></p>
-                      <p>Value Adjustment: <span id="summary-adjustment">$0.00</span></p>
-                      <p class="final-wage">Final Mgr Wage Payable: <span id="summary-final-mgr-wage">$0.00</span></p>
-                      <div class="current-rates">
-                          Rates Used: Full Day: $<span id="summary-rate-full">0.00</span>, Half Day: $<span id="summary-rate-half">0.00</span>, Cleaner: $<span id="summary-rate-cleaner">0.00</span>/hr </div>
-                 </div>
-             </section>
-
-             <section id="weekly-total-summary" class="summary-section weekly-total" role="region" aria-live="polite" aria-atomic="true">
-                <h3>Weekly Totals (All Staff)</h3>
-                <p><span>Total Standard Hours:</span> <span id="weekly-total-std-hours">0.00</span></p>
-                <p><span>Total Public Holiday Hours:</span> <span id="weekly-total-ph-hours" class="ph-total">0.00</span></p>
-                <p><span><strong>Overall Total Hours:</strong></span> <strong><span id="weekly-overall-total-hours">0.00</span></strong></p>
-             </section>
-
-            <section class="log-area" aria-label="Time Log Entries">
-                <h3>Time Log</h3>
-                <ul id="log-entries" role="log" aria-live="polite"></ul>
-                <div class="log-controls">
-                     <button type="button" id="export-log-button" class="export-log-button">Export Log (CSV)</button>
-                     <button type="button" id="clear-log-button" class="clear-log-button">Clear Log</button>
-                </div>
-            </section>
-        </aside>
-
+    <div class="header">
+        <div class="header-eyebrow">Wright Motel · Pay Calculator</div>
+        <h1>Lynette's <em>Weekly</em> Pay</h1>
     </div>
 
-    <script>
-        // --- Constants and Staff Data ---
-        const STAFF_LIST = ['Lynette', 'Sarah', 'Shaun', 'Upashna', 'Fiarah'];
-        const IRD_TARGET_HOURS = 15; // Mandatory hours declaration for Lynette in Xero
-        const PUBLIC_HOLIDAY_MULTIPLIER = 1.5; // Time and a half for PH work
-        const DEFAULT_FULL_DAY_RATE = 270.00;
-        const DEFAULT_HALF_DAY_RATE = 85.00;
-        const DEFAULT_CLEANER_RATE = 24.70;
-        const DEFAULT_LYNETTE_FULL_DAYS = 2;
-        const DEFAULT_LYNETTE_HALF_DAYS = 3;
-        const LOCAL_STORAGE_KEY = 'teamTimeTrackerLog_vFinal_enhanced_v9'; // Updated key for this version
-        const ANIMATION_DURATION = 400; // ms, sync with --transition-slow CSS variable
-        const LONG_SHIFT_THRESHOLD = 6; // hours - Warn if calculated duration exceeds this
-
-        // New Zealand Public Holidays for 2025 (Wellington Region)
-        // Note: Kept global for simplicity in this single-file app.
-        // For larger apps, consider loading this dynamically or scoping it better.
-        const PUBLIC_HOLIDAYS_2025 = new Set([ // Use a Set for efficient lookup
-            '2025-01-01', // New Year's Day
-            '2025-01-02', // Day after New Year's Day
-            '2025-01-20', // Wellington Anniversary Day (Confirmed Present)
-            '2025-02-06', // Waitangi Day
-            '2025-04-18', // Good Friday
-            '2025-04-21', // Easter Monday
-            '2025-04-25', // ANZAC Day
-            '2025-06-02', // King's Birthday (First Monday in June) - Updated Name
-            '2025-10-27', // Labour Day (Fourth Monday in October)
-            '2025-12-25', // Christmas Day
-            '2025-12-26'  // Boxing Day
-            // Note: Matariki holiday date varies, needs confirmation for 2025 if required. Assuming not needed for now.
-        ]);
-
-        // --- Application State ---
-        let currentStaff = null; // The currently selected staff member
-        let logEntries = [];     // Array to hold all logged time entries {id, staffName, date, start, end, hours, isPH, isDurationWarning}
-        let lynetteManagerDays = { // Specific state for Lynette's manager days
-            full: DEFAULT_LYNETTE_FULL_DAYS,
-            half: DEFAULT_LYNETTE_HALF_DAYS
-        };
-        // Centralized rates - ensures calculations use consistent values
-        let rates = {
-            fullDay: DEFAULT_FULL_DAY_RATE,
-            halfDay: DEFAULT_HALF_DAY_RATE,
-            cleanerHourly: DEFAULT_CLEANER_RATE
-        };
-
-        // --- DOM Element References ---
-        // Grouping DOM references for clarity
-        const ui = {
-            staffList: document.getElementById('staff-list-ui'),
-            currentStaffHeader: document.getElementById('current-staff-header'),
-            calculatorForm: document.getElementById('calculator-form'),
-            lynetteManagerInputs: document.getElementById('lynette-manager-inputs'),
-            timeEntryLegend: document.getElementById('time-entry-legend'),
-            logEntriesList: document.getElementById('log-entries'),
-            logButton: document.getElementById('log-entry-button'),
-            clearLogButton: document.getElementById('clear-log-button'),
-            exportLogButton: document.getElementById('export-log-button'),
-            entryDateInput: document.getElementById('entry_date'),
-            startTimeInput: document.getElementById('start_time'),
-            endTimeInput: document.getElementById('end_time'),
-            isPhCheckbox: document.getElementById('is_ph'),
-            phToggleGroup: document.getElementById('ph-group'), // Reference to the group for highlighting
-            fullDaysInput: document.getElementById('full_days'),
-            halfDaysInput: document.getElementById('half_days'),
-            // Individual Summary Elements
-            summarySection: document.getElementById('summary-section'),
-            summaryStaffName: document.getElementById('summary-staff-name'),
-            summaryStdHours: document.getElementById('summary-std-hours'),
-            summaryPhHours: document.getElementById('summary-ph-hours'),
-            lynetteSummaryDetails: document.getElementById('lynette-summary-details'),
-            summaryMgrDays: document.getElementById('summary-mgr-days'),
-            summaryBaseMgrWage: document.getElementById('summary-base-mgr-wage'),
-            summaryAdjustment: document.getElementById('summary-adjustment'),
-            summaryFinalMgrWage: document.getElementById('summary-final-mgr-wage'),
-            summaryRateFull: document.getElementById('summary-rate-full'),
-            summaryRateHalf: document.getElementById('summary-rate-half'),
-            summaryRateCleaner: document.getElementById('summary-rate-cleaner'),
-            // Weekly Total Summary Elements
-            weeklyTotalSummarySection: document.getElementById('weekly-total-summary'),
-            weeklyTotalStdHours: document.getElementById('weekly-total-std-hours'),
-            weeklyTotalPhHours: document.getElementById('weekly-total-ph-hours'),
-            weeklyOverallTotalHours: document.getElementById('weekly-overall-total-hours')
-        };
-
-
-        // --- Utility Functions ---
-
-        /**
-         * Formats a number representing hours to two decimal places.
-         * @param {number} hours - The number of hours.
-         * @returns {string} Formatted hours string (e.g., "8.00").
-         */
-        const formatHours = (hours) => isNaN(hours) || !hours || hours === 0 ? '0.00' : hours.toFixed(2);
-
-        /**
-         * Formats a number as currency (e.g., $123.45).
-         * @param {number} value - The numeric value.
-         * @returns {string} Formatted currency string.
-         */
-        const formatCurrency = (value) => isNaN(value) ? '$0.00' : `$${value.toFixed(2)}`;
-
-        /**
-         * Formats a date string (YYYY-MM-DD) into a more readable format.
-         * @param {string} dateStr - The date string (YYYY-MM-DD).
-         * @returns {string} Formatted date string (e.g., "Sun, 20 Apr").
-         */
-        const formatDate = (dateStr) => {
-            if (!dateStr) return 'N/A';
-            try {
-                // Ensure time zone offset doesn't shift the date by parsing as UTC
-                const d = new Date(dateStr + 'T00:00:00Z');
-                return d.toLocaleDateString('en-NZ', { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'Pacific/Auckland' });
-            } catch {
-                return dateStr; // Fallback if parsing fails
-            }
-        };
-
-        /**
-         * Formats a 24-hour time string (HH:MM) into a 12-hour AM/PM format.
-         * @param {string} timeStr24 - The time string in HH:MM format.
-         * @returns {string} Formatted time string (e.g., "8:00 AM").
-         */
-        const formatDisplayTime = (timeStr24) => {
-            if (!timeStr24 || typeof timeStr24 !== 'string' || !timeStr24.includes(':')) return 'N/A';
-            try {
-                const [h, m] = timeStr24.split(':');
-                const hr = parseInt(h);
-                const sfx = hr >= 12 ? 'PM' : 'AM';
-                const h12 = hr % 12 === 0 ? 12 : hr % 12; // Convert 0 or 12 hour to 12 for display
-                return `${h12}:${m} ${sfx}`;
-            } catch {
-                return timeStr24; // Fallback
-            }
-        };
-
-        // --- Smart Time Parsing ---
-
-        /**
-         * Parses flexible time input (e.g., "9", "9a", "14:30", "5p") into HH:MM format.
-         * Applies heuristics for ambiguous times (e.g., assuming "5" as end time is PM).
-         * Updates the input element's value and clears/shows errors.
-         * @param {HTMLInputElement} inputElement - The input element containing the time string.
-         * @returns {string|null} The formatted HH:MM time string, or null if invalid.
-         */
-        const parseAndFormatTime = (inputElement) => {
-             const rawValue = inputElement.value.trim().toLowerCase();
-             if (!rawValue) { clearError(inputElement.id); return null; } // Clear error if field is emptied
-
-             let hour = NaN, minute = 0;
-             let explicitAM = false, explicitPM = false;
-
-             // Check for explicit am/pm markers
-             if (rawValue.includes('a')) { explicitAM = true; }
-             if (rawValue.includes('p')) { explicitPM = true; }
-
-             // Extract numbers and potential separator (colon or period)
-             let numStr = rawValue.replace(/[^0-9.:]/g, '');
-
-             // --- Parse based on format ---
-             if (numStr.includes(':') || numStr.includes('.')) { // HH:MM or HH.MM format
-                 const parts = numStr.split(/[:.]/);
-                 hour = parseInt(parts[0]);
-                 minute = parseInt(parts[1] || '0'); // Default minute to 0 if missing after separator
-             } else { // Attempt to parse as H, HH, HMM, HHMM (integer only)
-                 const numVal = parseInt(numStr);
-                 if (!isNaN(numVal)) {
-                     if (numStr.length <= 2) { // H or HH (e.g., "9", "14")
-                         hour = numVal;
-                         minute = 0;
-                     } else if (numStr.length === 3) { // HMM (e.g., "930" -> 9:30)
-                         hour = parseInt(numStr.substring(0, 1));
-                         minute = parseInt(numStr.substring(1));
-                     } else if (numStr.length === 4) { // HHMM (e.g., "1430" -> 14:30)
-                         hour = parseInt(numStr.substring(0, 2));
-                         minute = parseInt(numStr.substring(2));
-                     }
-                 }
-             }
-
-             // --- Validate parsed numbers ---
-             if (isNaN(hour) || isNaN(minute) || minute < 0 || minute > 59) {
-                 showError(inputElement.id, 'Invalid time format.');
-                 return null;
-             }
-
-             // --- Adjust hour based on AM/PM ---
-             if (explicitAM || explicitPM) { // If user specified 'a' or 'p'
-                 if (hour < 1 || hour > 12) { // AM/PM format requires 1-12 hour
-                     showError(inputElement.id, 'Hour must be 1-12 w/ AM/PM.');
-                     return null;
-                 }
-                 if (explicitPM && hour !== 12) hour += 12; // Convert 1pm-11pm to 13-23
-                 if (explicitAM && hour === 12) hour = 0; // Convert 12am to 00
-             } else { // --- Apply Heuristics if AM/PM is NOT specified ---
-                 // Rule: If hour is 1-6 and it's the *end* time input, assume PM.
-                 // This handles common cases like "9" (start) -> "5" (end) correctly as 9am -> 5pm.
-                 // The specific "5" (start) -> "6" (end) edge case (5am -> 6pm = 13 hrs) is handled later in handleLogEntry.
-                 if (hour >= 1 && hour <= 6 && inputElement.id.includes('end')) {
-                     hour += 12; // Assume 1pm-6pm (13-18)
-                 }
-                 // Hours 7-11 are assumed AM.
-                 // Hour 12 is ambiguous (noon or midnight) but usually implies noon if entered simply as "12". Let calculateDuration handle overnight logic.
-                 // Hours 13-23 are assumed 24hr format.
-             }
-
-             // --- Final hour validation (0-23) ---
-             if (hour < 0 || hour > 23) {
-                 showError(inputElement.id, 'Invalid hour.');
-                 return null;
-             }
-
-             // --- Format to HH:MM and update input ---
-             const formattedTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-             inputElement.value = formattedTime; // Update the input field visually
-             clearError(inputElement.id); // Clear any previous error for this field
-             return formattedTime; // Return the valid, formatted time
-        };
-
-
-        // --- Time Calculation ---
-
-        /**
-         * Calculates the duration between two HH:MM time strings in decimal hours.
-         * Handles overnight shifts correctly (where end time is on the next day).
-         * @param {string} startStr24 - Start time in HH:MM format.
-         * @param {string} endStr24 - End time in HH:MM format.
-         * @returns {number} Duration in hours, rounded to 2 decimal places.
-         */
-        const calculateDuration = (startStr24, endStr24) => {
-             if (!startStr24 || !endStr24) return 0;
-             try {
-                 const baseDate = "1970-01-01"; // Use a fixed date to compare times
-                 const startDate = new Date(`${baseDate}T${startStr24}`);
-                 let endDate = new Date(`${baseDate}T${endStr24}`);
-
-                 // Check for invalid date objects after parsing time strings
-                 if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                     console.error("Invalid date created from time strings:", startStr24, endStr24);
-                     return 0;
-                 }
-
-                 // If end time is on or before start time, assume it rolls over to the next day
-                 if (endDate <= startDate) {
-                     endDate.setDate(endDate.getDate() + 1);
-                 }
-
-                 const diffMs = endDate - startDate; // Difference in milliseconds
-                 if (diffMs < 0) return 0; // Safeguard against negative difference
-
-                 const diffHrs = diffMs / (1000 * 60 * 60); // Convert ms to hours
-                 return Math.round(diffHrs * 100) / 100; // Round to 2 decimal places
-             } catch (e) {
-                 console.error("Error calculating duration:", startStr24, endStr24, e);
-                 return 0; // Return 0 on error
-             }
-        };
-
-        // --- Error Handling & User Feedback ---
-
-        /**
-         * Displays an error message for a specific input field and applies error styling.
-         * @param {string} elementId - The ID of the input element.
-         * @param {string} message - The error message to display.
-         */
-        const showError = (elementId, message) => {
-            const errorElement = document.getElementById(`${elementId}-error`);
-            const inputElement = document.getElementById(elementId);
-            if (errorElement) errorElement.textContent = message;
-            if (inputElement) {
-                inputElement.classList.add('input-error');
-                // Apply shake animation to relevant inputs on error
-                if (['start_time', 'end_time', 'full_days', 'half_days', 'entry_date'].includes(elementId)) {
-                    inputElement.classList.remove('input-shake'); // Remove first to allow re-triggering
-                    void inputElement.offsetWidth; // Force reflow to restart animation
-                    inputElement.classList.add('input-shake');
-                    // Automatically remove shake class after animation duration
-                    setTimeout(() => {
-                        inputElement?.classList.remove('input-shake');
-                    }, 500); // Match CSS animation duration
-                }
-            }
-        };
-
-        /**
-         * Clears the error message and styling for a specific input field.
-         * @param {string} elementId - The ID of the input element.
-         */
-        const clearError = (elementId) => {
-            const errorElement = document.getElementById(`${elementId}-error`);
-            const inputElement = document.getElementById(elementId);
-            if (errorElement) errorElement.textContent = '';
-            if (inputElement) {
-                inputElement.classList.remove('input-error');
-                inputElement.classList.remove('input-shake'); // Ensure shake class is removed
-            }
-        };
-
-        /** Clears all error messages and styling within the form. */
-        const clearAllErrors = () => {
-             ui.calculatorForm.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-             ui.calculatorForm.querySelectorAll('input.input-error').forEach(input => {
-                 input.classList.remove('input-error');
-                 input.classList.remove('input-shake'); // Ensure shake class is removed
-             });
-        };
-
-        /**
-         * Briefly applies a warning style (orange glow) to an input element.
-         * Used for non-blocking warnings like long shift duration.
-         * @param {string} elementId - The ID of the input element.
-         */
-        const showWarningFeedback = (elementId) => {
-            const inputElement = document.getElementById(elementId);
-            if (inputElement) {
-                inputElement.classList.add('input-warning');
-                setTimeout(() => {
-                    inputElement.classList.remove('input-warning');
-                }, 2000); // Keep warning visible for 2 seconds
-            }
-        };
-
-        // --- Input Validation ---
-
-        /**
-         * Validates the main time entry inputs (Date, Start Time, End Time)
-         * and Lynette's manager day inputs if applicable.
-         * Checks for required fields, valid formats, and logical consistency (end after start).
-         * @returns {boolean} True if all relevant inputs are valid, false otherwise.
-         */
-        const validateEntryInputs = () => {
-             clearAllErrors(); // Start fresh
-             let isValid = true;
-
-             // 1. Validate Date
-             if (!ui.entryDateInput.value) {
-                 showError('entry_date', 'Date required.');
-                 isValid = false;
-             } else {
-                 clearError('entry_date');
-             }
-
-             // 2. Validate Time Formats (using the potentially auto-formatted values)
-             const timeRegex = /^[0-2][0-9]:[0-5][0-9]$/; // HH:MM format
-             const startVal = ui.startTimeInput.value;
-             const endVal = ui.endTimeInput.value;
-
-             if (!startVal) { // Check if start time is empty *after* potential parsing
-                 showError('start_time', 'Start time required.'); isValid = false;
-             } else if (!timeRegex.test(startVal)) { // Check format if not empty
-                 showError('start_time', 'Invalid format (HH:MM).'); isValid = false;
-             } else {
-                 clearError('start_time');
-             }
-
-             if (!endVal) { // Check if end time is empty *after* potential parsing
-                 showError('end_time', 'End time required.'); isValid = false;
-             } else if (!timeRegex.test(endVal)) { // Check format if not empty
-                 showError('end_time', 'Invalid format (HH:MM).'); isValid = false;
-             } else {
-                 clearError('end_time');
-             }
-
-             // 3. Check Duration Logic (only if both times have valid format)
-             if (timeRegex.test(startVal) && timeRegex.test(endVal)) {
-                 if (calculateDuration(startVal, endVal) <= 0) {
-                     showError('end_time', 'End must be after start.');
-                     isValid = false;
-                 } else {
-                     // Clear only the specific "End must be after start" error if duration is now valid
-                     const endErrorElement = document.getElementById('end_time-error');
-                     if (endErrorElement && endErrorElement.textContent === 'End must be after start.') {
-                         clearError('end_time');
-                     }
-                 }
-             }
-
-             // 4. Validate Lynette's inputs if she is selected
-             if (currentStaff === 'Lynette') {
-                 const validateNum = (id, inputEl, min, max) => {
-                     const val = parseInt(inputEl.value);
-                     if (isNaN(val) || val < min || (max !== undefined && val > max)) {
-                         showError(id, `Must be ${min}-${max}.`);
-                         isValid = false; // Update overall validity flag
-                     } else {
-                         clearError(id);
-                     }
-                 };
-                 validateNum('full_days', ui.fullDaysInput, 0, 7);
-                 validateNum('half_days', ui.halfDaysInput, 0, 7);
-             }
-
-             return isValid;
-        };
-
-        // --- Local Storage Persistence ---
-
-        /** Saves the current logEntries array to local storage. */
-        const saveLog = () => {
-            try {
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(logEntries));
-            } catch (e) {
-                console.error("Error saving log to localStorage:", e);
-                // Consider notifying user if storage fails (e.g., quota exceeded)
-            }
-        };
-
-        /** Loads logEntries from local storage on initialization. */
-        const loadLog = () => {
-            try {
-                const storedLog = localStorage.getItem(LOCAL_STORAGE_KEY);
-                logEntries = storedLog ? JSON.parse(storedLog) : [];
-                // Basic validation of loaded data (optional but good practice)
-                if (!Array.isArray(logEntries)) {
-                    console.warn("Invalid data found in localStorage, resetting log.");
-                    logEntries = [];
-                }
-            } catch (e) {
-                console.error("Error loading log from localStorage:", e);
-                logEntries = []; // Reset to empty array on error
-            }
-        };
-
-        // --- UI Rendering Functions ---
-
-        /** Renders the list of staff buttons in the left panel. */
-        const renderStaffList = () => {
-            ui.staffList.innerHTML = ''; // Clear existing list
-            STAFF_LIST.forEach(name => {
-                const li = document.createElement('li');
-                const button = document.createElement('button');
-                button.textContent = name;
-                button.dataset.staffName = name; // Store name for event handling
-                if (name === currentStaff) {
-                    button.classList.add('active'); // Highlight active staff
-                    button.setAttribute('aria-current', 'true');
-                }
-                li.appendChild(button);
-                ui.staffList.appendChild(li);
-            });
-        };
-
-        /**
-         * Renders the list of logged time entries in the right panel.
-         * Applies animations for new or warned entries.
-         * @param {number|null} [newEntryId=null] - The ID of a newly added entry to animate.
-         */
-        const renderLog = (newEntryId = null) => {
-            const fragment = document.createDocumentFragment(); // Use fragment for efficiency
-
-            if (logEntries.length === 0) {
-                ui.logEntriesList.innerHTML = '<p style="color:var(--text-secondary);text-align:center;margin-top:20px;">No time logged yet.</p>';
-                return;
-            }
-
-            // Render entries in reverse chronological order (newest first)
-            logEntries.slice().reverse().forEach((entry) => {
-                const li = document.createElement('li');
-                li.classList.add('log-entry');
-                li.dataset.entryId = entry.id; // Store ID for deletion
-
-                const phMarker = entry.isPH ? '<span class="log-ph">(PH)</span>' : '';
-                const content = `
-                    <button type="button" class="delete-log-btn" aria-label="Delete entry for ${entry.staffName} on ${formatDate(entry.date)}">×</button>
-                    <p><strong>${entry.staffName}</strong> - ${formatDate(entry.date)}</p>
-                    <p>Time: <span>${formatDisplayTime(entry.start)} - ${formatDisplayTime(entry.end)}</span></p>
-                    <p>Hours: <span>${formatHours(entry.hours)} ${phMarker}</span></p>
-                `;
-                li.innerHTML = content;
-
-                // Apply warning pulse animation if flagged
-                if (entry.isDurationWarning) {
-                    li.classList.add('log-entry-warning');
-                }
-
-                // Prepare for enter animation if it's a new entry
-                if (entry.id === newEntryId) {
-                    li.classList.add('new-entry-enter');
-                }
-                fragment.appendChild(li);
-            });
-
-            // Replace content efficiently
-            ui.logEntriesList.innerHTML = '';
-            ui.logEntriesList.appendChild(fragment);
-
-            // Trigger animations for the new entry after it's in the DOM
-            if (newEntryId) {
-                const newLi = ui.logEntriesList.querySelector(`.log-entry[data-entry-id="${newEntryId}"]`);
-                if (newLi) {
-                    // Force reflow before adding animation classes
-                    void newLi.offsetWidth;
-                    // Trigger enter animation
-                    newLi.classList.remove('new-entry-enter');
-                    // Trigger standard blue highlight fade
-                    newLi.classList.add('new-entry-highlight');
-                    setTimeout(() => {
-                        newLi.classList.remove('new-entry-highlight');
-                    }, 1500); // Match highlightFade animation duration
-                }
-            }
-        };
-
-        /** Updates the summary section for the currently selected staff member. */
-        const updateSummary = () => {
-             // Hide summary if no staff is selected
-             if (!currentStaff) {
-                 ui.summarySection.classList.remove('visible');
-                 return;
-             }
-             ui.summarySection.classList.add('visible'); // Make section visible
-             ui.summaryStaffName.textContent = currentStaff; // Display current staff name
-
-             // Filter log entries for the current staff
-             const staffEntries = logEntries.filter(e => e.staffName === currentStaff);
-
-             // Calculate total standard and PH hours for this staff member
-             let totalStandardHours = 0;
-             let totalPublicHolidayHours = 0;
-             staffEntries.forEach(entry => {
-                 if (entry.isPH) {
-                     totalPublicHolidayHours += entry.hours;
-                 } else {
-                     totalStandardHours += entry.hours;
-                 }
-             });
-
-             // Display standard and PH hours
-             ui.summaryStdHours.textContent = formatHours(totalStandardHours);
-             ui.summaryPhHours.textContent = formatHours(totalPublicHolidayHours);
-             // Show/hide the PH hours line based on whether there are any
-             ui.summaryPhHours.parentElement.style.display = totalPublicHolidayHours > 0 ? 'flex' : 'none';
-
-             // --- Lynette's Specific Calculation ---
-             if (currentStaff === 'Lynette') {
-                 ui.lynetteSummaryDetails.classList.add('visible'); // Show Lynette's details section
-
-                 // Get current rates from the JS 'rates' object (Corrected)
-                 const fullDayRate = rates.fullDay;
-                 const halfDayRate = rates.halfDay;
-                 const stdCleanerRate = rates.cleanerHourly;
-
-                 // Get manager days from state
-                 const fullDays = lynetteManagerDays.full;
-                 const halfDays = lynetteManagerDays.half;
-
-                 // 1. Calculate Base Manager Wage
-                 const baseMgrWage = (fullDays * fullDayRate) + (halfDays * halfDayRate);
-
-                 // 2. Calculate Actual Value of Cleaner Hours Worked
-                 const actualStdClnValue = totalStandardHours * stdCleanerRate;
-                 const actualPHClnValue = totalPublicHolidayHours * stdCleanerRate * PUBLIC_HOLIDAY_MULTIPLIER;
-
-                 // 3. Calculate Total Actual Earnings
-                 const totalActualEarned = baseMgrWage + actualStdClnValue + actualPHClnValue;
-
-                 // 4. Calculate Value Declared/Paid as Cleaner in Xero (Mandatory 15 hours)
-                 //    - Prioritize paying PH hours first within the 15-hour limit.
-                 const phHrsPaid = Math.min(totalPublicHolidayHours, IRD_TARGET_HOURS);
-                 const stdHrsPaid = Math.max(0, IRD_TARGET_HOURS - phHrsPaid);
-                 const valuePaidClnInXero = (phHrsPaid * stdCleanerRate * PUBLIC_HOLIDAY_MULTIPLIER) + (stdHrsPaid * stdCleanerRate);
-
-                 // 5. Calculate Final Manager Wage Payable (The balancing figure for Xero)
-                 const finalMgrWagePayable = totalActualEarned - valuePaidClnInXero;
-
-                 // 6. Calculate Value Adjustment (Difference between final payable and base manager wage)
-                 const adjValue = finalMgrWagePayable - baseMgrWage;
-
-                 // Display Lynette's summary details
-                 ui.summaryMgrDays.textContent = `${fullDays} / ${halfDays}`;
-                 ui.summaryBaseMgrWage.textContent = formatCurrency(baseMgrWage);
-                 ui.summaryAdjustment.textContent = `${formatCurrency(Math.abs(adjValue))} ${adjValue >= -0.005 ? '(Add)' : '(Deduct)'}`; // Use threshold for float comparison
-                 ui.summaryAdjustment.className = adjValue >= -0.005 ? 'adjustment-positive' : 'adjustment-negative'; // Style adjustment text
-                 ui.summaryFinalMgrWage.textContent = formatCurrency(finalMgrWagePayable);
-
-                 // Display the rates used in the calculation
-                 ui.summaryRateFull.textContent = formatCurrency(fullDayRate).substring(1); // Remove $ sign for inline display
-                 ui.summaryRateHalf.textContent = formatCurrency(halfDayRate).substring(1);
-                 ui.summaryRateCleaner.textContent = stdCleanerRate.toFixed(2);
-
-             } else {
-                 // Hide Lynette's specific details if another staff member is selected
-                 ui.lynetteSummaryDetails.classList.remove('visible');
-             }
-        };
-
-        /** Updates the weekly total summary section (for all staff). */
-        const updateWeeklyTotalSummary = () => {
-            // Hide section if log is empty
-            if (logEntries.length === 0) {
-                ui.weeklyTotalSummarySection.classList.remove('visible');
-                return;
-            }
-
-            let totalStd = 0;
-            let totalPh = 0;
-            // Iterate through ALL log entries
-            logEntries.forEach(entry => {
-                if (entry.isPH) {
-                    totalPh += entry.hours;
-                } else {
-                    totalStd += entry.hours;
-                }
-            });
-
-            const overallTotal = totalStd + totalPh;
-
-            // Display the calculated totals
-            ui.weeklyTotalStdHours.textContent = formatHours(totalStd);
-            ui.weeklyTotalPhHours.textContent = formatHours(totalPh);
-            ui.weeklyOverallTotalHours.textContent = formatHours(overallTotal);
-
-            // Make the section visible
-            ui.weeklyTotalSummarySection.classList.add('visible');
-        };
-
-
-        // --- Event Handlers ---
-
-        /**
-         * Selects the next staff member in the list cyclically.
-         * @returns {string|null} The name of the next staff member, or null if list is empty.
-         */
-        const selectNextStaff = () => {
-            if (!currentStaff) return STAFF_LIST[0] || null; // Default to first if none selected
-            const currentIndex = STAFF_LIST.indexOf(currentStaff);
-            const nextIndex = (currentIndex + 1) % STAFF_LIST.length; // Wrap around
-            return STAFF_LIST[nextIndex];
-        };
-
-        /**
-         * Handles the selection of a staff member from the list.
-         * Updates UI elements, clears inputs, and sets focus.
-         * @param {Event|string} eventOrName - The click event or the staff name string.
-         */
-        const handleStaffSelect = (eventOrName) => {
-            let staffName = (typeof eventOrName === 'string') ? eventOrName : eventOrName.target.closest('button[data-staff-name]')?.dataset.staffName;
-
-            // Do nothing if the name is invalid or the same staff is clicked again
-            if (!staffName || staffName === currentStaff) return;
-
-            currentStaff = staffName; // Update state
-
-            // Animate header change
-            ui.currentStaffHeader.classList.add('entering');
-            setTimeout(() => {
-                ui.currentStaffHeader.innerHTML = `Enter Time for <span>${currentStaff}</span>`;
-                ui.currentStaffHeader.classList.remove('entering');
-            }, ANIMATION_DURATION / 2); // Half duration for smooth transition
-
-            renderStaffList(); // Update active button highlight
-
-            // Show/hide Lynette's specific inputs
-            if (currentStaff === 'Lynette') {
-                ui.lynetteManagerInputs.classList.add('visible');
-                // Restore her saved/default manager days
-                ui.fullDaysInput.value = lynetteManagerDays.full;
-                ui.halfDaysInput.value = lynetteManagerDays.half;
+    <!-- Manager Days -->
+    <div class="card">
+        <div class="card-title">Manager Days</div>
+        <div class="field-row">
+            <div>
+                <div class="field-label">Full Days</div>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="step('full_days', -1)">−</button>
+                <span class="stepper-val" id="full_days_val">2</span>
+                <button class="stepper-btn" onclick="step('full_days', 1)">+</button>
+            </div>
+        </div>
+        <div class="field-row">
+            <div>
+                <div class="field-label">Half Days</div>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="step('half_days', -1)">−</button>
+                <span class="stepper-val" id="half_days_val">3</span>
+                <button class="stepper-btn" onclick="step('half_days', 1)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Housekeeping Hours -->
+    <div class="card">
+        <div class="card-title">Housekeeping Hours</div>
+        <div class="field-row">
+            <div>
+                <div class="field-label">Actual Hours Worked</div>
+                <div class="field-sublabel">Real cleaning hours this period</div>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="step('actual_hours', -0.5)">−</button>
+                <input class="stepper-input" type="number" id="actual_hours_val" value="0" min="0" max="80" step="0.25" oninput="onHoursInput('actual_hours')">
+                <button class="stepper-btn" onclick="step('actual_hours', 0.5)">+</button>
+            </div>
+        </div>
+        <div class="field-row">
+            <div>
+                <div class="field-label">Hours Declaring to IRD</div>
+                <div class="field-sublabel">What Lynette reports to Xero</div>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="step('declaring_hours', -0.5)">−</button>
+                <input class="stepper-input" type="number" id="declaring_hours_val" value="15" min="0" max="80" step="0.25" oninput="onHoursInput('declaring_hours')">
+                <button class="stepper-btn" onclick="step('declaring_hours', 0.5)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rates -->
+    <div class="card">
+        <div class="card-title">
+            Rates
+            <button class="reset-link" onclick="resetRates()">reset to defaults</button>
+        </div>
+        <div class="field-row">
+            <div class="field-label">Full Day Rate</div>
+            <div class="rate-input-wrap">
+                <span class="rate-prefix">$</span>
+                <input class="rate-input" type="number" id="rate_full" value="270.00" step="0.50" min="0">
+            </div>
+        </div>
+        <div class="field-row">
+            <div class="field-label">Half Day Rate</div>
+            <div class="rate-input-wrap">
+                <span class="rate-prefix">$</span>
+                <input class="rate-input" type="number" id="rate_half" value="85.00" step="0.50" min="0">
+            </div>
+        </div>
+        <div class="field-row">
+            <div class="field-label">Hourly Cleaner Rate</div>
+            <div class="rate-input-wrap">
+                <span class="rate-prefix">$</span>
+                <input class="rate-input" type="number" id="rate_hourly" value="24.70" step="0.10" min="0">
+            </div>
+        </div>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">Calculate Pay</button>
+
+    <!-- Results -->
+    <div class="results-card" id="results">
+        <div class="results-header">
+            <span class="results-header-label">Pay Breakdown</span>
+        </div>
+        <div class="results-body">
+            <div class="result-line">
+                <span class="result-line-label" id="r_full_label">Full Days (2 × $270.00)</span>
+                <span class="result-line-value" id="r_full_val">$540.00</span>
+            </div>
+            <div class="result-line">
+                <span class="result-line-label" id="r_half_label">Half Days (3 × $85.00)</span>
+                <span class="result-line-value" id="r_half_val">$255.00</span>
+            </div>
+            <div class="result-line">
+                <span class="result-line-label" id="r_actual_label">Actual Cleaning (0 hrs × $24.70)</span>
+                <span class="result-line-value" id="r_actual_val">$0.00</span>
+            </div>
+
+            <div class="result-total">
+                <span class="result-total-label">Total Payout</span>
+                <span class="result-total-value" id="r_total">$795.00</span>
+            </div>
+
+            <!-- IRD Split -->
+            <div class="ird-section">
+                <div class="ird-title">IRD / Xero Reporting Split</div>
+                <div class="ird-line">
+                    <span class="ird-line-label" id="r_ird_hourly_label">Hourly Wage (declaring 15 hrs)</span>
+                    <span class="ird-line-value" id="r_ird_hourly_val">$370.50</span>
+                </div>
+                <div class="ird-line">
+                    <span class="ird-line-label">Manager Wage (balancing figure)</span>
+                    <span class="ird-line-value" id="r_ird_mgr_val">$424.50</span>
+                </div>
+                <div class="ird-note" id="r_ird_note"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- State ---
+    const state = {
+        full_days: 2,
+        half_days: 3,
+        actual_hours: 0,
+        declaring_hours: 15
+    };
+
+    const limits = {
+        full_days:       { min: 0, max: 14, step: 1 },
+        half_days:       { min: 0, max: 14, step: 1 },
+        actual_hours:    { min: 0, max: 80, step: 0.5 },
+        declaring_hours: { min: 0, max: 80, step: 0.5 }
+    };
+
+    const defaults = { rate_full: 270.00, rate_half: 85.00, rate_hourly: 24.70 };
+
+    function step(field, delta) {
+        const lim = limits[field];
+        const el = document.getElementById(`${field}_val`);
+        let val = (parseFloat(el.value) || 0) + delta;
+        val = Math.max(lim.min, Math.min(lim.max, val));
+        val = Math.round(val * 100) / 100;
+        state[field] = val;
+        el.value = val;
+    }
+
+    function onHoursInput(field) {
+        const el = document.getElementById(`${field}_val`);
+        const val = parseFloat(el.value);
+        if (!isNaN(val) && val >= 0) {
+            state[field] = Math.round(val * 100) / 100;
+        }
+    }
+
+    function resetRates() {
+        document.getElementById('rate_full').value = defaults.rate_full.toFixed(2);
+        document.getElementById('rate_half').value = defaults.rate_half.toFixed(2);
+        document.getElementById('rate_hourly').value = defaults.rate_hourly.toFixed(2);
+    }
+
+    function fmt(n) { return '$' + n.toFixed(2); }
+
+    function calculate() {
+        const fullDays      = state.full_days;
+        const halfDays      = state.half_days;
+        const actualHours   = parseFloat(document.getElementById('actual_hours_val').value) || 0;
+        const declaringHrs  = parseFloat(document.getElementById('declaring_hours_val').value) || 0;
+        const rFull         = parseFloat(document.getElementById('rate_full').value) || 0;
+        const rHalf         = parseFloat(document.getElementById('rate_half').value) || 0;
+        const rHourly       = parseFloat(document.getElementById('rate_hourly').value) || 0;
+
+        // Actual earnings
+        const fullPay    = fullDays * rFull;
+        const halfPay    = halfDays * rHalf;
+        const actualPay  = actualHours * rHourly;
+        const totalPayout = fullPay + halfPay + actualPay;
+
+        // IRD split: declaring hours × rate carved out from manager bucket
+        const irdHourly = declaringHrs * rHourly;
+        const irdMgr    = totalPayout - irdHourly;
+
+        // Update result lines
+        document.getElementById('r_full_label').textContent   = `Full Days (${fullDays} × ${fmt(rFull)})`;
+        document.getElementById('r_full_val').textContent     = fmt(fullPay);
+        document.getElementById('r_half_label').textContent   = `Half Days (${halfDays} × ${fmt(rHalf)})`;
+        document.getElementById('r_half_val').textContent     = fmt(halfPay);
+        document.getElementById('r_actual_label').textContent = `Actual Cleaning (${actualHours} hrs × ${fmt(rHourly)})`;
+        document.getElementById('r_actual_val').textContent   = fmt(actualPay);
+        document.getElementById('r_total').textContent        = fmt(totalPayout);
+
+        document.getElementById('r_ird_hourly_label').textContent = `Hourly Wage (declaring ${declaringHrs} hrs)`;
+        document.getElementById('r_ird_hourly_val').textContent   = fmt(irdHourly);
+        document.getElementById('r_ird_mgr_val').textContent      = fmt(irdMgr);
+
+        // Note about difference between actual vs declared hours
+        const diff = declaringHrs - actualHours;
+        let note = '';
+        if (Math.abs(diff) > 0.01) {
+            if (diff > 0) {
+                note = `Declaring ${diff} more hours than actually worked — the extra ${fmt(diff * rHourly)} is absorbed from the manager bucket, keeping your total outlay the same.`;
             } else {
-                ui.lynetteManagerInputs.classList.remove('visible');
+                note = `Declaring ${Math.abs(diff)} fewer hours than actually worked — the extra ${fmt(Math.abs(diff) * rHourly)} adds to the manager bucket, keeping your total outlay the same.`;
             }
+        } else {
+            note = 'Declared hours match actual hours worked.';
+        }
+        document.getElementById('r_ird_note').textContent = note;
 
-            // Update legend text based on staff
-            ui.timeEntryLegend.textContent = currentStaff === 'Lynette' ? 'Log Cleaner Time Entry' : 'Log Work Time Entry';
-
-            // Reset time entry fields (keep date)
-            ui.startTimeInput.value = '';
-            ui.endTimeInput.value = '';
-            ui.isPhCheckbox.checked = false; // Reset PH checkbox
-            clearAllErrors(); // Clear any previous validation errors
-            updateSummary(); // Update the individual summary section
-
-            // Set focus to the start time input for quick entry
-            ui.startTimeInput.focus();
-        };
-
-        /** Handles changes to Lynette's manager day inputs, validates, and updates state/summary. */
-        const handleManagerDaysChange = () => {
-             if (currentStaff !== 'Lynette') return; // Only applies to Lynette
-
-             let fullDaysValid = true;
-             let halfDaysValid = true;
-             const fullVal = parseInt(ui.fullDaysInput.value);
-             const halfVal = parseInt(ui.halfDaysInput.value);
-
-             // Validate Full Days
-             if (isNaN(fullVal) || fullVal < 0 || fullVal > 7) {
-                 showError('full_days', 'Must be 0-7.');
-                 fullDaysValid = false;
-             } else {
-                 clearError('full_days');
-             }
-             // Validate Half Days
-             if (isNaN(halfVal) || halfVal < 0 || halfVal > 7) {
-                 showError('half_days', 'Must be 0-7.');
-                 halfDaysValid = false;
-             } else {
-                 clearError('half_days');
-             }
-
-             // If both are valid, update state and recalculate summary
-             if (fullDaysValid && halfDaysValid) {
-                 lynetteManagerDays.full = fullVal;
-                 lynetteManagerDays.half = halfVal;
-                 updateSummary(); // Recalculate Lynette's specific summary
-                 // Note: No need to update weekly total as manager days don't affect logged hours.
-             }
-        };
-
-        /**
-         * Handles the main "Log Time Entry" button click or Ctrl+Enter action.
-         * Parses times, performs validation, applies corrections, calculates duration,
-         * adds entry to log, updates UI, and saves state.
-         * @returns {boolean} True if the entry was successfully logged, false otherwise.
-         */
-        const handleLogEntry = () => {
-            if (!currentStaff) { alert('Please select a staff member first.'); return false; }
-
-            // --- 1. Parse & Format Times ---
-            // Get raw input for later comparison/heuristics
-            const rawStartTime = ui.startTimeInput.value.trim().toLowerCase();
-            const rawEndTime = ui.endTimeInput.value.trim().toLowerCase();
-            // Attempt to parse/format (this also updates the input fields visually)
-            let startTime24 = parseAndFormatTime(ui.startTimeInput);
-            let endTime24 = parseAndFormatTime(ui.endTimeInput);
-
-            // --- 2. Initial Validation (Check if parsing succeeded and date exists) ---
-            // Note: validateEntryInputs will handle more detailed checks later
-            if (!ui.entryDateInput.value || !startTime24 || !endTime24) {
-                validateEntryInputs(); // Run full validation to show all relevant errors
-                const firstError = ui.calculatorForm.querySelector('.input-error');
-                firstError?.focus(); // Focus the first field with an error
-                return false; // Indicate failure
-            }
-
-            // --- 3. Smarter Time Correction (Attempt to fix ambiguous 5am -> 6pm type entries) ---
-            let isDurationWarning = false; // Flag for potential long duration warning
-            const startHour = parseInt(startTime24.split(':')[0]);
-            const endHour = parseInt(endTime24.split(':')[0]);
-            const startIsAmbiguous = !rawStartTime.includes('a') && !rawStartTime.includes('p');
-            const endIsAmbiguous = !rawEndTime.includes('a') && !rawEndTime.includes('p');
-
-            // Condition: Start time looks like early AM (1-6), End time looks like afternoon/evening PM (13-18), AND *neither* had explicit AM/PM.
-            if (startHour >= 1 && startHour <= 6 && endHour >= 13 && endHour <= 18 && startIsAmbiguous && endIsAmbiguous) {
-                 // Heuristic: Assume user meant PM for the start time as well (e.g., "5" and "6" -> 5pm to 6pm).
-                 const correctedStartHour = startHour + 12;
-                 startTime24 = `${String(correctedStartHour).padStart(2, '0')}:${startTime24.split(':')[1]}`;
-                 // Update the input field visually *only* if the raw input was just the number (e.g., "5")
-                 // Avoids changing "5:00" explicitly entered by user to "17:00" if they somehow met the other conditions.
-                 if (rawStartTime === String(startHour)) {
-                     ui.startTimeInput.value = startTime24; // Reflect the assumed PM time
-                 }
-                 console.log(`Auto-corrected ambiguous start time ${startHour} to PM (${correctedStartHour}) based on end time.`);
-            }
-
-            // --- 4. Final Validation (After potential correction) ---
-            if (!validateEntryInputs()) {
-                 const firstError = ui.calculatorForm.querySelector('.input-error');
-                 firstError?.focus();
-                 return false; // Indicate failure
-            }
-
-            // --- 5. Calculate Duration & Check Warnings ---
-            let hours = calculateDuration(startTime24, endTime24);
-
-            // Check for unusually long shifts (threshold defined as constant)
-            if (hours > LONG_SHIFT_THRESHOLD) {
-                isDurationWarning = true; // Set flag to visually mark the log entry
-                showWarningFeedback('end_time'); // Briefly highlight the end time input
-                console.log(`Duration warning: Calculated ${hours} hours exceeds threshold ${LONG_SHIFT_THRESHOLD}`);
-            }
-
-            // Final check for zero/negative hours (should be caught by validation, but belt-and-suspenders)
-            if (hours <= 0) {
-                 showError('end_time', 'Calculated hours <= 0.');
-                 ui.endTimeInput.focus();
-                 return false; // Indicate failure
-            }
-
-            // --- 6. Determine Public Holiday Status ---
-            const entryDate = ui.entryDateInput.value;
-            let isPH = ui.isPhCheckbox.checked; // Start with checkbox value
-            let wasAutoChecked = false;
-            // Automatically mark as PH if the date matches the list, even if checkbox wasn't ticked
-            if (PUBLIC_HOLIDAYS_2025.has(entryDate) && !isPH) {
-                isPH = true;
-                ui.isPhCheckbox.checked = true; // Visually check the box
-                wasAutoChecked = true; // Flag that we auto-checked it
-                console.log(`Date ${entryDate} detected as Public Holiday.`);
-            }
-
-            // --- 7. Create and Log the Entry ---
-            const newEntryId = Date.now(); // Use timestamp as unique ID
-            const newEntry = {
-                id: newEntryId,
-                staffName: currentStaff,
-                date: entryDate,
-                start: startTime24, // Use potentially corrected time
-                end: endTime24,
-                hours: hours,
-                isPH: isPH,
-                isDurationWarning: isDurationWarning // Store warning state for rendering
-            };
-            logEntries.push(newEntry); // Add to the main log array
-            saveLog(); // Persist to localStorage
-
-            // --- 8. Update UI ---
-            renderLog(newEntryId); // Re-render the log, passing ID to animate the new entry
-            updateSummary(); // Update the individual summary section
-            updateWeeklyTotalSummary(); // Update the weekly totals section
-
-            // Highlight the PH group briefly if it was auto-checked
-            if (wasAutoChecked) {
-                ui.phToggleGroup.classList.add('ph-auto-checked-highlight');
-                setTimeout(() => {
-                    ui.phToggleGroup.classList.remove('ph-auto-checked-highlight');
-                }, 1500); // Match highlight animation duration
-            }
-
-            // --- 9. Reset Inputs for Next Entry ---
-            ui.startTimeInput.value = '';
-            ui.endTimeInput.value = '';
-            ui.isPhCheckbox.checked = false; // Always reset checkbox for next entry
-            clearError('start_time'); // Clear any potential lingering errors
-            clearError('end_time');
-            ui.startTimeInput.focus(); // Set focus for quick next entry
-
-            return true; // Indicate success
-        };
-
-        /** Handles the Ctrl+Enter shortcut: attempts to log and then selects the next staff. */
-        const handleLogAndSelectNextStaff = () => {
-            // Attempt to log the current entry. handleLogEntry performs all validation.
-            if (handleLogEntry()) {
-                // If logging was successful (returned true)...
-                const nextStaff = selectNextStaff(); // Get the next staff member's name
-                if (nextStaff) {
-                    handleStaffSelect(nextStaff); // Select the next staff member
-                }
-            }
-            // If handleLogEntry() returned false (due to validation errors), nothing happens here.
-        };
-
-        /** Handles clicks on the stepper buttons (+/-) for Lynette's manager days. */
-        const handleStep = (event) => {
-            const button = event.target.closest('.stepper-button');
-            if (!button) return; // Ignore clicks not on a stepper button
-
-            const targetId = button.dataset.target; // Get target input ID (e.g., 'full_days')
-            const step = parseInt(button.dataset.step); // Get step value (+1 or -1)
-            const targetInput = document.getElementById(targetId);
-
-            if (targetInput) {
-                let currentValue = parseInt(targetInput.value);
-                // Default to min/max boundary if current value is invalid
-                if (isNaN(currentValue)) currentValue = (step > 0 ? (parseInt(targetInput.min) || 0) - step : (parseInt(targetInput.max) || 7) - step);
-
-                const min = parseInt(targetInput.min) || 0;
-                const max = parseInt(targetInput.max); // Might be undefined
-                let newValue = currentValue + step;
-
-                // Clamp value within min/max bounds
-                if (newValue < min) newValue = min;
-                if (max !== undefined && !isNaN(max) && newValue > max) newValue = max;
-
-                targetInput.value = newValue; // Update input value
-                handleManagerDaysChange(); // Trigger validation and summary update
-            }
-        };
-
-        /** Handles clicks on the delete button for a log entry. */
-        const handleDeleteLogEntry = (event) => {
-            const deleteButton = event.target.closest('.delete-log-btn');
-            if (!deleteButton) return; // Ignore clicks not on a delete button
-
-            const entryElement = deleteButton.closest('.log-entry');
-            const entryId = parseInt(entryElement.dataset.entryId);
-            if (isNaN(entryId)) return; // Ignore if entry ID is invalid
-
-            // Confirm deletion with the user
-            if (confirm('Delete this log entry?')) {
-                // Add 'removing' class to trigger CSS animation
-                entryElement.classList.add('removing');
-                // Wait for animation to finish before removing data and element
-                setTimeout(() => {
-                    logEntries = logEntries.filter(e => e.id !== entryId); // Remove from array
-                    saveLog(); // Update localStorage
-                    entryElement.remove(); // Remove element from DOM
-                    updateSummary(); // Update individual summary
-                    updateWeeklyTotalSummary(); // Update weekly totals
-                    // If log is now empty, re-render to show the "empty" message
-                    if (logEntries.length === 0) {
-                         renderLog();
-                    }
-                }, ANIMATION_DURATION); // Match CSS animation duration
-            }
-        };
-
-        /** Handles the "Clear Log" button click, confirms, and clears all entries. */
-        const handleClearLog = () => {
-            if (logEntries.length > 0 && confirm('Clear the entire time log? This cannot be undone.')) {
-                const entriesToRemove = ui.logEntriesList.querySelectorAll('.log-entry');
-                if (entriesToRemove.length > 0) {
-                    // Animate removal of all entries
-                    entriesToRemove.forEach(el => el.classList.add('removing'));
-                    // Wait for animation before clearing data and UI
-                    setTimeout(() => {
-                        logEntries = []; // Clear the array
-                        saveLog(); // Update localStorage
-                        renderLog(); // Re-render to show empty state
-                        updateSummary(); // Update individual summary
-                        updateWeeklyTotalSummary(); // Update weekly totals
-                    }, ANIMATION_DURATION);
-                } else {
-                    // Fallback if no elements found (e.g., if UI was out of sync)
-                    logEntries = []; saveLog(); renderLog(); updateSummary(); updateWeeklyTotalSummary();
-                }
-            }
-        };
-
-        /** Handles the "Export Log" button click, generating and downloading a CSV file. */
-        const handleExportLog = () => {
-            if (logEntries.length === 0) { alert('Log is empty. Nothing to export.'); return; }
-
-            // Define CSV headers
-            let csvContent = "data:text/csv;charset=utf-8,Staff Name,Date,Start Time (24hr),End Time (24hr),Hours,Public Holiday\n";
-
-            // Add each log entry as a row
-            logEntries.forEach(entry => {
-                // Ensure values are properly quoted if they contain commas (staff name unlikely but good practice)
-                const row = [
-                    `"${entry.staffName}"`,
-                    entry.date || '',
-                    entry.start || '',
-                    entry.end || '',
-                    formatHours(entry.hours), // Use formatted hours
-                    entry.isPH ? 'Yes' : 'No'
-                ].join(",");
-                csvContent += row + "\r\n"; // Use CRLF for broad compatibility
-            });
-
-            // Create a temporary link element to trigger the download
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            const timestamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-            link.setAttribute("download", `time_log_${timestamp}.csv`);
-            document.body.appendChild(link); // Required for Firefox
-            link.click(); // Simulate click to download
-            document.body.removeChild(link); // Clean up the temporary link
-        };
-
-        // --- Keyboard Flow Event Listeners ---
-
-        /** Handles keydown events within the form for Enter/Ctrl+Enter shortcuts. */
-        const handleFormKeyDown = (e) => {
-            const target = e.target;
-            const targetId = target.id;
-
-            // --- Enter Key Logic (Field Progression) ---
-            if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
-                 if (targetId === 'entry_date') {
-                     e.preventDefault(); // Prevent default form submission
-                     ui.startTimeInput.focus(); // Move to start time
-                 }
-                 else if (targetId === 'start_time') {
-                     e.preventDefault();
-                     parseAndFormatTime(target); // Parse current field on Enter
-                     ui.endTimeInput.focus(); // Move to end time
-                 }
-                 else if (targetId === 'end_time') {
-                     e.preventDefault();
-                     parseAndFormatTime(target); // Parse current field on Enter
-                     ui.logButton.focus(); // Move to log button
-                 }
-                 // Allow Enter to activate buttons (Log, Steppers, etc.)
-            }
-
-            // --- Ctrl+Enter / Cmd+Enter Shortcut (Log and Select Next) ---
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { // Check for Ctrl or Cmd key
-                 // Ensure the event originated within the calculator form
-                 if (target.closest('#calculator-form')) {
-                     e.preventDefault(); // Prevent default form submission or line break
-                     handleLogAndSelectNextStaff(); // Attempt to log and select the next staff member
-                 }
-            }
-        };
-
-        // --- Application Initialization ---
-
-        /** Initializes the application: loads data, sets up UI, attaches event listeners. */
-        const init = () => {
-            // Load data from localStorage
-            loadLog();
-
-            // Initial UI rendering
-            renderStaffList(); // Render staff buttons
-            renderLog(); // Render any existing log entries
-            updateSummary(); // Update individual summary (might be hidden if no staff selected yet)
-            updateWeeklyTotalSummary(); // Update weekly totals (might be hidden if log empty)
-
-            // Set default date to the upcoming Sunday for convenience
-            try {
-                const today = new Date();
-                const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon,... 6=Sat
-                // Calculate days to add to get to the next Sunday
-                const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? 0 : 7); // If today is Sunday, diff is today, otherwise add days to reach next Sunday
-                const weekEndingDate = new Date(today.setDate(diff));
-                ui.entryDateInput.value = weekEndingDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-            } catch (e) {
-                console.error("Error setting default date:", e);
-                // Fallback: set to today if calculation fails
-                ui.entryDateInput.value = new Date().toISOString().split('T')[0];
-            }
-
-
-            // --- Attach Event Listeners ---
-            ui.staffList.addEventListener('click', handleStaffSelect);
-            ui.logButton.addEventListener('click', handleLogEntry);
-            ui.clearLogButton.addEventListener('click', handleClearLog);
-            ui.exportLogButton.addEventListener('click', handleExportLog);
-            ui.calculatorForm.addEventListener('click', handleStep); // Use event delegation for steppers
-            ui.logEntriesList.addEventListener('click', handleDeleteLogEntry); // Use delegation for delete buttons
-
-            // Add blur listeners for automatic time parsing when leaving fields
-            ui.startTimeInput.addEventListener('blur', (e) => parseAndFormatTime(e.target));
-            ui.endTimeInput.addEventListener('blur', (e) => parseAndFormatTime(e.target));
-
-            // Add keydown listener to the form for keyboard shortcuts
-            ui.calculatorForm.addEventListener('keydown', handleFormKeyDown);
-
-            // Add change listeners for Lynette's manager day inputs
-            ui.fullDaysInput.addEventListener('change', handleManagerDaysChange);
-            ui.halfDaysInput.addEventListener('change', handleManagerDaysChange);
-
-            // Add input listeners to clear errors proactively as user types
-            ui.calculatorForm.querySelectorAll('input[type="date"], input[type="number"], input[type="text"][name*="time"]').forEach(input => {
-                input.addEventListener('input', () => clearError(input.id));
-            });
-
-             // --- Set Initial State ---
-             // Select the first staff member automatically if none is selected (e.g., on first load)
-             if (!currentStaff && STAFF_LIST.length > 0) {
-                 handleStaffSelect(STAFF_LIST[0]);
-             } else if (currentStaff) {
-                 // If reloading and staff was already selected (e.g., from previous state), ensure UI is correct
-                 if (currentStaff === 'Lynette') ui.lynetteManagerInputs.classList.add('visible');
-                 // Visibility of summary sections is handled by their respective update functions called earlier in init
-                 ui.startTimeInput.focus(); // Focus start time for convenience
-             } else {
-                 // Fallback focus if no staff list exists
-                 ui.entryDateInput.focus();
-             }
-        };
-
-        // --- Run Initialization ---
-        // Wait for the DOM to be fully loaded before running initialization
-        document.addEventListener('DOMContentLoaded', init);
-
-    </script>
+        document.getElementById('results').classList.add('visible');
+    }
+</script>
 </body>
-</html>"
+</html>
