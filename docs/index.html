@@ -498,11 +498,11 @@
     function step(field, delta) {
         const lim = limits[field];
         const el = document.getElementById(`${field}_val`);
-        let val = (parseFloat(el.value) || 0) + delta;
+        let val = (parseFloat(el.textContent) || 0) + delta;
         val = Math.max(lim.min, Math.min(lim.max, val));
         val = Math.round(val * 100) / 100;
         state[field] = val;
-        el.value = val;
+        el.textContent = val;
     }
 
     function onHoursInput(field) {
